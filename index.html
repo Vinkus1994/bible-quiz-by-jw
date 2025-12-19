@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JW Quiz</title>
+
+  <style>
+    :root{
+      --sky1:#4cc3ff;
+      --sky2:#2a8dff;
+      --bg:#eaf6ff;
+      --panel:#ffffff;
+      --panel2:#f5fbff;
+      --line:#bfe6ff;
+      --ink:#12304a;
+      --muted:#4f6b86;
+      --shadow: 0 14px 30px rgba(0,0,0,.14);
+      --shadowSoft: 0 10px 18px rgba(0,0,0,.10);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(900px 650px at 20% 0%, rgba(255,255,255,.65), transparent 55%),
+        radial-gradient(900px 650px at 90% 10%, rgba(255,255,255,.45), transparent 55%),
+        linear-gradient(180deg, var(--sky1), var(--sky2) 35%, var(--bg) 35%, var(--bg));
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:14px;
+      color:var(--ink);
+    }
+    .wrap{width:min(460px, 100%);}
+
+    .hud{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.22);
+      border:1px solid rgba(255,255,255,.40);
+      box-shadow: var(--shadow);
+      color:#fff;
+      backdrop-filter: blur(8px);
+    }
+    .hud-center{
+      font-weight:950;
+      letter-spacing:.2px;
+      text-shadow: 0 2px 10px rgba(0,0,0,.15);
+      user-select:none;
+      cursor:pointer;
+    }
+    .hud-right{display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap}
+    .hud-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.16);
+      border:1px solid rgba(255,255,255,.35);
+      font-weight:900;
+      font-size:12px;
+      white-space:nowrap;
+      user-select:none;
+    }
+    .hud-pill strong{ font-variant-numeric: tabular-nums; }
+
+    .track{ position:relative; margin:12px 0 14px; height:48px; }
+    .track-line{
+      position:absolute; left:18px; right:18px; top:50%;
+      height:10px; transform:translateY(-50%);
+      background: rgba(255,255,255,.65);
+      border:1px solid rgba(255,255,255,.95);
+      border-radius:999px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,.10);
+    }
+    .track-dot{
+      position:absolute; top:50%;
+      width:18px;height:18px; transform:translate(-50%,-50%);
+      border-radius:999px;
+      background:#ffe27a;
+      border:2px solid rgba(255,255,255,.98);
+      box-shadow: 0 6px 14px rgba(0,0,0,.16);
+      transition:left .2s ease;
+    }
+    .avatar{
+      position:absolute; top:50%;
+      width:36px; height:36px; transform:translateY(-50%);
+      border-radius:999px;
+      background: rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      display:grid; place-items:center;
+      box-shadow: 0 10px 18px rgba(0,0,0,.14);
+      font-size:18px; user-select:none;
+    }
+    .avatar.left{left:0}
+    .avatar.right{right:0}
+
+    .card{
+      position:relative;
+      background: var(--panel);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transform: translateZ(0);
+    }
+    .card-top{
+      padding:12px 14px;
+      background: linear-gradient(180deg, rgba(58,166,255,.14), rgba(58,166,255,.04));
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(58,166,255,.08);
+      color: var(--muted);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .tag strong{color:var(--ink)}
+    .counter{ font-size:12px; color:var(--muted); font-weight:900; white-space:nowrap; }
+
+    .qarea{
+      padding:14px;
+      display:grid;
+      grid-template-columns: 82px 1fr;
+      gap:12px;
+      align-items:center;
+      background: linear-gradient(180deg, #ffffff, var(--panel2));
+    }
+    .qmedia{
+      width:82px; height:82px;
+      border-radius: 14px;
+      background: #f2fbff;
+      border: 1px dashed #a9dcff;
+      display:grid;
+      place-items:center;
+      font-size:32px;
+      user-select:none;
+    }
+    .qtext{ font-size:16px; font-weight:950; line-height:1.2; }
+
+    .ref{
+      padding:0 14px 12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+      display:none;
+    }
+
+    .btn{
+      width:100%;
+      margin-top:12px;
+      padding:14px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, #ffffff, #eaf7ff);
+      font-size:16px;
+      font-weight:950;
+      color:var(--ink);
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .btn:hover{ box-shadow: 0 14px 26px rgba(0,0,0,.12); border-color: rgba(58,166,255,.35); }
+    .btn:active{ transform: scale(.99); }
+    .btn[disabled]{opacity:.55; cursor:not-allowed;}
+    .btn.secondary{ background: linear-gradient(180deg, #ffffff, #f3fbff); }
+    .btn.gold{ background: linear-gradient(180deg, #fff8d9, #ffeaa9); }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .row .btn{flex:1; min-width:140px; margin-top:0;}
+
+    .answers{margin-top:12px; display:grid; gap:10px;}
+    .ansbtn{
+      width:100%;
+      text-align:center;
+      padding:14px 12px;
+      font-size:16px;
+      font-weight:950;
+      color:var(--ink);
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #eaf7ff);
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .ansbtn:hover{border-color: rgba(58,166,255,.35); box-shadow: 0 14px 26px rgba(0,0,0,.12);}
+    .ansbtn:active{transform: scale(.99)}
+    .ansbtn[disabled]{opacity:.55; cursor:not-allowed}
+    .ansbtn.correct{border-color: rgba(26,165,106,.45); background: rgba(26,165,106,.08);}
+    .ansbtn.wrong{border-color: rgba(229,72,93,.45); background: rgba(229,72,93,.07);}
+
+    .order-wrap{margin-top:12px; display:grid; gap:10px;}
+    .order-zone{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:14px;
+      padding:10px;
+      box-shadow: var(--shadowSoft);
+    }
+    .order-title{
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      margin:0 0 8px 0;
+    }
+    .chips{display:flex; flex-wrap:wrap; gap:8px;}
+    .chipbtn{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f2fbff);
+      border-radius:999px;
+      padding:8px 10px;
+      font-weight:900;
+      color:var(--ink);
+      cursor:pointer;
+      box-shadow: 0 10px 16px rgba(0,0,0,.08);
+      user-select:none;
+    }
+    .chipbtn[disabled]{opacity:.45; cursor:not-allowed}
+
+    .result{
+      margin-top:12px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    .result.good{border-color: rgba(26,165,106,.35); background: rgba(26,165,106,.06)}
+    .result.bad{border-color: rgba(229,72,93,.35); background: rgba(229,72,93,.05)}
+    .result .title{font-weight:950}
+    .result .small{margin-top:6px; font-size:12px; color:var(--muted); line-height:1.35}
+
+    .controls{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;}
+    .ctrl{
+      flex:1; min-width:140px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:950;
+      color:var(--ink);
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+    }
+    .ctrl.danger{
+      border-color: rgba(229,72,93,.25);
+      background: rgba(229,72,93,.06);
+    }
+    .ctrl.gold{
+      border-color: rgba(255,206,92,.55);
+      background: rgba(255,206,92,.18);
+    }
+
+    .form{ display:grid; gap:10px; margin-top:12px; }
+    .field{ display:grid; gap:6px; }
+    .label{ font-size:12px; font-weight:900; color:var(--muted); }
+    .input{
+      width:100%;
+      padding:14px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, #ffffff, #f3fbff);
+      font-weight:950;
+      color:var(--ink);
+      outline:none;
+      box-shadow: var(--shadowSoft);
+      transition: box-shadow .18s ease, border-color .18s ease;
+    }
+    .input:focus{
+      border-color: rgba(58,166,255,.45);
+      box-shadow: 0 14px 26px rgba(0,0,0,.12);
+    }
+    .hint{ font-size:12px; color:var(--muted); line-height:1.35; }
+
+    .themes{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .theme-card{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f3fbff);
+      border-radius: 16px;
+      padding:12px;
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      text-align:left;
+      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .theme-card:hover{
+      border-color: rgba(58,166,255,.35);
+      box-shadow: 0 14px 26px rgba(0,0,0,.12);
+    }
+    .theme-card:active{ transform: scale(.99); }
+    .theme-card.selected{
+      border-color: rgba(26,165,106,.35);
+      background: linear-gradient(180deg, rgba(26,165,106,.08), #ffffff);
+    }
+    .theme-card .t-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .theme-card .t-ico{ font-size:18px; }
+    .theme-card .t-name{ font-weight:950; }
+    .theme-card .t-sub{ margin-top:6px; font-size:12px; color:var(--muted); line-height:1.25; }
+
+    /* Aventure */
+    .adv-banner{
+      margin-top:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,204,77,.20), rgba(255,204,77,.06));
+      box-shadow: var(--shadowSoft);
+    }
+    .adv-banner .big{font-weight:950}
+    .adv-banner .small{margin-top:6px; font-size:12px; color:var(--muted); line-height:1.35}
+
+    .map{ margin-top:12px; display:grid; gap:10px; }
+    .lvl{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: var(--shadowSoft);
+      overflow:hidden;
+    }
+    .lvl-head{
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(58,166,255,.10), rgba(58,166,255,.03));
+      cursor:pointer;
+      user-select:none;
+    }
+    .lvl-left{display:flex; align-items:center; gap:10px; min-width:0;}
+    .badge{
+      width:34px;height:34px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      border:1px solid rgba(0,0,0,.08);
+      background: linear-gradient(180deg,#fff,#f2fbff);
+      box-shadow: 0 10px 16px rgba(0,0,0,.08);
+      font-weight:950;
+    }
+    .lvl-title{
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .lvl-right{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+    .stars{font-weight:950; color:#946200; white-space:nowrap;}
+    .lock{font-weight:950; color:var(--muted)}
+    .lvl-body{
+      padding:10px 12px 12px;
+      display:grid;
+      gap:8px;
+      background: linear-gradient(180deg, #fff, #f7fcff);
+    }
+    .lvl-body[hidden]{display:none}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(191,230,255,.95);
+      background: rgba(58,166,255,.06);
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      width:max-content;
+    }
+    .pill strong{color:var(--ink)}
+
+    /* Menu Modes */
+    .mode-grid{ margin-top:12px; display:grid; gap:10px; }
+    .mode-card{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: var(--shadowSoft);
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+    .mode-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .mode-title{
+      font-weight:950;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:16px;
+    }
+    .mode-desc{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    /* ===== Mots croisés ===== */
+    .xw-wrap{
+      margin-top:12px;
+      display:grid;
+      gap:12px;
+    }
+    .xw-toprow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .xw-stats{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .xw-grid{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: var(--shadowSoft);
+      background:#fff;
+      display:grid;
+      gap:1px;
+      padding:1px;
+    }
+    .xw-cell{
+      position:relative;
+      background:#f6fbff;
+      border:1px solid rgba(191,230,255,.65);
+      aspect-ratio: 1 / 1;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .xw-cell.block{
+      background: #1b3d5a;
+      border-color: rgba(0,0,0,.10);
+    }
+    .xw-cell input{
+      width:100%;
+      height:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      text-align:center;
+      font-weight:950;
+      font-size:16px;
+      color:var(--ink);
+      text-transform: uppercase;
+      caret-color: transparent;
+    }
+    .xw-cell input::selection{ background: rgba(58,166,255,.25); }
+    .xw-cell .num{
+      position:absolute;
+      top:2px; left:3px;
+      font-size:10px;
+      font-weight:950;
+      color: rgba(18,48,74,.72);
+      user-select:none;
+      pointer-events:none;
+    }
+    .xw-cell.selected{
+      box-shadow: inset 0 0 0 2px rgba(58,166,255,.80);
+      background: rgba(58,166,255,.08);
+    }
+    .xw-cell.bad{
+      background: rgba(229,72,93,.12);
+      box-shadow: inset 0 0 0 2px rgba(229,72,93,.35);
+    }
+    .xw-cell.good{
+      background: rgba(26,165,106,.10);
+    }
+    .xw-clues{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .xw-panel{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background:#fff;
+      box-shadow: var(--shadowSoft);
+      padding:10px;
+      overflow:hidden;
+    }
+    .xw-panel h3{
+      margin:0 0 8px 0;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:950;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .xw-cluelist{
+      display:grid;
+      gap:8px;
+      font-size:12px;
+      color:var(--ink);
+      line-height:1.3;
+      max-height: 240px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .xw-clue{
+      padding:8px;
+      border:1px solid rgba(191,230,255,.75);
+      border-radius:12px;
+      background: rgba(58,166,255,.05);
+    }
+    .xw-clue .n{
+      font-weight:950;
+      color:var(--ink);
+    }
+    .xw-footnote{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hud">
+      <div class="hud-center" id="hudTitle">JW Quiz</div>
+      <div class="hud-right">
+        <span class="hud-pill" title="Profil">👤 <strong id="profileName">—</strong></span>
+        <span class="hud-pill">🪙 <strong id="coins">0</strong></span>
+        <span class="hud-pill" id="heartsPill" style="display:none;">❤️ <strong id="hearts">0</strong></span>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-line"></div>
+      <div class="track-dot" id="trackDot" style="left:50%"></div>
+      <div class="avatar left" title="Joueur">🙂</div>
+      <div class="avatar right" title="Adversaire">😄</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="tag">
+          <span id="qType">MENU</span>
+          • Thème : <strong id="themeLabel">Mixte</strong>
+          • Difficulté : <strong id="diffStars">—</strong>
+        </div>
+        <div class="counter" id="counter">—</div>
+      </div>
+
+      <div class="qarea">
+        <div class="qmedia" id="qmedia">📘</div>
+        <div class="qtext" id="qtext">Bienvenue</div>
+      </div>
+
+      <div class="ref" id="ref"></div>
+
+      <div style="padding: 0 14px 14px;">
+        <div id="gameArea"></div>
+        <div class="result" id="resultBox" style="display:none;"></div>
+
+        <div class="controls" id="controls" style="display:none;">
+          <button class="ctrl gold" id="btnJoker">🃏 Joker (2 🪙)</button>
+          <button class="ctrl" id="btnSkip">⏭️ Passer</button>
+          <button class="ctrl danger" id="btnEnd">⛔ Finir</button>
+        </div>
+
+        <div class="footer" id="footer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Données (tous les modes utilisent la même banque QUESTIONS) -->
+  <script src="questions.js"></script>
+
+  <!-- ✅ Données Mots croisés -->
+  <script src="crosswords.js"></script>
+
+  <!-- ✅ Moteur du jeu (Classique + Aventure + Mots croisés) -->
+  <script>
+  /* ========= Base =========
+     IMPORTANT:
+     - Classique + Aventure restent ici (comme tu voulais)
+     - Seules les données (THEMES/QUESTIONS + mots croisés) sont externalisées
+  */
+
+  // Récupère les banques externes
+  const THEMES = window.THEMES || [];
+  const QUESTIONS = window.QUESTIONS || [];
+  // CROSSWORD_BANKS vient de crosswords.js (window.CROSSWORD_BANKS)
+  const CROSSWORD_BANKS = window.CROSSWORD_BANKS || [];
+
+  /* Règles */
+  const COINS_START = 0;
+  const COINS_PER_GOOD = 2;
+  const JOKER_COST = 2;
+  const ADVENTURE_HEARTS_START = 3;
+
+  /* Aventure */
+  const ADVENTURE_LEVELS = [
+    { n:1,  name:"Tutoriel",   qCount:5,  minD:1, maxD:1,  minTypes:["QCM"],                  boss:false, bonusStars:[3,6,10] },
+    { n:2,  name:"Départ",     qCount:7,  minD:1, maxD:2,  minTypes:["QCM","VF"],            boss:false, bonusStars:[3,6,10] },
+    { n:3,  name:"Chemin",     qCount:8,  minD:2, maxD:3,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[4,7,12] },
+    { n:4,  name:"Forêt",      qCount:9,  minD:2, maxD:3,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[4,7,12] },
+    { n:5,  name:"Mini Boss",  qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:true,  bonusStars:[6,10,16] },
+    { n:6,  name:"Montée",     qCount:10, minD:3, maxD:4,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[5,9,14] },
+    { n:7,  name:"Plateau",    qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:false, bonusStars:[5,9,14] },
+    { n:8,  name:"Épreuve",    qCount:10, minD:4, maxD:4,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[6,10,16] },
+    { n:9,  name:"Avant-boss", qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","ORDRE"],    boss:false, bonusStars:[7,12,18] },
+    { n:10, name:"Boss",       qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","TROU","ORDRE"], boss:true, bonusStars:[10,16,24] },
+  ];
+
+  /* Stockage */
+  const STORAGE_KEY = "jwquiz_full_v2025_12_19_crossword_banks";
+
+  /* Helpers */
+  const $ = (s)=>document.querySelector(s);
+  function normalize(s){
+    return String(s ?? "").trim().toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/\s+/g," ");
+  }
+  function normalizeLettersOnly(s){
+    const t = String(s ?? "")
+      .toUpperCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^A-Z]/g,"");
+    return t;
+  }
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function shuffle(a){
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+  function stars(n){
+    n=Math.max(1,Math.min(5,Number(n)||1));
+    return "⭐".repeat(n);
+  }
+  function pickMedia(q){
+    const t=(q.type||"QCM").toUpperCase();
+    if(t==="ORDRE") return "🧩";
+    if(t==="TROU") return "🕳️";
+    if(t==="VF") return "✅";
+    const d=Number(q.difficulty)||1;
+    return d<=1?"📘":d===2?"📗":d===3?"📙":d===4?"📕":"👑";
+  }
+  function splitOrderAnswer(ans){
+    const raw=String(ans??"").trim();
+    if(!raw) return [];
+    if(raw.includes("|")) return raw.split("|").map(x=>x.trim()).filter(Boolean);
+    if(raw.includes(",")) return raw.split(",").map(x=>x.trim()).filter(Boolean);
+    return raw.split(/\s+/).map(x=>x.trim()).filter(Boolean);
+  }
+
+  /* UI */
+  const ui = {
+    coins: $("#coins"),
+    profileName: $("#profileName"),
+    hudTitle: $("#hudTitle"),
+    trackDot: $("#trackDot"),
+    qType: $("#qType"),
+    themeLabel: $("#themeLabel"),
+    diffStars: $("#diffStars"),
+    counter: $("#counter"),
+    qmedia: $("#qmedia"),
+    qtext: $("#qtext"),
+    ref: $("#ref"),
+    gameArea: $("#gameArea"),
+    resultBox: $("#resultBox"),
+    controls: $("#controls"),
+    btnJoker: $("#btnJoker"),
+    btnSkip: $("#btnSkip"),
+    btnEnd: $("#btnEnd"),
+    footer: $("#footer"),
+    heartsPill: $("#heartsPill"),
+    hearts: $("#hearts"),
+  };
+
+  /* State */
+  const defaultState = () => ({
+    version: 1,
+    profile: null,
+    coins: COINS_START,
+    selectedTheme: "Mixte",
+    correctIds: {},
+    session: null,
+    adventure: {
+      currentLevel: 1,
+      levelStars: {},
+      hearts: ADVENTURE_HEARTS_START,
+    },
+    crossword: {
+      last: null,
+      wins: 0,
+      selectedBank: "grille1",
+    }
+  });
+
+  let state = loadState();
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const st = raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
+
+      if(typeof st.coins !== "number") st.coins = COINS_START;
+      if(!st.selectedTheme) st.selectedTheme = "Mixte";
+      if(!st.correctIds || typeof st.correctIds !== "object") st.correctIds = {};
+      if(!st.adventure || typeof st.adventure !== "object") st.adventure = defaultState().adventure;
+      if(!st.crossword || typeof st.crossword !== "object") st.crossword = defaultState().crossword;
+
+      if(!st.adventure.currentLevel) st.adventure.currentLevel = 1;
+      if(!st.adventure.levelStars || typeof st.adventure.levelStars !== "object") st.adventure.levelStars = {};
+      if(typeof st.adventure.hearts !== "number") st.adventure.hearts = ADVENTURE_HEARTS_START;
+
+      if(typeof st.crossword.wins !== "number") st.crossword.wins = 0;
+      if(!st.crossword.selectedBank) st.crossword.selectedBank = "grille1";
+
+      return st;
+    }catch(e){
+      return defaultState();
+    }
+  }
+  function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+  function setHeartsVisible(show){
+    ui.heartsPill.style.display = show ? "inline-flex" : "none";
+  }
+  function updateTopBar(){
+    ui.coins.textContent = String(state.coins);
+    ui.profileName.textContent = state.profile?.name ? state.profile.name : "—";
+    ui.themeLabel.textContent = state.selectedTheme || "Mixte";
+    ui.hearts.textContent = String(state.adventure?.hearts ?? 0);
+
+    const inAdventure = state.session?.mode === "adventure";
+    setHeartsVisible(inAdventure);
+  }
+  ui.hudTitle.onclick = ()=> renderModeMenu();
+
+  /* ------------------------
+     (LE RESTE = ton moteur)
+     ------------------------
+     IMPORTANT : à partir d’ici, tu gardes EXACTEMENT ton code actuel :
+     - export/import
+     - profile
+     - menu modes
+     - classique
+     - aventure
+     - mots croisés
+     - génération crossword
+     - boot()
+     -> tout identique, juste sans les const THEMES / QUESTIONS / CROSSWORD_BANKS
+  */
+
+  // ✅ Colle ici TOUT ton code existant à partir de:
+  // /* Save/Import */ jusqu’à boot();
+  // (SANS remettre THEMES/QUESTIONS/CROSSWORD_BANKS)
+
+  /* Save/Import */
+  function exportSave(){
+    const data = {
+      version: state.version,
+      profile: state.profile,
+      coins: state.coins,
+      selectedTheme: state.selectedTheme,
+      correctIds: state.correctIds,
+      adventure: state.adventure,
+      crossword: state.crossword,
+      exportedAt: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `jwquiz_save_${(state.profile?.name||"player").replace(/\s+/g,"_")}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importSaveFile(file){
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const data = JSON.parse(reader.result);
+        if(!data || typeof data !== "object") throw new Error("invalid");
+
+        state.profile = data.profile || state.profile;
+        state.coins = Number.isFinite(data.coins) ? data.coins : state.coins;
+        state.selectedTheme = data.selectedTheme || state.selectedTheme;
+        state.correctIds = (data.correctIds && typeof data.correctIds === "object") ? data.correctIds : state.correctIds;
+
+        if(data.adventure && typeof data.adventure === "object"){
+          state.adventure.currentLevel = Number(data.adventure.currentLevel) || state.adventure.currentLevel;
+          state.adventure.levelStars = (data.adventure.levelStars && typeof data.adventure.levelStars==="object")
+            ? data.adventure.levelStars : state.adventure.levelStars;
+
+          const h = Number(data.adventure.hearts);
+          state.adventure.hearts = Number.isFinite(h) ? h : state.adventure.hearts;
+        }
+
+        if(data.crossword && typeof data.crossword === "object"){
+          state.crossword.wins = Number(data.crossword.wins) || 0;
+          state.crossword.last = data.crossword.last || null;
+          state.crossword.selectedBank = data.crossword.selectedBank || state.crossword.selectedBank || "grille1";
+        }
+
+        state.session = null;
+        saveState();
+        renderModeMenu();
+      }catch(e){
+        ui.footer.innerHTML = "⚠️ Fichier de sauvegarde invalide.";
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /* Profile */
+  function renderProfileGate(){
+    updateTopBar();
+    ui.qType.textContent = "COMPTE";
+    ui.diffStars.textContent = "—";
+    ui.counter.textContent = "—";
+    ui.trackDot.style.left = "50%";
+    ui.qmedia.textContent = "👤";
+    ui.qtext.textContent = "Créer ton compte";
+    ui.ref.style.display="none";
+    ui.resultBox.style.display="none";
+    ui.controls.style.display="none";
+    ui.footer.innerHTML = "";
+    setHeartsVisible(false);
+
+    ui.gameArea.innerHTML = `
+      <div class="hint">Ton compte reste enregistré sur cet appareil.</div>
+      <div class="form">
+        <div class="field">
+          <div class="label">Pseudo *</div>
+          <input class="input" id="inpName" maxlength="18" placeholder="Ex: Vincenzo" />
+        </div>
+        <button class="btn" id="btnCreate">✅ Créer mon compte</button>
+      </div>
+    `;
+
+    $("#btnCreate").onclick = ()=>{
+      const name = ($("#inpName").value || "").trim();
+      if(!name){ ui.footer.innerHTML = "⚠️ Mets un pseudo."; return; }
+      state.profile = { id: "id_"+Date.now(), name };
+      saveState();
+      renderModeMenu();
+    };
+  }
+
+  /* Counts */
+  function computeCounts(){
+    const correct = state.correctIds || {};
+    const totalAll = QUESTIONS.length;
+    const doneAll = Object.keys(correct).filter(id => QUESTIONS.some(q=>q.id===id)).length;
+
+    const byTheme = {};
+    THEMES.forEach(t=>{
+      if(t.key === "Mixte") return;
+      const list = QUESTIONS.filter(q => (q.theme||"Bible") === t.key);
+      const done = list.filter(q => !!correct[q.id]).length;
+      byTheme[t.key] = { total: list.length, remaining: Math.max(0, list.length - done), done };
+    });
+
+    return { totalAll, doneAll, remainingAll: Math.max(0, totalAll - doneAll), byTheme };
+  }
+
+  /* ----- MENU MODES ----- */
+  function getAdventureInfo(){
+    const currentLevel = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
+    const starsMap = state.adventure.levelStars || {};
+    const totalStars = Object.values(starsMap).reduce((a,b)=>a+(Number(b)||0),0);
+    const cfg = ADVENTURE_LEVELS[currentLevel-1];
+    const nextGoal = cfg.boss ? `Vaincre le boss (niveau ${cfg.n})` : `Valider le niveau ${cfg.n}`;
+    return { currentLevel, totalStars, nextGoal };
+  }
+
+  function renderModeMenu(){
+    updateTopBar();
+    if(!state.profile){ renderProfileGate(); return; }
+
+    const counts = computeCounts();
+    const adv = getAdventureInfo();
+
+    ui.qType.textContent = "ACCUEIL";
+    ui.diffStars.textContent = "—";
+    ui.counter.textContent = "—";
+    ui.trackDot.style.left = "50%";
+    ui.qmedia.textContent = "🎮";
+    ui.qtext.textContent = `Choisis ton mode`;
+    ui.ref.style.display="none";
+    ui.resultBox.style.display="none";
+    ui.controls.style.display="none";
+    ui.footer.innerHTML = "";
+    setHeartsVisible(false);
+
+    ui.gameArea.innerHTML = `
+      <div class="hint">
+        👋 ${esc(state.profile.name)}
+        • Pièces : <strong>${state.coins}</strong>
+        • Réussies : <strong>${counts.doneAll}</strong>/${counts.totalAll}
+        • Cœurs aventure : <strong>❤️ ${state.adventure.hearts}</strong>
+        • Mots croisés gagnés : <strong>${state.crossword.wins}</strong>
+      </div>
+
+      <div class="mode-grid">
+        <div class="mode-card">
+          <div class="mode-top">
+            <div class="mode-title">📘 Mode Classique</div>
+          </div>
+          <div class="mode-desc">
+            Choisis un thème et réponds aux questions (les bonnes réponses sont exclues des catégories, sauf Mixte).
+          </div>
+          <button class="btn" id="goClassic">▶️ CLASSIQUE</button>
+        </div>
+
+        <div class="mode-card">
+          <div class="mode-top">
+            <div class="mode-title">🗺️ Mode Aventure</div>
+          </div>
+          <div class="mode-desc">
+            Progresse niveau par niveau, gagne des étoiles ⭐ et des cœurs ❤️.
+            Niveau actuel : <strong>${adv.currentLevel}</strong>.
+          </div>
+          <button class="btn gold" id="goAdventure">🗺️ AVENTURE</button>
+        </div>
+
+        <div class="mode-card">
+          <div class="mode-top">
+            <div class="mode-title">🧩 Mode Mots croisés</div>
+          </div>
+          <div class="mode-desc">
+            Grilles générées automatiquement. Accents tolérés. Gagne <strong>+10 🪙</strong> si 100% correct.
+          </div>
+          <button class="btn" id="goCrossword">🧩 MOTS CROISÉS</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
+        <button class="btn secondary" id="btnSave">💾 Sauvegarder</button>
+      </div>
+
+      <div class="row">
+        <button class="btn secondary" id="btnImport">📥 Importer</button>
+        <input type="file" id="fileImport" accept="application/json" style="display:none;">
+      </div>
+    `;
+
+    $("#goClassic").onclick = ()=> renderClassicHome();
+    $("#goAdventure").onclick = ()=> renderAdventureMap();
+    $("#goCrossword").onclick = ()=> renderCrosswordHome();
+
+    $("#btnWins").onclick  = ()=> renderSuccesses();
+    $("#btnSave").onclick  = ()=> exportSave();
+    $("#btnImport").onclick = ()=> $("#fileImport").click();
+    $("#fileImport").onchange = (e)=>{
+      const f = e.target.files && e.target.files[0];
+      e.target.value = "";
+      if(f) importSaveFile(f);
+    };
+  }
+
+  /* ==========================
+     ➜ À PARTIR D’ICI :
+     colle le reste de ton code
+     (Classique, Aventure, Mots croisés, generateCrossword, buildCrosswordNumbering, boot)
+     TEL QU’IL EST DANS TON FICHIER ACTUEL.
+     ========================== */
+
+  // NOTE: Pour ne pas te spammer 600 lignes ici,
+  // tu peux copier/coller à partir de :
+  // /* ====== CLASSIQUE (inchangé) ====== */
+  // jusqu’à la fin (boot()) depuis ton ancien index.
+
+  function boot(){
+    updateTopBar();
+    if(!state.profile) renderProfileGate();
+    else if(state.session && state.session.ids && state.session.ids.length) renderQuestion();
+    else renderModeMenu();
+  }
+  // ⚠️ renderQuestion(), renderClassicHome(), renderAdventureMap(), renderCrosswordHome() etc.
+  // sont dans le "reste du code" à coller comme indiqué juste au-dessus.
+  boot();
+  </script>
+</body>
+</html>
