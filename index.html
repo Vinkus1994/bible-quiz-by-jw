@@ -429,23 +429,10 @@
     }
 
     /* ===== Mots croisés ===== */
-    .xw-wrap{
-      margin-top:12px;
-      display:grid;
-      gap:12px;
-    }
-    .xw-toprow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .xw-stats{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
+    .xw-wrap{ margin-top:12px; display:grid; gap:12px; }
+    .xw-toprow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .xw-stats{ display:flex; gap:8px; flex-wrap:wrap; }
+
     .xw-grid{
       border:1px solid var(--line);
       border-radius: 16px;
@@ -465,10 +452,7 @@
       place-items:center;
       overflow:hidden;
     }
-    .xw-cell.block{
-      background: #1b3d5a;
-      border-color: rgba(0,0,0,.10);
-    }
+    .xw-cell.block{ background: #1b3d5a; border-color: rgba(0,0,0,.10); }
     .xw-cell input{
       width:100%;
       height:100%;
@@ -482,7 +466,6 @@
       text-transform: uppercase;
       caret-color: transparent;
     }
-    .xw-cell input::selection{ background: rgba(58,166,255,.25); }
     .xw-cell .num{
       position:absolute;
       top:2px; left:3px;
@@ -492,22 +475,16 @@
       user-select:none;
       pointer-events:none;
     }
-    .xw-cell.selected{
-      box-shadow: inset 0 0 0 2px rgba(58,166,255,.80);
-      background: rgba(58,166,255,.08);
+    .xw-cell.selected{ box-shadow: inset 0 0 0 2px rgba(58,166,255,.80); background: rgba(58,166,255,.08); }
+    .xw-cell.bad{ background: rgba(229,72,93,.12); box-shadow: inset 0 0 0 2px rgba(229,72,93,.35); }
+    .xw-cell.good{ background: rgba(26,165,106,.10); }
+
+    .xw-cell.hint{
+      box-shadow: inset 0 0 0 3px rgba(255,206,92,.95);
+      background: rgba(255,206,92,.22) !important;
     }
-    .xw-cell.bad{
-      background: rgba(229,72,93,.12);
-      box-shadow: inset 0 0 0 2px rgba(229,72,93,.35);
-    }
-    .xw-cell.good{
-      background: rgba(26,165,106,.10);
-    }
-    .xw-clues{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-    }
+
+    .xw-clues{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     .xw-panel{
       border:1px solid var(--line);
       border-radius: 16px;
@@ -541,15 +518,8 @@
       border-radius:12px;
       background: rgba(58,166,255,.05);
     }
-    .xw-clue .n{
-      font-weight:950;
-      color:var(--ink);
-    }
-    .xw-footnote{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-    }
+    .xw-clue .n{ font-weight:950; color:var(--ink); }
+    .xw-footnote{ font-size:12px; color:var(--muted); line-height:1.35; }
   </style>
 </head>
 
@@ -603,67 +573,53 @@
     </div>
   </div>
 
-  <!-- ✅ Données (tous les modes utilisent la même banque QUESTIONS) -->
+  <!-- Données -->
   <script src="questions.js"></script>
-
-  <!-- ✅ Données Mots croisés -->
   <script src="crosswords.js"></script>
 
-  <!-- ✅ Moteur du jeu (Classique + Aventure + Mots croisés) -->
   <script>
-  /* ========= Base =========
-     IMPORTANT:
-     - Classique + Aventure restent ici (comme tu voulais)
-     - Seules les données (THEMES/QUESTIONS + mots croisés) sont externalisées
-  */
-
-  // Récupère les banques externes
+  /* ========= Données externes ========= */
   const THEMES = window.THEMES || [];
   const QUESTIONS = window.QUESTIONS || [];
-  // CROSSWORD_BANKS vient de crosswords.js (window.CROSSWORD_BANKS)
   const CROSSWORD_BANKS = window.CROSSWORD_BANKS || [];
 
-  /* Règles */
+  /* ========= Règles ========= */
   const COINS_START = 0;
   const COINS_PER_GOOD = 2;
   const JOKER_COST = 2;
   const ADVENTURE_HEARTS_START = 3;
 
-  /* Aventure */
   const ADVENTURE_LEVELS = [
-    { n:1,  name:"Tutoriel",   qCount:5,  minD:1, maxD:1,  minTypes:["QCM"],                  boss:false, bonusStars:[3,6,10] },
-    { n:2,  name:"Départ",     qCount:7,  minD:1, maxD:2,  minTypes:["QCM","VF"],            boss:false, bonusStars:[3,6,10] },
-    { n:3,  name:"Chemin",     qCount:8,  minD:2, maxD:3,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[4,7,12] },
-    { n:4,  name:"Forêt",      qCount:9,  minD:2, maxD:3,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[4,7,12] },
-    { n:5,  name:"Mini Boss",  qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:true,  bonusStars:[6,10,16] },
-    { n:6,  name:"Montée",     qCount:10, minD:3, maxD:4,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[5,9,14] },
-    { n:7,  name:"Plateau",    qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:false, bonusStars:[5,9,14] },
-    { n:8,  name:"Épreuve",    qCount:10, minD:4, maxD:4,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[6,10,16] },
-    { n:9,  name:"Avant-boss", qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","ORDRE"],    boss:false, bonusStars:[7,12,18] },
-    { n:10, name:"Boss",       qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","TROU","ORDRE"], boss:true, bonusStars:[10,16,24] },
+    { n:1,  name:"Tutoriel",   qCount:5,  minD:1, maxD:1, minTypes:["QCM","VF"], boss:false },
+    { n:2,  name:"Départ",     qCount:7,  minD:1, maxD:2, minTypes:["QCM","VF"], boss:false },
+    { n:3,  name:"Chemin",     qCount:8,  minD:2, maxD:3, minTypes:["QCM","VF","TROU"], boss:false },
+    { n:4,  name:"Forêt",      qCount:9,  minD:2, maxD:3, minTypes:["QCM","TROU"], boss:false },
+    { n:5,  name:"Mini Boss",  qCount:10, minD:3, maxD:4, minTypes:["QCM","ORDRE"], boss:true },
+    { n:6,  name:"Montée",     qCount:10, minD:3, maxD:4, minTypes:["QCM","VF","TROU"], boss:false },
+    { n:7,  name:"Plateau",    qCount:10, minD:3, maxD:4, minTypes:["QCM","ORDRE"], boss:false },
+    { n:8,  name:"Épreuve",    qCount:10, minD:4, maxD:4, minTypes:["QCM","TROU"], boss:false },
+    { n:9,  name:"Avant-boss", qCount:10, minD:4, maxD:5, minTypes:["QCM","VF","ORDRE"], boss:false },
+    { n:10, name:"Boss",       qCount:10, minD:4, maxD:5, minTypes:["QCM","VF","TROU","ORDRE"], boss:true },
   ];
 
-  /* Stockage */
-  const STORAGE_KEY = "jwquiz_full_v2025_12_19_crossword_banks";
+  const STORAGE_KEY = "jwquiz_pack_v2025_12_19";
 
-  /* Helpers */
+  /* ========= Helpers ========= */
   const $ = (s)=>document.querySelector(s);
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function normalize(s){
     return String(s ?? "").trim().toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
       .replace(/\s+/g," ");
   }
   function normalizeLettersOnly(s){
-    const t = String(s ?? "")
+    return String(s ?? "")
       .toUpperCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
       .replace(/[^A-Z]/g,"");
-    return t;
-  }
-  function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
   function shuffle(a){
+    a = a.slice();
     for(let i=a.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
       [a[i],a[j]]=[a[j],a[i]];
@@ -690,7 +646,7 @@
     return raw.split(/\s+/).map(x=>x.trim()).filter(Boolean);
   }
 
-  /* UI */
+  /* ========= UI ========= */
   const ui = {
     coins: $("#coins"),
     profileName: $("#profileName"),
@@ -714,24 +670,15 @@
     hearts: $("#hearts"),
   };
 
-  /* State */
+  /* ========= State ========= */
   const defaultState = () => ({
-    version: 1,
     profile: null,
     coins: COINS_START,
     selectedTheme: "Mixte",
     correctIds: {},
-    session: null,
-    adventure: {
-      currentLevel: 1,
-      levelStars: {},
-      hearts: ADVENTURE_HEARTS_START,
-    },
-    crossword: {
-      last: null,
-      wins: 0,
-      selectedBank: "grille1",
-    }
+    session: null, // {mode:'classic'|'adventure'|'crossword', ...}
+    adventure: { currentLevel: 1, hearts: ADVENTURE_HEARTS_START, levelStars:{} },
+    crossword: { wins: 0, selectedBank: (CROSSWORD_BANKS[0]?.key || "grille1") }
   });
 
   let state = loadState();
@@ -740,20 +687,16 @@
     try{
       const raw = localStorage.getItem(STORAGE_KEY);
       const st = raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
-
+      if(!st.adventure) st.adventure = defaultState().adventure;
+      if(!st.crossword) st.crossword = defaultState().crossword;
+      if(!st.correctIds) st.correctIds = {};
       if(typeof st.coins !== "number") st.coins = COINS_START;
       if(!st.selectedTheme) st.selectedTheme = "Mixte";
-      if(!st.correctIds || typeof st.correctIds !== "object") st.correctIds = {};
-      if(!st.adventure || typeof st.adventure !== "object") st.adventure = defaultState().adventure;
-      if(!st.crossword || typeof st.crossword !== "object") st.crossword = defaultState().crossword;
-
-      if(!st.adventure.currentLevel) st.adventure.currentLevel = 1;
-      if(!st.adventure.levelStars || typeof st.adventure.levelStars !== "object") st.adventure.levelStars = {};
       if(typeof st.adventure.hearts !== "number") st.adventure.hearts = ADVENTURE_HEARTS_START;
-
+      if(!st.adventure.currentLevel) st.adventure.currentLevel = 1;
+      if(!st.adventure.levelStars) st.adventure.levelStars = {};
+      if(!st.crossword.selectedBank) st.crossword.selectedBank = (CROSSWORD_BANKS[0]?.key || "grille1");
       if(typeof st.crossword.wins !== "number") st.crossword.wins = 0;
-      if(!st.crossword.selectedBank) st.crossword.selectedBank = "grille1";
-
       return st;
     }catch(e){
       return defaultState();
@@ -769,105 +712,35 @@
     ui.profileName.textContent = state.profile?.name ? state.profile.name : "—";
     ui.themeLabel.textContent = state.selectedTheme || "Mixte";
     ui.hearts.textContent = String(state.adventure?.hearts ?? 0);
-
-    const inAdventure = state.session?.mode === "adventure";
-    setHeartsVisible(inAdventure);
+    setHeartsVisible(state.session?.mode === "adventure");
   }
   ui.hudTitle.onclick = ()=> renderModeMenu();
 
-  /* ------------------------
-     (LE RESTE = ton moteur)
-     ------------------------
-     IMPORTANT : à partir d’ici, tu gardes EXACTEMENT ton code actuel :
-     - export/import
-     - profile
-     - menu modes
-     - classique
-     - aventure
-     - mots croisés
-     - génération crossword
-     - boot()
-     -> tout identique, juste sans les const THEMES / QUESTIONS / CROSSWORD_BANKS
-  */
-
-  // ✅ Colle ici TOUT ton code existant à partir de:
-  // /* Save/Import */ jusqu’à boot();
-  // (SANS remettre THEMES/QUESTIONS/CROSSWORD_BANKS)
-
-  /* Save/Import */
-  function exportSave(){
-    const data = {
-      version: state.version,
-      profile: state.profile,
-      coins: state.coins,
-      selectedTheme: state.selectedTheme,
-      correctIds: state.correctIds,
-      adventure: state.adventure,
-      crossword: state.crossword,
-      exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `jwquiz_save_${(state.profile?.name||"player").replace(/\s+/g,"_")}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+  function setHeader({type="MENU", theme=state.selectedTheme, diff="—", counter="—", media="📘", title=""}){
+    ui.qType.textContent = type;
+    ui.themeLabel.textContent = theme || "Mixte";
+    ui.diffStars.textContent = diff;
+    ui.counter.textContent = counter;
+    ui.qmedia.textContent = media;
+    ui.qtext.textContent = title;
   }
-
-  function importSaveFile(file){
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      try{
-        const data = JSON.parse(reader.result);
-        if(!data || typeof data !== "object") throw new Error("invalid");
-
-        state.profile = data.profile || state.profile;
-        state.coins = Number.isFinite(data.coins) ? data.coins : state.coins;
-        state.selectedTheme = data.selectedTheme || state.selectedTheme;
-        state.correctIds = (data.correctIds && typeof data.correctIds === "object") ? data.correctIds : state.correctIds;
-
-        if(data.adventure && typeof data.adventure === "object"){
-          state.adventure.currentLevel = Number(data.adventure.currentLevel) || state.adventure.currentLevel;
-          state.adventure.levelStars = (data.adventure.levelStars && typeof data.adventure.levelStars==="object")
-            ? data.adventure.levelStars : state.adventure.levelStars;
-
-          const h = Number(data.adventure.hearts);
-          state.adventure.hearts = Number.isFinite(h) ? h : state.adventure.hearts;
-        }
-
-        if(data.crossword && typeof data.crossword === "object"){
-          state.crossword.wins = Number(data.crossword.wins) || 0;
-          state.crossword.last = data.crossword.last || null;
-          state.crossword.selectedBank = data.crossword.selectedBank || state.crossword.selectedBank || "grille1";
-        }
-
-        state.session = null;
-        saveState();
-        renderModeMenu();
-      }catch(e){
-        ui.footer.innerHTML = "⚠️ Fichier de sauvegarde invalide.";
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  /* Profile */
-  function renderProfileGate(){
-    updateTopBar();
-    ui.qType.textContent = "COMPTE";
-    ui.diffStars.textContent = "—";
-    ui.counter.textContent = "—";
-    ui.trackDot.style.left = "50%";
-    ui.qmedia.textContent = "👤";
-    ui.qtext.textContent = "Créer ton compte";
-    ui.ref.style.display="none";
-    ui.resultBox.style.display="none";
-    ui.controls.style.display="none";
+  function clearFooter(){
     ui.footer.innerHTML = "";
+    ui.resultBox.style.display = "none";
+    ui.controls.style.display = "none";
+    ui.ref.style.display = "none";
+  }
+
+  /* ========= Profile ========= */
+  function renderProfileGate(){
+    state.session = null;
+    saveState();
+    updateTopBar();
+    clearFooter();
     setHeartsVisible(false);
+
+    setHeader({type:"COMPTE", theme:"—", diff:"—", counter:"—", media:"👤", title:"Créer ton compte"});
+    ui.trackDot.style.left = "50%";
 
     ui.gameArea.innerHTML = `
       <div class="hint">Ton compte reste enregistré sur cet appareil.</div>
@@ -879,7 +752,6 @@
         <button class="btn" id="btnCreate">✅ Créer mon compte</button>
       </div>
     `;
-
     $("#btnCreate").onclick = ()=>{
       const name = ($("#inpName").value || "").trim();
       if(!name){ ui.footer.innerHTML = "⚠️ Mets un pseudo."; return; }
@@ -889,7 +761,7 @@
     };
   }
 
-  /* Counts */
+  /* ========= Counts / stats ========= */
   function computeCounts(){
     const correct = state.correctIds || {};
     const totalAll = QUESTIONS.length;
@@ -906,34 +778,26 @@
     return { totalAll, doneAll, remainingAll: Math.max(0, totalAll - doneAll), byTheme };
   }
 
-  /* ----- MENU MODES ----- */
-  function getAdventureInfo(){
-    const currentLevel = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
-    const starsMap = state.adventure.levelStars || {};
-    const totalStars = Object.values(starsMap).reduce((a,b)=>a+(Number(b)||0),0);
-    const cfg = ADVENTURE_LEVELS[currentLevel-1];
-    const nextGoal = cfg.boss ? `Vaincre le boss (niveau ${cfg.n})` : `Valider le niveau ${cfg.n}`;
-    return { currentLevel, totalStars, nextGoal };
-  }
-
+  /* ========= Mode menu ========= */
   function renderModeMenu(){
     updateTopBar();
+    clearFooter();
+    setHeartsVisible(false);
+
     if(!state.profile){ renderProfileGate(); return; }
 
     const counts = computeCounts();
-    const adv = getAdventureInfo();
+    const lvl = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
 
-    ui.qType.textContent = "ACCUEIL";
-    ui.diffStars.textContent = "—";
-    ui.counter.textContent = "—";
+    setHeader({
+      type:"ACCUEIL",
+      theme: state.selectedTheme,
+      diff:"—",
+      counter:"—",
+      media:"🎮",
+      title:"Choisis ton mode"
+    });
     ui.trackDot.style.left = "50%";
-    ui.qmedia.textContent = "🎮";
-    ui.qtext.textContent = `Choisis ton mode`;
-    ui.ref.style.display="none";
-    ui.resultBox.style.display="none";
-    ui.controls.style.display="none";
-    ui.footer.innerHTML = "";
-    setHeartsVisible(false);
 
     ui.gameArea.innerHTML = `
       <div class="hint">
@@ -946,82 +810,978 @@
 
       <div class="mode-grid">
         <div class="mode-card">
-          <div class="mode-top">
-            <div class="mode-title">📘 Mode Classique</div>
-          </div>
-          <div class="mode-desc">
-            Choisis un thème et réponds aux questions (les bonnes réponses sont exclues des catégories, sauf Mixte).
-          </div>
+          <div class="mode-top"><div class="mode-title">📘 Mode Classique</div></div>
+          <div class="mode-desc">Choisis un thème et réponds aux questions. Les bonnes réponses sont exclues des catégories (sauf Mixte).</div>
           <button class="btn" id="goClassic">▶️ CLASSIQUE</button>
         </div>
 
         <div class="mode-card">
-          <div class="mode-top">
-            <div class="mode-title">🗺️ Mode Aventure</div>
-          </div>
-          <div class="mode-desc">
-            Progresse niveau par niveau, gagne des étoiles ⭐ et des cœurs ❤️.
-            Niveau actuel : <strong>${adv.currentLevel}</strong>.
-          </div>
+          <div class="mode-top"><div class="mode-title">🗺️ Mode Aventure</div></div>
+          <div class="mode-desc">Progresse niveau par niveau. Bonne réponse = +1 ❤️, mauvaise = -1 ❤️ (sans limite de gain). Niveau actuel : <strong>${lvl}</strong>.</div>
           <button class="btn gold" id="goAdventure">🗺️ AVENTURE</button>
         </div>
 
         <div class="mode-card">
-          <div class="mode-top">
-            <div class="mode-title">🧩 Mode Mots croisés</div>
-          </div>
-          <div class="mode-desc">
-            Grilles générées automatiquement. Accents tolérés. Gagne <strong>+10 🪙</strong> si 100% correct.
-          </div>
+          <div class="mode-top"><div class="mode-title">🧩 Mode Mots croisés</div></div>
+          <div class="mode-desc">Grilles générées automatiquement depuis tes listes. Accents tolérés, espaces ignorés. +10 🪙 si 100% correct. Joker = position du prochain mot (2 🪙).</div>
           <button class="btn" id="goCrossword">🧩 MOTS CROISÉS</button>
         </div>
       </div>
 
       <div class="row">
         <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
-        <button class="btn secondary" id="btnSave">💾 Sauvegarder</button>
-      </div>
-
-      <div class="row">
-        <button class="btn secondary" id="btnImport">📥 Importer</button>
-        <input type="file" id="fileImport" accept="application/json" style="display:none;">
+        <button class="btn secondary" id="btnReset">🧼 Reset (local)</button>
       </div>
     `;
 
     $("#goClassic").onclick = ()=> renderClassicHome();
     $("#goAdventure").onclick = ()=> renderAdventureMap();
     $("#goCrossword").onclick = ()=> renderCrosswordHome();
-
-    $("#btnWins").onclick  = ()=> renderSuccesses();
-    $("#btnSave").onclick  = ()=> exportSave();
-    $("#btnImport").onclick = ()=> $("#fileImport").click();
-    $("#fileImport").onchange = (e)=>{
-      const f = e.target.files && e.target.files[0];
-      e.target.value = "";
-      if(f) importSaveFile(f);
+    $("#btnWins").onclick = ()=> renderSuccesses();
+    $("#btnReset").onclick = ()=>{
+      localStorage.removeItem(STORAGE_KEY);
+      state = defaultState();
+      renderModeMenu();
     };
   }
 
-  /* ==========================
-     ➜ À PARTIR D’ICI :
-     colle le reste de ton code
-     (Classique, Aventure, Mots croisés, generateCrossword, buildCrosswordNumbering, boot)
-     TEL QU’IL EST DANS TON FICHIER ACTUEL.
-     ========================== */
+  /* ========= Successes ========= */
+  function renderSuccesses(){
+    updateTopBar();
+    clearFooter();
+    setHeartsVisible(false);
 
-  // NOTE: Pour ne pas te spammer 600 lignes ici,
-  // tu peux copier/coller à partir de :
-  // /* ====== CLASSIQUE (inchangé) ====== */
-  // jusqu’à la fin (boot()) depuis ton ancien index.
+    const done = Object.keys(state.correctIds||{}).filter(id=>QUESTIONS.some(q=>q.id===id));
+    const doneQs = done.map(id=>QUESTIONS.find(q=>q.id===id)).filter(Boolean);
 
+    setHeader({type:"RÉUSSITES", theme:state.selectedTheme, diff:"—", counter:`${doneQs.length}/${QUESTIONS.length}`, media:"🏆", title:"Tes bonnes réponses"});
+    ui.trackDot.style.left = "50%";
+
+    if(!doneQs.length){
+      ui.gameArea.innerHTML = `
+        <div class="hint">Aucune question réussie pour le moment.</div>
+        <button class="btn" id="back">⬅️ Retour</button>
+      `;
+      $("#back").onclick = ()=> renderModeMenu();
+      return;
+    }
+
+    ui.gameArea.innerHTML = `
+      <div class="hint">Liste des questions validées (local).</div>
+      <div class="order-zone" style="max-height: 320px; overflow:auto;">
+        ${doneQs.map(q=>`
+          <div style="padding:10px; border-bottom:1px solid rgba(191,230,255,.7);">
+            <div style="font-weight:950">${esc(q.question)}</div>
+            <div style="font-size:12px; color:var(--muted); margin-top:4px;">✅ ${esc(q.answer)} • ${esc(q.reference||"")}</div>
+          </div>
+        `).join("")}
+      </div>
+      <button class="btn" id="back">⬅️ Retour</button>
+    `;
+    $("#back").onclick = ()=> renderModeMenu();
+  }
+
+  /* ========= Classic ========= */
+  function renderClassicHome(){
+    updateTopBar();
+    clearFooter();
+    setHeartsVisible(false);
+
+    setHeader({type:"CLASSIQUE", theme:state.selectedTheme, diff:"—", counter:"—", media:"📘", title:"Choisis un thème"});
+    ui.trackDot.style.left = "50%";
+
+    const counts = computeCounts();
+
+    ui.gameArea.innerHTML = `
+      <div class="hint">En Mixte: toutes les questions. Dans une catégorie: les questions déjà réussies sont retirées.</div>
+      <div class="themes">
+        ${THEMES.map(t=>{
+          const c = t.key==="Mixte" ? {total:QUESTIONS.length, remaining:counts.remainingAll, done:counts.doneAll} : (counts.byTheme[t.key] || {total:0, remaining:0, done:0});
+          return `
+            <div class="theme-card ${state.selectedTheme===t.key?'selected':''}" data-key="${esc(t.key)}">
+              <div class="t-top">
+                <div class="t-name">${esc(t.label||t.key)}</div>
+                <div class="t-ico">${esc(t.icon||"📘")}</div>
+              </div>
+              <div class="t-sub">${esc(t.hint||"")}</div>
+              <div class="t-sub"><strong>${c.done}</strong> validées • <strong>${c.remaining}</strong> restantes • Total ${c.total}</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="row">
+        <button class="btn gold" id="start">▶️ Démarrer</button>
+        <button class="btn secondary" id="back">⬅️ Retour</button>
+      </div>
+    `;
+
+    document.querySelectorAll(".theme-card").forEach(el=>{
+      el.onclick = ()=>{
+        const k = el.getAttribute("data-key");
+        state.selectedTheme = k;
+        saveState();
+        renderClassicHome();
+      };
+    });
+
+    $("#back").onclick = ()=> renderModeMenu();
+    $("#start").onclick = ()=> startClassicSession();
+  }
+
+  function startClassicSession(){
+    const theme = state.selectedTheme || "Mixte";
+    const correct = state.correctIds || {};
+    let pool = QUESTIONS.slice();
+
+    if(theme !== "Mixte"){
+      pool = pool.filter(q => (q.theme||"Bible") === theme && !correct[q.id]);
+    }else{
+      pool = QUESTIONS.slice(); // Mixte = tout
+    }
+
+    if(!pool.length){
+      ui.footer.innerHTML = "⚠️ Plus de questions disponibles dans ce thème (toutes validées).";
+      return;
+    }
+
+    const ids = shuffle(pool).map(q=>q.id);
+    state.session = { mode:"classic", ids, idx:0, usedJoker:false };
+    saveState();
+    renderQuestion();
+  }
+
+  /* ========= Adventure ========= */
+  function renderAdventureMap(){
+    updateTopBar();
+    clearFooter();
+    setHeartsVisible(true);
+
+    const current = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
+
+    setHeader({type:"AVENTURE", theme:"—", diff:"—", counter:"—", media:"🗺️", title:"Carte d’aventure"});
+    ui.trackDot.style.left = "50%";
+
+    ui.gameArea.innerHTML = `
+      <div class="adv-banner">
+        <div class="big">❤️ Cœurs : ${state.adventure.hearts}</div>
+        <div class="small">Bonne réponse = +1 ❤️ • Mauvaise = -1 ❤️ • (pas de limite de gain)</div>
+      </div>
+
+      <div class="map">
+        ${ADVENTURE_LEVELS.map(l=>{
+          const unlocked = l.n <= current;
+          const doneStars = Number((state.adventure.levelStars||{})[l.n]||0);
+          const lockTxt = unlocked ? "✅" : "🔒";
+          return `
+            <div class="lvl">
+              <div class="lvl-head" data-lvl="${l.n}">
+                <div class="lvl-left">
+                  <div class="badge">${l.n}</div>
+                  <div class="lvl-title">${esc(l.name)} ${l.boss ? "👑" : ""}</div>
+                </div>
+                <div class="lvl-right">
+                  <div class="stars">${doneStars ? ("⭐".repeat(Math.min(5, doneStars))) : ""}</div>
+                  <div class="lock">${lockTxt}</div>
+                </div>
+              </div>
+              <div class="lvl-body" ${unlocked ? "" : "hidden"}>
+                <div class="pill">Questions: <strong>${l.qCount}</strong></div>
+                <div class="pill">Difficulté: <strong>${l.minD}–${l.maxD}</strong></div>
+                <button class="btn gold" data-start="${l.n}" ${unlocked ? "" : "disabled"}>▶️ Jouer ce niveau</button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="row">
+        <button class="btn secondary" id="back">⬅️ Retour</button>
+      </div>
+    `;
+
+    document.querySelectorAll(".lvl-head").forEach(h=>{
+      h.onclick = ()=>{
+        const body = h.parentElement.querySelector(".lvl-body");
+        if(body) body.hidden = !body.hidden;
+      };
+    });
+
+    document.querySelectorAll("[data-start]").forEach(b=>{
+      b.onclick = ()=>{
+        const lvl = Number(b.getAttribute("data-start"));
+        startAdventureLevel(lvl);
+      };
+    });
+
+    $("#back").onclick = ()=> renderModeMenu();
+  }
+
+  function startAdventureLevel(levelN){
+    const current = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
+    if(levelN > current) return;
+
+    const cfg = ADVENTURE_LEVELS[levelN-1];
+    const pool = QUESTIONS.filter(q=>{
+      const d = Number(q.difficulty)||1;
+      const t = (q.type||"QCM").toUpperCase();
+      return d>=cfg.minD && d<=cfg.maxD && cfg.minTypes.includes(t);
+    });
+
+    if(!pool.length){
+      ui.footer.innerHTML = "⚠️ Pas assez de questions pour ce niveau (filtrage trop strict).";
+      return;
+    }
+
+    const ids = shuffle(pool).slice(0, cfg.qCount).map(q=>q.id);
+    state.session = { mode:"adventure", level: levelN, ids, idx:0 };
+    saveState();
+    renderQuestion();
+  }
+
+  /* ========= Questions runner ========= */
+  function currentQuestion(){
+    const sid = state.session?.ids?.[state.session.idx];
+    if(!sid) return null;
+    return QUESTIONS.find(q=>q.id===sid) || null;
+  }
+
+  function renderQuestion(){
+    updateTopBar();
+    clearFooter();
+
+    const q = currentQuestion();
+    if(!q){
+      if(state.session?.mode === "adventure") return endAdventureLevel(false);
+      state.session = null;
+      saveState();
+      return renderClassicHome();
+    }
+
+    const total = state.session.ids.length;
+    const idx = state.session.idx + 1;
+    const type = (q.type||"QCM").toUpperCase();
+    const diff = stars(q.difficulty||1);
+
+    setHeader({
+      type,
+      theme: (q.theme||state.selectedTheme||"Mixte"),
+      diff,
+      counter: `${idx}/${total}`,
+      media: pickMedia(q),
+      title: q.question
+    });
+
+    ui.ref.style.display = q.reference ? "block" : "none";
+    ui.ref.innerHTML = q.reference ? `📌 ${esc(q.reference)}` : "";
+
+    ui.controls.style.display = "flex";
+    ui.resultBox.style.display = "none";
+
+    const inClassic = state.session.mode === "classic";
+    ui.btnJoker.style.display = inClassic ? "block" : "none";
+
+    ui.btnSkip.onclick = ()=>{
+      state.session.idx++;
+      saveState();
+      renderQuestion();
+    };
+    ui.btnEnd.onclick = ()=>{
+      if(state.session.mode === "adventure") return endAdventureLevel(true);
+      state.session = null;
+      saveState();
+      renderClassicHome();
+    };
+
+    ui.btnJoker.onclick = ()=>{
+      if(!inClassic) return;
+      if(state.session.usedJoker){
+        ui.footer.innerHTML = "⚠️ Joker déjà utilisé dans cette session.";
+        return;
+      }
+      if(state.coins < JOKER_COST){
+        ui.footer.innerHTML = "⚠️ Pas assez de pièces.";
+        return;
+      }
+      state.coins -= JOKER_COST;
+      state.session.usedJoker = true;
+      saveState();
+      updateTopBar();
+      applyJokerRemoveOptions(q);
+    };
+
+    if(type === "ORDRE"){
+      renderOrderQuestion(q);
+    }else if(type === "TROU"){
+      renderFillBlankQuestion(q);
+    }else{
+      renderChoiceQuestion(q);
+    }
+  }
+
+  function awardAfterAnswer(isGood, q){
+    if(isGood){
+      state.coins += COINS_PER_GOOD;
+      state.correctIds[q.id] = true;
+    }
+    if(state.session?.mode === "adventure"){
+      if(isGood) state.adventure.hearts += 1;
+      else state.adventure.hearts = Math.max(0, state.adventure.hearts - 1);
+    }
+    saveState();
+    updateTopBar();
+  }
+
+  function showResult(isGood, q, extraSmall=""){
+    ui.resultBox.style.display = "block";
+    ui.resultBox.className = "result " + (isGood ? "good":"bad");
+    ui.resultBox.innerHTML = `
+      <div class="title">${isGood ? "✅ Bonne réponse !" : "❌ Mauvaise réponse"}</div>
+      <div class="small"><strong>Réponse :</strong> ${esc(q.answer)}${q.reference ? `<br><strong>Référence :</strong> ${esc(q.reference)}` : ""}${extraSmall ? `<br>${extraSmall}` : ""}</div>
+    `;
+  }
+
+  function nextAfterDelay(){
+    setTimeout(()=>{
+      state.session.idx++;
+      saveState();
+      renderQuestion();
+    }, 550);
+  }
+
+  /* QCM/VF */
+  function buildOptionsFor(q){
+    const type = (q.type||"QCM").toUpperCase();
+    if(Array.isArray(q.options) && q.options.length){
+      const opts = q.options.slice();
+      if(!opts.some(x=>normalize(x)===normalize(q.answer))) opts.push(q.answer);
+      return shuffle(opts);
+    }
+    if(type==="VF") return ["Vrai","Faux"];
+    return shuffle([q.answer, "—", "—", "—"]).filter(Boolean);
+  }
+
+  let lastChoiceButtons = [];
+  function renderChoiceQuestion(q){
+    const opts = buildOptionsFor(q);
+
+    ui.gameArea.innerHTML = `
+      <div class="answers">
+        ${opts.map(o=>`<button class="ansbtn" data-ans="${esc(o)}">${esc(o)}</button>`).join("")}
+      </div>
+    `;
+
+    lastChoiceButtons = Array.from(document.querySelectorAll(".ansbtn"));
+
+    lastChoiceButtons.forEach(btn=>{
+      btn.onclick = ()=>{
+        const chosen = btn.getAttribute("data-ans");
+        const good = normalize(chosen) === normalize(q.answer);
+
+        lastChoiceButtons.forEach(b=>b.disabled=true);
+
+        if(good){
+          btn.classList.add("correct");
+          awardAfterAnswer(true, q);
+          showResult(true, q);
+        }else{
+          btn.classList.add("wrong");
+          lastChoiceButtons.forEach(b=>{
+            if(normalize(b.getAttribute("data-ans")) === normalize(q.answer)) b.classList.add("correct");
+          });
+          awardAfterAnswer(false, q);
+          showResult(false, q);
+        }
+        nextAfterDelay();
+      };
+    });
+  }
+
+  function applyJokerRemoveOptions(q){
+    if(!lastChoiceButtons?.length){
+      ui.footer.innerHTML = "⚠️ Joker dispo seulement sur QCM/VF.";
+      return;
+    }
+    let removed = 0;
+    for(const b of lastChoiceButtons){
+      if(removed>=2) break;
+      const val = b.getAttribute("data-ans");
+      if(normalize(val) !== normalize(q.answer)){
+        b.disabled = true;
+        b.style.opacity = "0.35";
+        removed++;
+      }
+    }
+    ui.footer.innerHTML = "🃏 Joker utilisé : 2 mauvaises réponses retirées.";
+  }
+
+  /* TROU */
+  function renderFillBlankQuestion(q){
+    ui.gameArea.innerHTML = `
+      <div class="form">
+        <div class="field">
+          <div class="label">Ta réponse</div>
+          <input class="input" id="inpFill" placeholder="Écris le mot..." />
+        </div>
+        <button class="btn gold" id="submit">✅ Valider</button>
+      </div>
+    `;
+    const inp = $("#inpFill");
+    inp.focus();
+
+    $("#submit").onclick = ()=>{
+      const val = (inp.value||"").trim();
+      const good = normalize(val) === normalize(q.answer);
+      $("#submit").disabled = true;
+      inp.disabled = true;
+
+      awardAfterAnswer(good, q);
+      showResult(good, q);
+      nextAfterDelay();
+    };
+  }
+
+  /* ORDRE */
+  function renderOrderQuestion(q){
+    const target = splitOrderAnswer(q.answer);
+    const pool = shuffle(target);
+
+    let chosen = [];
+    function draw(){
+      ui.gameArea.innerHTML = `
+        <div class="order-wrap">
+          <div class="order-zone">
+            <div class="order-title">Clique les éléments dans le bon ordre</div>
+            <div class="chips" id="pool">
+              ${pool.map((w,i)=>`<button class="chipbtn" data-i="${i}" ${chosen.includes(i) ? "disabled":""}>${esc(w)}</button>`).join("")}
+            </div>
+          </div>
+
+          <div class="order-zone">
+            <div class="order-title">Ton ordre</div>
+            <div class="chips" id="pick">
+              ${chosen.map(i=>`<span class="pill">${esc(pool[i])}</span>`).join("") || `<span class="hint">—</span>`}
+            </div>
+          </div>
+
+          <div class="row">
+            <button class="btn secondary" id="undo" ${chosen.length? "":"disabled"}>↩️ Annuler</button>
+            <button class="btn gold" id="submit" ${chosen.length===target.length? "":"disabled"}>✅ Valider</button>
+          </div>
+        </div>
+      `;
+
+      document.querySelectorAll(".chipbtn").forEach(b=>{
+        b.onclick = ()=>{
+          const i = Number(b.getAttribute("data-i"));
+          if(chosen.includes(i)) return;
+          chosen.push(i);
+          draw();
+        };
+      });
+
+      $("#undo").onclick = ()=>{
+        chosen.pop();
+        draw();
+      };
+
+      $("#submit").onclick = ()=>{
+        const attempt = chosen.map(i=>pool[i]);
+        const good = attempt.map(normalize).join("|") === target.map(normalize).join("|");
+        awardAfterAnswer(good, q);
+        showResult(good, q, good ? "⭐ Bien joué !" : "💡 Astuce : relis la liste et recommence au prochain.");
+        nextAfterDelay();
+      };
+    }
+    draw();
+  }
+
+  function endAdventureLevel(force=false){
+    const sess = state.session;
+    if(!sess || sess.mode!=="adventure"){
+      state.session = null;
+      saveState();
+      return renderModeMenu();
+    }
+
+    const total = sess.ids.length;
+    const answered = Math.min(total, Math.max(0, sess.idx));
+    const ratio = total ? (answered/total) : 0;
+    const starsEarned = ratio >= .9 ? 5 : ratio >= .75 ? 4 : ratio >= .6 ? 3 : ratio >= .4 ? 2 : 1;
+
+    const lvl = sess.level || 1;
+    state.adventure.levelStars[lvl] = Math.max(Number(state.adventure.levelStars[lvl]||0), starsEarned);
+
+    if(!force){
+      state.adventure.currentLevel = Math.max(state.adventure.currentLevel, Math.min(ADVENTURE_LEVELS.length, lvl+1));
+    }
+
+    state.session = null;
+    saveState();
+
+    updateTopBar();
+    clearFooter();
+    setHeartsVisible(true);
+
+    setHeader({type:"AVENTURE", theme:"—", diff:"—", counter:"—", media:"🏁", title:`Niveau ${lvl} terminé`});
+    ui.trackDot.style.left = "50%";
+
+    ui.gameArea.innerHTML = `
+      <div class="result good">
+        <div class="title">⭐ Étoiles gagnées : ${"⭐".repeat(starsEarned)}</div>
+        <div class="small">Cœurs actuels : ❤️ ${state.adventure.hearts}</div>
+      </div>
+      <div class="row">
+        <button class="btn gold" id="backMap">🗺️ Retour carte</button>
+        <button class="btn secondary" id="home">🏠 Accueil</button>
+      </div>
+    `;
+    $("#backMap").onclick = ()=> renderAdventureMap();
+    $("#home").onclick = ()=> renderModeMenu();
+  }
+
+  /* ========= Mots croisés ========= */
+  function getSelectedBank(){
+    const key = state.crossword.selectedBank;
+    return CROSSWORD_BANKS.find(b=>b.key===key) || CROSSWORD_BANKS[0] || null;
+  }
+
+  function renderCrosswordHome(){
+    updateTopBar();
+    clearFooter();
+    setHeartsVisible(false);
+
+    setHeader({type:"MOTS CROISÉS", theme:"—", diff:"—", counter:"—", media:"🧩", title:"Choisis une grille"});
+    ui.trackDot.style.left = "50%";
+
+    ui.gameArea.innerHTML = `
+      <div class="hint">
+        Les mots croisés vont vous donner le plaisir de lire la Bible différemment car pour ce mode de jeu ci, votre Bible vous sera très utile. Bon amusement.<br>
+        <strong>Grille générée automatiquement depuis ta liste.</strong> • Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
+      </div>
+
+      <div class="form">
+        <div class="field">
+          <div class="label">Grille</div>
+          <select class="input" id="bankSel">
+            ${CROSSWORD_BANKS.map(b=>`<option value="${esc(b.key)}" ${b.key===state.crossword.selectedBank?"selected":""}>${esc(b.title)} — ${esc(b.subtitle||"")}</option>`).join("")}
+          </select>
+        </div>
+        <button class="btn gold" id="startXW">▶️ Démarrer la grille</button>
+        <button class="btn secondary" id="back">⬅️ Retour</button>
+      </div>
+    `;
+
+    $("#bankSel").onchange = (e)=>{
+      state.crossword.selectedBank = e.target.value;
+      saveState();
+    };
+    $("#startXW").onclick = ()=> startCrossword();
+    $("#back").onclick = ()=> renderModeMenu();
+  }
+
+  function startCrossword(){
+    const bank = getSelectedBank();
+    if(!bank || !bank.items?.length){
+      ui.footer.innerHTML = "⚠️ Grille vide.";
+      return;
+    }
+
+    const entries = bank.items.map((it, idx)=>({
+      id: it.id || ("xw_"+idx),
+      clue: it.clue || "",
+      answerRaw: it.answer || "",
+      answer: normalizeLettersOnly(it.answer || "")
+    })).filter(e=>e.answer.length>=2);
+
+    entries.sort((a,b)=>b.answer.length - a.answer.length);
+
+    const gridSize = Math.max(13, Math.min(19, Math.max(...entries.map(e=>e.answer.length)) + 4));
+    const grid = Array.from({length:gridSize}, ()=>Array.from({length:gridSize}, ()=>null));
+    const placed = [];
+
+    function canPlace(word, r, c, dir){
+      for(let i=0;i<word.length;i++){
+        const rr = r + (dir==='D'?i:0);
+        const cc = c + (dir==='A'?i:0);
+        if(rr<0||cc<0||rr>=gridSize||cc>=gridSize) return false;
+        const cur = grid[rr][cc];
+        if(cur && cur !== word[i]) return false;
+      }
+      return true;
+    }
+
+    function placeWord(entry, r, c, dir){
+      for(let i=0;i<entry.answer.length;i++){
+        const rr = r + (dir==='D'?i:0);
+        const cc = c + (dir==='A'?i:0);
+        grid[rr][cc] = entry.answer[i];
+      }
+      placed.push({entry, r, c, dir});
+    }
+
+    const first = entries[0];
+    const r0 = Math.floor(gridSize/2);
+    const c0 = Math.floor((gridSize - first.answer.length)/2);
+    placeWord(first, r0, c0, 'A');
+
+    for(let k=1;k<entries.length;k++){
+      const entry = entries[k];
+      let ok = false;
+
+      for(let pi=0; pi<placed.length && !ok; pi++){
+        const p = placed[pi];
+        const w = p.entry.answer;
+
+        for(let i=0;i<entry.answer.length && !ok;i++){
+          const ch = entry.answer[i];
+
+          for(let j=0;j<w.length && !ok;j++){
+            if(w[j] !== ch) continue;
+
+            const rr = p.r + (p.dir==='D'?j:0);
+            const cc = p.c + (p.dir==='A'?j:0);
+
+            const dir = (p.dir==='A') ? 'D' : 'A';
+            const r = rr - (dir==='D'?i:0);
+            const c = cc - (dir==='A'?i:0);
+
+            if(canPlace(entry.answer, r, c, dir)){
+              placeWord(entry, r, c, dir);
+              ok = true;
+            }
+          }
+        }
+      }
+
+      if(!ok){
+        for(let tries=0; tries<250 && !ok; tries++){
+          const dir = Math.random()<0.5?'A':'D';
+          const r = Math.floor(Math.random()*gridSize);
+          const c = Math.floor(Math.random()*gridSize);
+          if(canPlace(entry.answer, r, c, dir)){
+            placeWord(entry, r, c, dir);
+            ok = true;
+          }
+        }
+      }
+    }
+
+    let minR=gridSize, minC=gridSize, maxR=0, maxC=0;
+    for(let r=0;r<gridSize;r++){
+      for(let c=0;c<gridSize;c++){
+        if(grid[r][c]){
+          minR=Math.min(minR,r); minC=Math.min(minC,c);
+          maxR=Math.max(maxR,r); maxC=Math.max(maxC,c);
+        }
+      }
+    }
+    minR=Math.max(0,minR-1); minC=Math.max(0,minC-1);
+    maxR=Math.min(gridSize-1,maxR+1); maxC=Math.min(gridSize-1,maxC+1);
+
+    const H = maxR-minR+1;
+    const W = maxC-minC+1;
+
+    const cropped = Array.from({length:H}, (_,rr)=>Array.from({length:W}, (_,cc)=>grid[minR+rr][minC+cc]));
+    const placements = placed.map(p=>({
+      id: p.entry.id,
+      clue: p.entry.clue,
+      answer: p.entry.answer,
+      dir: p.dir,
+      r: p.r - minR,
+      c: p.c - minC,
+      len: p.entry.answer.length
+    }));
+
+    const nums = Array.from({length:H}, ()=>Array.from({length:W}, ()=>0));
+    let num=1;
+    const across = [];
+    const down = [];
+
+    function isLetter(rr,cc){ return !!cropped[rr]?.[cc]; }
+    function startsAcross(rr,cc){
+      if(!isLetter(rr,cc)) return false;
+      const left = cc===0 ? false : isLetter(rr,cc-1);
+      const right = cc+1<W ? isLetter(rr,cc+1) : false;
+      return (!left && right);
+    }
+    function startsDown(rr,cc){
+      if(!isLetter(rr,cc)) return false;
+      const up = rr===0 ? false : isLetter(rr-1,cc);
+      const downn = rr+1<H ? isLetter(rr+1,cc) : false;
+      return (!up && downn);
+    }
+
+    const byStart = new Map();
+    for(const pl of placements){
+      byStart.set(`${pl.r},${pl.c},${pl.dir}`, pl);
+    }
+
+    for(let r=0;r<H;r++){
+      for(let c=0;c<W;c++){
+        const a = startsAcross(r,c);
+        const d = startsDown(r,c);
+        if(a || d){
+          nums[r][c] = num;
+
+          if(a){
+            const pl = byStart.get(`${r},${c},A`);
+            if(pl) across.push({n:num, clue: pl.clue, id: pl.id, len: pl.len});
+          }
+          if(d){
+            const pl = byStart.get(`${r},${c},D`);
+            if(pl) down.push({n:num, clue: pl.clue, id: pl.id, len: pl.len});
+          }
+          num++;
+        }
+      }
+    }
+
+    const user = Array.from({length:H}, ()=>Array.from({length:W}, ()=>""));
+    state.session = { mode:"crossword", xw:{H,W,grid:cropped,nums,across,down,user} };
+    saveState();
+    renderCrosswordGame();
+  }
+
+  function renderCrosswordGame(){
+    updateTopBar();
+    clearFooter();
+    setHeartsVisible(false);
+
+    const xw = state.session?.xw;
+    if(!xw){ return renderCrosswordHome(); }
+
+    setHeader({type:"MOTS CROISÉS", theme:"—", diff:"—", counter:"", media:"🧩", title:"Complète la grille"});
+    ui.trackDot.style.left = "50%";
+
+    const {H,W,grid,nums,across,down,user} = xw;
+
+    ui.gameArea.innerHTML = `
+      <div class="xw-wrap">
+        <div class="xw-toprow">
+          <div class="xw-stats">
+            <span class="pill">Cases: <strong>${H*W}</strong></span>
+            <span class="pill">Mots: <strong>${across.length + down.length}</strong></span>
+          </div>
+          <div class="row" style="margin:0;">
+            <button class="btn secondary" id="xwBack" style="margin:0; min-width:120px;">⬅️ Retour</button>
+            <button class="btn" id="xwJoker" style="margin:0; min-width:120px;">🃏 Joker (2 🪙)</button>
+            <button class="btn gold" id="xwCheck" style="margin:0; min-width:120px;">✅ Vérifier</button>
+          </div>
+        </div>
+
+        <div class="xw-grid" id="xwGrid" style="grid-template-columns: repeat(${W}, 1fr);">
+          ${Array.from({length:H}, (_,r)=>Array.from({length:W}, (_,c)=>{
+            if(!grid[r][c]) return `<div class="xw-cell block"></div>`;
+            const n = nums[r][c] ? `<div class="num">${nums[r][c]}</div>` : "";
+            const val = esc(user[r][c]||"");
+            return `
+              <div class="xw-cell" data-r="${r}" data-c="${c}">
+                ${n}
+                <input maxlength="1" inputmode="text" value="${val}" />
+              </div>
+            `;
+          }).join("")).join("")}
+        </div>
+
+        <div class="xw-clues">
+          <div class="xw-panel">
+            <h3>➡️ Horizontal</h3>
+            <div class="xw-cluelist">
+              ${across.map(it=>`<div class="xw-clue"><span class="n">${it.n}.</span> ${esc(it.clue)}</div>`).join("") || `<div class="xw-footnote">—</div>`}
+            </div>
+          </div>
+          <div class="xw-panel">
+            <h3>⬇️ Vertical</h3>
+            <div class="xw-cluelist">
+              ${down.map(it=>`<div class="xw-clue"><span class="n">${it.n}.</span> ${esc(it.clue)}</div>`).join("") || `<div class="xw-footnote">—</div>`}
+            </div>
+          </div>
+        </div>
+
+        <div class="xw-footnote">
+          Grille générée automatiquement depuis ta liste. • Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
+        </div>
+      </div>
+    `;
+
+    $("#xwBack").onclick = ()=>{
+      state.session = null;
+      saveState();
+      renderCrosswordHome();
+    };
+
+    // inputs
+    document.querySelectorAll("#xwGrid .xw-cell input").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        const cell = inp.closest(".xw-cell");
+        if(!cell) return;
+        const r = Number(cell.getAttribute("data-r"));
+        const c = Number(cell.getAttribute("data-c"));
+        const ch = normalizeLettersOnly(inp.value || "");
+        inp.value = ch ? ch[0] : "";
+        xw.user[r][c] = inp.value;
+        saveState();
+
+        if(inp.value){
+          const next = cell.nextElementSibling;
+          if(next && next.classList.contains("xw-cell") && !next.classList.contains("block")){
+            const ni = next.querySelector("input");
+            if(ni) ni.focus();
+          }
+        }
+      });
+    });
+
+    // -------- Joker crossword : position du mot suivant --------
+    function wordSolved(pl){
+      for(let i=0;i<pl.len;i++){
+        const rr = pl.r + (pl.dir==='D'?i:0);
+        const cc = pl.c + (pl.dir==='A'?i:0);
+        const expected = grid[rr][cc];
+        const got = (xw.user[rr][cc]||"").toUpperCase();
+        if(got !== expected) return false;
+      }
+      return true;
+    }
+
+    function getPlacementsFromGrid(){
+      const placements = [];
+      function isLetter(rr,cc){ return !!grid[rr]?.[cc]; }
+
+      // Across
+      for(let r=0;r<H;r++){
+        for(let c=0;c<W;c++){
+          if(!isLetter(r,c)) continue;
+          const left = (c>0) ? isLetter(r,c-1) : false;
+          const right = (c+1<W) ? isLetter(r,c+1) : false;
+          if(!left && right){
+            let len=1;
+            while(c+len<W && isLetter(r,c+len)) len++;
+            placements.push({ r, c, dir:'A', len });
+          }
+        }
+      }
+      // Down
+      for(let r=0;r<H;r++){
+        for(let c=0;c<W;c++){
+          if(!isLetter(r,c)) continue;
+          const up = (r>0) ? isLetter(r-1,c) : false;
+          const downn = (r+1<H) ? isLetter(r+1,c) : false;
+          if(!up && downn){
+            let len=1;
+            while(r+len<H && isLetter(r+len,c)) len++;
+            placements.push({ r, c, dir:'D', len });
+          }
+        }
+      }
+      return placements;
+    }
+
+    function clearHint(){
+      document.querySelectorAll("#xwGrid .xw-cell.hint").forEach(el=>el.classList.remove("hint"));
+    }
+
+    function hintPlacement(pl){
+      clearHint();
+      const cell = document.querySelector(`#xwGrid .xw-cell[data-r="${pl.r}"][data-c="${pl.c}"]`);
+      if(cell){
+        cell.classList.add("hint");
+        const inp = cell.querySelector("input");
+        if(inp) inp.focus();
+      }
+
+      const n = (nums[pl.r][pl.c]||"?");
+      const dirTxt = pl.dir === 'A' ? "Horizontal ➡️" : "Vertical ⬇️";
+
+      ui.footer.innerHTML = `🃏 Position du mot suivant : <strong>${n}</strong> (${dirTxt}) — départ sur la case surlignée.`;
+      setTimeout(()=>{ clearHint(); }, 2500);
+    }
+
+    $("#xwJoker").onclick = ()=>{
+      const cost = 2;
+      if(state.coins < cost){
+        ui.footer.innerHTML = "⚠️ Pas assez de pièces pour le joker.";
+        return;
+      }
+
+      const placements = getPlacementsFromGrid();
+      placements.sort((p1,p2)=>{
+        const n1 = nums[p1.r][p1.c] || 9999;
+        const n2 = nums[p2.r][p2.c] || 9999;
+        if(n1!==n2) return n1-n2;
+        if(p1.dir!==p2.dir) return (p1.dir==='A' ? -1 : 1);
+        return 0;
+      });
+
+      const next = placements.find(pl => !wordSolved(pl));
+      if(!next){
+        ui.footer.innerHTML = "✅ Tous les mots semblent déjà complétés. (Tu peux vérifier !)";
+        return;
+      }
+
+      state.coins -= cost;
+      saveState();
+      updateTopBar();
+      hintPlacement(next);
+    };
+    // ----------------------------------------------------------
+
+    $("#xwCheck").onclick = ()=>{
+      let totalLetters=0, goodLetters=0;
+      document.querySelectorAll("#xwGrid .xw-cell").forEach(cell=>{
+        cell.classList.remove("bad","good");
+        if(cell.classList.contains("block")) return;
+        const r = Number(cell.getAttribute("data-r"));
+        const c = Number(cell.getAttribute("data-c"));
+        const expected = grid[r][c];
+        const got = (xw.user[r][c]||"").toUpperCase();
+        totalLetters++;
+        if(got && got === expected){
+          goodLetters++;
+          cell.classList.add("good");
+        }else{
+          if(got) cell.classList.add("bad");
+        }
+      });
+
+      const pct = totalLetters ? Math.round((goodLetters/totalLetters)*100) : 0;
+
+      ui.resultBox.style.display = "block";
+      ui.resultBox.className = "result " + (pct===100 ? "good":"bad");
+      ui.resultBox.innerHTML = `
+        <div class="title">${pct===100 ? "🎉 Grille complète !" : "🔎 Résultat"}</div>
+        <div class="small">Lettres correctes : <strong>${goodLetters}</strong> / ${totalLetters} (${pct}%).</div>
+      `;
+
+      if(pct === 100){
+        state.coins += 10;
+        state.crossword.wins += 1;
+        updateTopBar();
+        saveState();
+      }
+    };
+  }
+
+  /* ========= Boot ========= */
   function boot(){
+    if(!THEMES.length || !QUESTIONS.length){
+      setHeader({type:"ERREUR", theme:"—", diff:"—", counter:"—", media:"⚠️", title:"Données introuvables"});
+      ui.gameArea.innerHTML = `
+        <div class="hint">
+          Je ne trouve pas <strong>questions.js</strong> (ou il est vide).<br>
+          Mets <strong>index.html</strong>, <strong>questions.js</strong>, <strong>crosswords.js</strong> dans le même dossier.
+        </div>
+      `;
+      return;
+    }
+
     updateTopBar();
     if(!state.profile) renderProfileGate();
-    else if(state.session && state.session.ids && state.session.ids.length) renderQuestion();
+    else if(state.session?.mode === "crossword") renderCrosswordGame();
+    else if(state.session?.ids?.length) renderQuestion();
     else renderModeMenu();
   }
-  // ⚠️ renderQuestion(), renderClassicHome(), renderAdventureMap(), renderCrosswordHome() etc.
-  // sont dans le "reste du code" à coller comme indiqué juste au-dessus.
   boot();
   </script>
 </body>
