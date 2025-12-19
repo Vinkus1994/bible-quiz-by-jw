@@ -1,11 +1,11 @@
 
+
 <!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>JW Quiz</title>
-
   <style>
     :root{
       --sky1:#4cc3ff;
@@ -430,30 +430,58 @@
     }
 
     /* ===== Mots croisés ===== */
-    .xw-wrap{ margin-top:12px; display:grid; gap:12px; }
-    .xw-toprow{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-    .xw-stats{ display:flex; gap:8px; flex-wrap:wrap; }
-
+    .xw-wrap{
+      margin-top:12px;
+      display:grid;
+      gap:12px;
+    }
+    .xw-toprow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .xw-stats{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
     .xw-grid{
       border:1px solid var(--line);
       border-radius: 16px;
-      overflow:hidden;
+      overflow:auto;                  /* ✅ scroll si trop large */
       box-shadow: var(--shadowSoft);
       background:#fff;
       display:grid;
-      gap:1px;
-      padding:1px;
+      gap:6px;
+      padding:10px;
+      max-width:100%;
     }
+
     .xw-cell{
       position:relative;
       background:#f6fbff;
       border:1px solid rgba(191,230,255,.65);
-      aspect-ratio: 1 / 1;
+      width:46px;                     /* ✅ taille PC */
+      height:46px;
       display:grid;
       place-items:center;
       overflow:hidden;
+      border-radius:10px;
     }
-    .xw-cell.block{ background: #1b3d5a; border-color: rgba(0,0,0,.10); }
+
+    @media (max-width: 480px){
+      .xw-cell{
+        width:36px;                   /* ✅ mobile */
+        height:36px;
+      }
+    }
+
+    .xw-cell.block{
+      background: #1b3d5a;
+      border-color: rgba(0,0,0,.10);
+    }
     .xw-cell input{
       width:100%;
       height:100%;
@@ -467,6 +495,7 @@
       text-transform: uppercase;
       caret-color: transparent;
     }
+    .xw-cell input::selection{ background: rgba(58,166,255,.25); }
     .xw-cell .num{
       position:absolute;
       top:2px; left:3px;
@@ -476,16 +505,22 @@
       user-select:none;
       pointer-events:none;
     }
-    .xw-cell.selected{ box-shadow: inset 0 0 0 2px rgba(58,166,255,.80); background: rgba(58,166,255,.08); }
-    .xw-cell.bad{ background: rgba(229,72,93,.12); box-shadow: inset 0 0 0 2px rgba(229,72,93,.35); }
-    .xw-cell.good{ background: rgba(26,165,106,.10); }
-
-    .xw-cell.hint{
-      box-shadow: inset 0 0 0 3px rgba(255,206,92,.95);
-      background: rgba(255,206,92,.22) !important;
+    .xw-cell.selected{
+      box-shadow: inset 0 0 0 2px rgba(58,166,255,.80);
+      background: rgba(58,166,255,.08);
     }
-
-    .xw-clues{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .xw-cell.bad{
+      background: rgba(229,72,93,.12);
+      box-shadow: inset 0 0 0 2px rgba(229,72,93,.35);
+    }
+    .xw-cell.good{
+      background: rgba(26,165,106,.10);
+    }
+    .xw-clues{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
     .xw-panel{
       border:1px solid var(--line);
       border-radius: 16px;
@@ -519,8 +554,15 @@
       border-radius:12px;
       background: rgba(58,166,255,.05);
     }
-    .xw-clue .n{ font-weight:950; color:var(--ink); }
-    .xw-footnote{ font-size:12px; color:var(--muted); line-height:1.35; }
+    .xw-clue .n{
+      font-weight:950;
+      color:var(--ink);
+    }
+    .xw-footnote{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
   </style>
 </head>
 
@@ -574,1216 +616,1736 @@
     </div>
   </div>
 
-  <!-- Données -->
-  <script src="questions.js"></script>
-  <script src="crosswords.js"></script>
+<script>
+/* ========= Base (tes modes existants) ========= */
+const THEMES = [
+  { key:"Mixte", label:"Mixte", icon:"🔀", hint:"Toutes les questions (même déjà réussies)" },
+  { key:"Croyance", label:"Croyance", icon:"📖", hint:"Doctrine / foi / vérités bibliques" },
+  { key:"Qualités chrétiennes", label:"Qualités chrétiennes", icon:"💛", hint:"Amour, foi, patience..." },
+  { key:"Jéhovah", label:"Jéhovah", icon:"✨", hint:"Nom, qualités, actions" },
+  { key:"Jésus", label:"Jésus", icon:"👑", hint:"Vie, enseignements" },
+  { key:"Bible", label:"Bible", icon:"📚", hint:"Livres, versets, structure" },
+];
 
-  <script>
-  /* ========= Données externes ========= */
-  const THEMES = window.THEMES || [];
-  const QUESTIONS = window.QUESTIONS || [];
-  const CROSSWORD_BANKS = window.CROSSWORD_BANKS || [];
+const QUESTIONS = [
+  { id:"jw001", question:"Quelle est la qualité dominante de Jéhovah ?", answer:"Amour",
+    options:["Amour","Joie","Patience","Bonté"], reference:"1 Jean 4:8", difficulty:2, type:"TROU", theme:"Jéhovah" },
+  { id:"jw002", question:"Car Dieu a tellement aimé le monde qu’il a donné son Fils unique, afin que tous ceux qui exercent la ________ en lui ne soient pas détruits mais aient la vie éternelle.",
+    answer:"Foi", options:["Foi","Patience","Miséricorde","Bonté"], reference:"Jean 3:16", difficulty:1, type:"QCM", theme:"Croyance" },
+  { id:"jw003", question:"Marc a coupé l’oreille d’un serviteur du grand prêtre ?",
+    answer:"Faux", options:["Vrai","Faux"], reference:"C’est Pierre qui coupa l’oreille du serviteur. – Jean 18:10",
+    difficulty:1, type:"VF", theme:"Croyance" },
+  { id:"jw004", question:"Mets les livres de la Bible dans l’ordre.",
+    answer:"Juges | 1 Rois | 1 Chroniques | Néhémie | Lamentations | Daniel | Osée | Joël | Nahum | Sophonie",
+    options:null, reference:"", difficulty:3, type:"ORDRE", theme:"Bible" },
+  { id:"jw005", question:"Quel est le nom de Dieu ?",
+    answer:"Jéhovah", options:["Jéhovah","Jean-Pierre","Allah","Jésus"], reference:"Psaume 83:18", difficulty:1, type:"QCM", theme:"Croyance" },
+  { id:"jw006", question:"Qui est le fils unique de Dieu ?",
+    answer:"Jésus", options:["Jésus","Adam","Gabriel","Marc"], reference:"Luc 22:29 ; Jean 3:16", difficulty:1, type:"QCM", theme:"Croyance" },
+  { id:"jw007", question:"Quel est le premier livre de la Bible ?",
+    answer:"Genèse", options:["Genèse","Révélation","Psaumes","Blanche neige"], reference:"", difficulty:1, type:"QCM", theme:"Bible" },
+  { id:"jw008", question:"Combien de noms avait l'apôtre Pierre ?",
+    answer:"5", options:["5","2","1","7"],
+    reference:"Ses noms étaient Syméôn (hébreu), Simon (grec), Pierre, Céphas, Simon Pierre - Actes 15:14 ; Matthieu 10:2; 16:16 ; Jean 1:42",
+    difficulty:2, type:"QCM", theme:"Bible" },
+  { id:"jw009", question:"Combien y a-t-il d’Oints ?",
+    answer:"144000", options:["144000","144001","144400","1"], reference:"Révélation 7:4 ; 14:1", difficulty:1, type:"QCM", theme:"Bible" },
+  { id:"jw010", question:"Quel livre se trouve entre Michée et Habacuc ?",
+    answer:"Nahum", options:["Nahum","Matthieu","Jonas","Zacharie"], reference:"", difficulty:3, type:"QCM", theme:"Bible" },
+  { id:"jw011", question:"Dans quel domaine devons-nous être parfaits ?",
+    answer:"En amour", options:["En amour","En toute chose","En richesse","Possible uniquement dans le paradis"],
+    reference:"Matthieu 5:43-48", difficulty:4, type:"QCM", theme:"Croyance" },
+  { id:"jw012", question:"Peux-tu mettre le fruit de l’esprit dans l’ordre ?",
+    answer:"Amour | joie | paix | patience | bienveillance | bonté | foi | douceur | maîtrise de soi",
+    options:null, reference:"Galates 5:22,23", difficulty:4, type:"ORDRE", theme:"Bible" },
+  { id:"jw013", question:"Comment s’appelle le 8e roi de Juda ?",
+    answer:"Joas", options:["Joas","Joram","Amazia","David"], reference:"2 Rois 12:1", difficulty:5, type:"QCM", theme:"Bible" },
+  { id:"jw014", question:"L’omer est une unité de mesure. À combien équivaut un omer ?",
+    answer:"2,2 litres", options:["2,2 litres","2 litres","1 litres","37 saisons et 797 épisodes"],
+    reference:"Exode 16:16, note", difficulty:5, type:"QCM", theme:"Bible" },
+  { id:"jw015", question:"Pourquoi Jésus est-il venu sur terre ?",
+    answer:"Pour sanctifier son Père et nous sauver",
+    options:[
+      "Pour sanctifier son Père et nous sauver",
+      "Parce qu'il s'ennuyait au ciel",
+      "Pour nous sauver",
+      "Parce qu'il voulait goûter la carbonnade flamande"
+    ],
+    reference:"Jean 3:16 ; Jean 17:16",
+    difficulty:1,
+    type:"QCM",
+    theme:"Jésus"
+  },
+  { id:"jw016", question:"Quelle qualité est manifestée en Actes 20:35 ?",
+    answer:"La générosité",
+    options:["La générosité","La joie","La patience","La bonté"],
+    reference:"Actes 20:35",
+    difficulty:3,
+    type:"QCM",
+    theme:"Qualités chrétiennes"
+  },
+];
 
-  /* ========= Règles ========= */
-  const COINS_START = 0;
-  const COINS_PER_GOOD = 2;
-  const JOKER_COST = 2;
-  const ADVENTURE_HEARTS_START = 3;
+/* ======== NOUVEAU : banques "Mots croisés" (2 grilles) ======== */
+const CROSSWORD_BANKS = [
+  {
+    key: "grille1",
+    title: "Grille 1",
+    subtitle: "Liste 1 (mixte)",
+    items: [
+      { id:"cw01", clue:"Si nous profitons de la délivrance qui nous est offerte par Jésus, nous ne le serons plus [en trois mots] (Romains 6:6).", answer:"ESCLAVES DU PÉCHÉ" },
+      { id:"cw02", clue:"Personne qui a fait des études et qui exerçait bien souvent la fonction de notaire public (Juges 5:14).", answer:"SCRIBE" },
+      { id:"cw03", clue:"Petit-fils d’Aaron (Exode 6:25).", answer:"PHINÉHAS" },
+      { id:"cw04", clue:"A exprimé sa gaieté (Genèse 18:15).", answer:"RI" },
+      { id:"cw05", clue:"Dans une expression signifiant: sans en avoir conscience (Hébreux 13:2).", answer:"INSU" },
+      { id:"cw06", clue:"Colorées (Exode 25:5).", answer:"TEINTES" },
+      { id:"cw07", clue:"Femme de haute naissance (1 Rois 15:13).", answer:"DAME" },
+      { id:"cw08", clue:"Cinquième fils de Gad (Genèse 46:16).", answer:"ÉRI" },
+      { id:"cw09", clue:"Cuir (Lévitique 4:11).", answer:"PEAU" },
+      { id:"cw10", clue:"Sec (Jérémie 50:12).", answer:"ARIDE" },
+      { id:"cw11", clue:"Comble (Proverbes 29:21).", answer:"GÂTE" },
+      { id:"cw12", clue:"Jésus l’était souvent [en trois mots] (Marc 1:41).", answer:"ÉMU DE PITIÉ" },
+      { id:"cw13", clue:"Révolte (Actes 19:40).", answer:"SÉDITION" },
+      { id:"cw14", clue:"Premier-né de Juda (Genèse 38:2, 3).", answer:"ER" },
+      { id:"cw15", clue:"Groupes d’insectes (Exode 8:24).", answer:"ESSAIMS" },
+    ],
+  },
+  {
+    key: "grille2",
+    title: "Grille 2",
+    subtitle: "Liste 2 (verticalement)",
+    items: [
+      { id:"cw2_01", clue:"Paul priait pour que ses frères le reçoivent [en trois mots] (Éphésiens 1:17).", answer:"ESPRIT DE SAGESSE" },
+      { id:"cw2_02", clue:"Ancien nom de la Babylonie (Genèse 10:10).", answer:"SCHINÉAR" },
+      { id:"cw2_03", clue:"Il peut être joyeux (Psaume 105:43).", answer:"CRI" },
+      { id:"cw2_04", clue:"Symbolise parfois la justice (Révélation 19:8).", answer:"LIN" },
+      { id:"cw2_05", clue:"Premier sur la liste des témoins (Hébreux 11:4).", answer:"ABEL" },
+      { id:"cw2_06", clue:"Ardeur (Actes 23:9).", answer:"VÉHÉMENCE" },
+      { id:"cw2_07", clue:"Distrait (Juges 16:25).", answer:"AMUSE" },
+      { id:"cw2_08", clue:"Qui ne saurait décevoir (Néhémie 7:2).", answer:"SÛR" },
+      { id:"cw2_09", clue:"Dette (1 Corinthiens 7:3).", answer:"DÛ" },
+      { id:"cw2_10", clue:"Se servant (Exode 38:8).", answer:"UTILISANT" },
+      { id:"cw2_11", clue:"Mesure de poids (1 Samuel 13:21).", answer:"PIM" },
+      { id:"cw2_12", clue:"Un homme vaillant de David (2 Samuel 23:24, 25).", answer:"ÉLICA" },
+      { id:"cw2_13", clue:"Démonstratif (Actes 1:18).", answer:"CET" },
+      { id:"cw2_14", clue:"Elle fut bâtie par Nimrod (Genèse 10:10, Darby).", answer:"ÉREC" },
+      { id:"cw2_15", clue:"Accablerez (Job 19:2).", answer:"ÉCRASEREZ" },
+    ],
+  },
+];
 
-  const ADVENTURE_LEVELS = [
-    { n:1,  name:"Tutoriel",   qCount:5,  minD:1, maxD:1, minTypes:["QCM","VF"], boss:false },
-    { n:2,  name:"Départ",     qCount:7,  minD:1, maxD:2, minTypes:["QCM","VF"], boss:false },
-    { n:3,  name:"Chemin",     qCount:8,  minD:2, maxD:3, minTypes:["QCM","VF","TROU"], boss:false },
-    { n:4,  name:"Forêt",      qCount:9,  minD:2, maxD:3, minTypes:["QCM","TROU"], boss:false },
-    { n:5,  name:"Mini Boss",  qCount:10, minD:3, maxD:4, minTypes:["QCM","ORDRE"], boss:true },
-    { n:6,  name:"Montée",     qCount:10, minD:3, maxD:4, minTypes:["QCM","VF","TROU"], boss:false },
-    { n:7,  name:"Plateau",    qCount:10, minD:3, maxD:4, minTypes:["QCM","ORDRE"], boss:false },
-    { n:8,  name:"Épreuve",    qCount:10, minD:4, maxD:4, minTypes:["QCM","TROU"], boss:false },
-    { n:9,  name:"Avant-boss", qCount:10, minD:4, maxD:5, minTypes:["QCM","VF","ORDRE"], boss:false },
-    { n:10, name:"Boss",       qCount:10, minD:4, maxD:5, minTypes:["QCM","VF","TROU","ORDRE"], boss:true },
-  ];
+/* Règles */
+const COINS_START = 0;
+const COINS_PER_GOOD = 2;
+const JOKER_COST = 2;
+const ADVENTURE_HEARTS_START = 3;
 
-  const STORAGE_KEY = "jwquiz_pack_v2025_12_19";
+/* Aventure */
+const ADVENTURE_LEVELS = [
+  { n:1,  name:"Tutoriel",   qCount:5,  minD:1, maxD:1,  minTypes:["QCM"],                  boss:false, bonusStars:[3,6,10] },
+  { n:2,  name:"Départ",     qCount:7,  minD:1, maxD:2,  minTypes:["QCM","VF"],            boss:false, bonusStars:[3,6,10] },
+  { n:3,  name:"Chemin",     qCount:8,  minD:2, maxD:3,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[4,7,12] },
+  { n:4,  name:"Forêt",      qCount:9,  minD:2, maxD:3,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[4,7,12] },
+  { n:5,  name:"Mini Boss",  qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:true,  bonusStars:[6,10,16] },
+  { n:6,  name:"Montée",     qCount:10, minD:3, maxD:4,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[5,9,14] },
+  { n:7,  name:"Plateau",    qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:false, bonusStars:[5,9,14] },
+  { n:8,  name:"Épreuve",    qCount:10, minD:4, maxD:4,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[6,10,16] },
+  { n:9,  name:"Avant-boss", qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","ORDRE"],    boss:false, bonusStars:[7,12,18] },
+  { n:10, name:"Boss",       qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","TROU","ORDRE"], boss:true, bonusStars:[10,16,24] },
+];
 
-  /* ========= Helpers ========= */
-  const $ = (s)=>document.querySelector(s);
-  function esc(s){ return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-  function normalize(s){
-    return String(s ?? "").trim().toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .replace(/\s+/g," ");
-  }
-  function normalizeLettersOnly(s){
-    return String(s ?? "")
-      .toUpperCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-      .replace(/[^A-Z]/g,"");
-  }
-  function shuffle(a){
-    a = a.slice();
-    for(let i=a.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
-    }
-    return a;
-  }
-  function stars(n){
-    n=Math.max(1,Math.min(5,Number(n)||1));
-    return "⭐".repeat(n);
-  }
-  function pickMedia(q){
-    const t=(q.type||"QCM").toUpperCase();
-    if(t==="ORDRE") return "🧩";
-    if(t==="TROU") return "🕳️";
-    if(t==="VF") return "✅";
-    const d=Number(q.difficulty)||1;
-    return d<=1?"📘":d===2?"📗":d===3?"📙":d===4?"📕":"👑";
-  }
-  function splitOrderAnswer(ans){
-    const raw=String(ans??"").trim();
-    if(!raw) return [];
-    if(raw.includes("|")) return raw.split("|").map(x=>x.trim()).filter(Boolean);
-    if(raw.includes(",")) return raw.split(",").map(x=>x.trim()).filter(Boolean);
-    return raw.split(/\s+/).map(x=>x.trim()).filter(Boolean);
-  }
+/* Stockage */
+const STORAGE_KEY = "jwquiz_full_v2025_12_19_crossword_banks";
 
-  /* ========= UI ========= */
-  const ui = {
-    coins: $("#coins"),
-    profileName: $("#profileName"),
-    hudTitle: $("#hudTitle"),
-    trackDot: $("#trackDot"),
-    qType: $("#qType"),
-    themeLabel: $("#themeLabel"),
-    diffStars: $("#diffStars"),
-    counter: $("#counter"),
-    qmedia: $("#qmedia"),
-    qtext: $("#qtext"),
-    ref: $("#ref"),
-    gameArea: $("#gameArea"),
-    resultBox: $("#resultBox"),
-    controls: $("#controls"),
-    btnJoker: $("#btnJoker"),
-    btnSkip: $("#btnSkip"),
-    btnEnd: $("#btnEnd"),
-    footer: $("#footer"),
-    heartsPill: $("#heartsPill"),
-    hearts: $("#hearts"),
+/* Helpers */
+const $ = (s)=>document.querySelector(s);
+function normalize(s){
+  return String(s ?? "").trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+}
+function normalizeLettersOnly(s){
+  const t = String(s ?? "")
+    .toUpperCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^A-Z]/g,"");
+  return t;
+}
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function stars(n){
+  n=Math.max(1,Math.min(5,Number(n)||1));
+  return "⭐".repeat(n);
+}
+function pickMedia(q){
+  const t=(q.type||"QCM").toUpperCase();
+  if(t==="ORDRE") return "🧩";
+  if(t==="TROU") return "🕳️";
+  if(t==="VF") return "✅";
+  const d=Number(q.difficulty)||1;
+  return d<=1?"📘":d===2?"📗":d===3?"📙":d===4?"📕":"👑";
+}
+function splitOrderAnswer(ans){
+  const raw=String(ans??"").trim();
+  if(!raw) return [];
+  if(raw.includes("|")) return raw.split("|").map(x=>x.trim()).filter(Boolean);
+  if(raw.includes(",")) return raw.split(",").map(x=>x.trim()).filter(Boolean);
+  return raw.split(/\s+/).map(x=>x.trim()).filter(Boolean);
+}
+
+/* UI */
+const ui = {
+  coins: $("#coins"),
+  profileName: $("#profileName"),
+  hudTitle: $("#hudTitle"),
+  trackDot: $("#trackDot"),
+  qType: $("#qType"),
+  themeLabel: $("#themeLabel"),
+  diffStars: $("#diffStars"),
+  counter: $("#counter"),
+  qmedia: $("#qmedia"),
+  qtext: $("#qtext"),
+  ref: $("#ref"),
+  gameArea: $("#gameArea"),
+  resultBox: $("#resultBox"),
+  controls: $("#controls"),
+  btnJoker: $("#btnJoker"),
+  btnSkip: $("#btnSkip"),
+  btnEnd: $("#btnEnd"),
+  footer: $("#footer"),
+  heartsPill: $("#heartsPill"),
+  hearts: $("#hearts"),
+};
+
+/* State */
+const defaultState = () => ({
+  version: 1,
+  profile: null,
+  coins: COINS_START,
+  selectedTheme: "Mixte",
+  correctIds: {},
+  session: null,
+  adventure: {
+    currentLevel: 1,
+    levelStars: {},
+    hearts: ADVENTURE_HEARTS_START,
+  },
+  crossword: {
+    last: null,
+    wins: 0,
+    selectedBank: "grille1",
+  }
+});
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const st = raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
+
+    if(typeof st.coins !== "number") st.coins = COINS_START;
+    if(!st.selectedTheme) st.selectedTheme = "Mixte";
+    if(!st.correctIds || typeof st.correctIds !== "object") st.correctIds = {};
+    if(!st.adventure || typeof st.adventure !== "object") st.adventure = defaultState().adventure;
+    if(!st.crossword || typeof st.crossword !== "object") st.crossword = defaultState().crossword;
+
+    if(!st.adventure.currentLevel) st.adventure.currentLevel = 1;
+    if(!st.adventure.levelStars || typeof st.adventure.levelStars !== "object") st.adventure.levelStars = {};
+    if(typeof st.adventure.hearts !== "number") st.adventure.hearts = ADVENTURE_HEARTS_START;
+
+    if(typeof st.crossword.wins !== "number") st.crossword.wins = 0;
+    if(!st.crossword.selectedBank) st.crossword.selectedBank = "grille1";
+
+    return st;
+  }catch(e){
+    return defaultState();
+  }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function setHeartsVisible(show){
+  ui.heartsPill.style.display = show ? "inline-flex" : "none";
+}
+function updateTopBar(){
+  ui.coins.textContent = String(state.coins);
+  ui.profileName.textContent = state.profile?.name ? state.profile.name : "—";
+  ui.themeLabel.textContent = state.selectedTheme || "Mixte";
+  ui.hearts.textContent = String(state.adventure?.hearts ?? 0);
+
+  const inAdventure = state.session?.mode === "adventure";
+  setHeartsVisible(inAdventure);
+}
+ui.hudTitle.onclick = ()=> renderModeMenu();
+
+/* Save/Import */
+function exportSave(){
+  const data = {
+    version: state.version,
+    profile: state.profile,
+    coins: state.coins,
+    selectedTheme: state.selectedTheme,
+    correctIds: state.correctIds,
+    adventure: state.adventure,
+    crossword: state.crossword,
+    exportedAt: new Date().toISOString(),
   };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `jwquiz_save_${(state.profile?.name||"player").replace(/\s+/g,"_")}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function importSaveFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data !== "object") throw new Error("invalid");
 
-  /* ========= State ========= */
-  const defaultState = () => ({
-    profile: null,
-    coins: COINS_START,
-    selectedTheme: "Mixte",
-    correctIds: {},
-    session: null, // {mode:'classic'|'adventure'|'crossword', ...}
-    adventure: { currentLevel: 1, hearts: ADVENTURE_HEARTS_START, levelStars:{} },
-    crossword: { wins: 0, selectedBank: (CROSSWORD_BANKS[0]?.key || "grille1") }
+      state.profile = data.profile || state.profile;
+      state.coins = Number.isFinite(data.coins) ? data.coins : state.coins;
+      state.selectedTheme = data.selectedTheme || state.selectedTheme;
+      state.correctIds = (data.correctIds && typeof data.correctIds === "object") ? data.correctIds : state.correctIds;
+
+      if(data.adventure && typeof data.adventure === "object"){
+        state.adventure.currentLevel = Number(data.adventure.currentLevel) || state.adventure.currentLevel;
+        state.adventure.levelStars = (data.adventure.levelStars && typeof data.adventure.levelStars==="object")
+          ? data.adventure.levelStars : state.adventure.levelStars;
+
+        const h = Number(data.adventure.hearts);
+        state.adventure.hearts = Number.isFinite(h) ? h : state.adventure.hearts;
+      }
+
+      if(data.crossword && typeof data.crossword === "object"){
+        state.crossword.wins = Number(data.crossword.wins) || 0;
+        state.crossword.last = data.crossword.last || null;
+        state.crossword.selectedBank = data.crossword.selectedBank || state.crossword.selectedBank || "grille1";
+      }
+
+      state.session = null;
+      saveState();
+      renderModeMenu();
+    }catch(e){
+      ui.footer.innerHTML = "⚠️ Fichier de sauvegarde invalide.";
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* Profile */
+function renderProfileGate(){
+  updateTopBar();
+  ui.qType.textContent = "COMPTE";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "👤";
+  ui.qtext.textContent = "Créer ton compte";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">Ton compte reste enregistré sur cet appareil.</div>
+    <div class="form">
+      <div class="field">
+        <div class="label">Pseudo *</div>
+        <input class="input" id="inpName" maxlength="18" placeholder="Ex: Vincenzo" />
+      </div>
+      <button class="btn" id="btnCreate">✅ Créer mon compte</button>
+    </div>
+  `;
+
+  $("#btnCreate").onclick = ()=>{
+    const name = ($("#inpName").value || "").trim();
+    if(!name){ ui.footer.innerHTML = "⚠️ Mets un pseudo."; return; }
+    state.profile = { id: "id_"+Date.now(), name };
+    saveState();
+    renderModeMenu();
+  };
+}
+
+/* Counts */
+function computeCounts(){
+  const correct = state.correctIds || {};
+  const totalAll = QUESTIONS.length;
+  const doneAll = Object.keys(correct).filter(id => QUESTIONS.some(q=>q.id===id)).length;
+
+  const byTheme = {};
+  THEMES.forEach(t=>{
+    if(t.key === "Mixte") return;
+    const list = QUESTIONS.filter(q => (q.theme||"Bible") === t.key);
+    const done = list.filter(q => !!correct[q.id]).length;
+    byTheme[t.key] = { total: list.length, remaining: Math.max(0, list.length - done), done };
   });
 
-  let state = loadState();
+  return { totalAll, doneAll, remainingAll: Math.max(0, totalAll - doneAll), byTheme };
+}
 
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      const st = raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
-      if(!st.adventure) st.adventure = defaultState().adventure;
-      if(!st.crossword) st.crossword = defaultState().crossword;
-      if(!st.correctIds) st.correctIds = {};
-      if(typeof st.coins !== "number") st.coins = COINS_START;
-      if(!st.selectedTheme) st.selectedTheme = "Mixte";
-      if(typeof st.adventure.hearts !== "number") st.adventure.hearts = ADVENTURE_HEARTS_START;
-      if(!st.adventure.currentLevel) st.adventure.currentLevel = 1;
-      if(!st.adventure.levelStars) st.adventure.levelStars = {};
-      if(!st.crossword.selectedBank) st.crossword.selectedBank = (CROSSWORD_BANKS[0]?.key || "grille1");
-      if(typeof st.crossword.wins !== "number") st.crossword.wins = 0;
-      return st;
-    }catch(e){
-      return defaultState();
-    }
-  }
-  function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+/* ----- MENU MODES ----- */
+function getAdventureInfo(){
+  const currentLevel = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
+  const starsMap = state.adventure.levelStars || {};
+  const totalStars = Object.values(starsMap).reduce((a,b)=>a+(Number(b)||0),0);
+  const cfg = ADVENTURE_LEVELS[currentLevel-1];
+  const nextGoal = cfg.boss ? `Vaincre le boss (niveau ${cfg.n})` : `Valider le niveau ${cfg.n}`;
+  return { currentLevel, totalStars, nextGoal };
+}
 
-  function setHeartsVisible(show){
-    ui.heartsPill.style.display = show ? "inline-flex" : "none";
-  }
-  function updateTopBar(){
-    ui.coins.textContent = String(state.coins);
-    ui.profileName.textContent = state.profile?.name ? state.profile.name : "—";
-    ui.themeLabel.textContent = state.selectedTheme || "Mixte";
-    ui.hearts.textContent = String(state.adventure?.hearts ?? 0);
-    setHeartsVisible(state.session?.mode === "adventure");
-  }
-  ui.hudTitle.onclick = ()=> renderModeMenu();
+function renderModeMenu(){
+  updateTopBar();
+  if(!state.profile){ renderProfileGate(); return; }
 
-  function setHeader({type="MENU", theme=state.selectedTheme, diff="—", counter="—", media="📘", title=""}){
-    ui.qType.textContent = type;
-    ui.themeLabel.textContent = theme || "Mixte";
-    ui.diffStars.textContent = diff;
-    ui.counter.textContent = counter;
-    ui.qmedia.textContent = media;
-    ui.qtext.textContent = title;
-  }
-  function clearFooter(){
-    ui.footer.innerHTML = "";
-    ui.resultBox.style.display = "none";
-    ui.controls.style.display = "none";
-    ui.ref.style.display = "none";
-  }
+  const counts = computeCounts();
+  const adv = getAdventureInfo();
 
-  /* ========= Profile ========= */
-  function renderProfileGate(){
-    state.session = null;
-    saveState();
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(false);
+  ui.qType.textContent = "ACCUEIL";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🎮";
+  ui.qtext.textContent = `Choisis ton mode`;
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
 
-    setHeader({type:"COMPTE", theme:"—", diff:"—", counter:"—", media:"👤", title:"Créer ton compte"});
-    ui.trackDot.style.left = "50%";
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      👋 ${esc(state.profile.name)}
+      • Pièces : <strong>${state.coins}</strong>
+      • Réussies : <strong>${counts.doneAll}</strong>/${counts.totalAll}
+      • Cœurs aventure : <strong>❤️ ${state.adventure.hearts}</strong>
+      • Mots croisés gagnés : <strong>${state.crossword.wins}</strong>
+    </div>
 
-    ui.gameArea.innerHTML = `
-      <div class="hint">Ton compte reste enregistré sur cet appareil.</div>
-      <div class="form">
-        <div class="field">
-          <div class="label">Pseudo *</div>
-          <input class="input" id="inpName" maxlength="18" placeholder="Ex: Vincenzo" />
+    <div class="mode-grid">
+      <div class="mode-card">
+        <div class="mode-top">
+          <div class="mode-title">📘 Mode Classique</div>
         </div>
-        <button class="btn" id="btnCreate">✅ Créer mon compte</button>
-      </div>
-    `;
-    $("#btnCreate").onclick = ()=>{
-      const name = ($("#inpName").value || "").trim();
-      if(!name){ ui.footer.innerHTML = "⚠️ Mets un pseudo."; return; }
-      state.profile = { id: "id_"+Date.now(), name };
-      saveState();
-      renderModeMenu();
-    };
-  }
-
-  /* ========= Counts / stats ========= */
-  function computeCounts(){
-    const correct = state.correctIds || {};
-    const totalAll = QUESTIONS.length;
-    const doneAll = Object.keys(correct).filter(id => QUESTIONS.some(q=>q.id===id)).length;
-
-    const byTheme = {};
-    THEMES.forEach(t=>{
-      if(t.key === "Mixte") return;
-      const list = QUESTIONS.filter(q => (q.theme||"Bible") === t.key);
-      const done = list.filter(q => !!correct[q.id]).length;
-      byTheme[t.key] = { total: list.length, remaining: Math.max(0, list.length - done), done };
-    });
-
-    return { totalAll, doneAll, remainingAll: Math.max(0, totalAll - doneAll), byTheme };
-  }
-
-  /* ========= Mode menu ========= */
-  function renderModeMenu(){
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(false);
-
-    if(!state.profile){ renderProfileGate(); return; }
-
-    const counts = computeCounts();
-    const lvl = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
-
-    setHeader({
-      type:"ACCUEIL",
-      theme: state.selectedTheme,
-      diff:"—",
-      counter:"—",
-      media:"🎮",
-      title:"Choisis ton mode"
-    });
-    ui.trackDot.style.left = "50%";
-
-    ui.gameArea.innerHTML = `
-      <div class="hint">
-        👋 ${esc(state.profile.name)}
-        • Pièces : <strong>${state.coins}</strong>
-        • Réussies : <strong>${counts.doneAll}</strong>/${counts.totalAll}
-        • Cœurs aventure : <strong>❤️ ${state.adventure.hearts}</strong>
-        • Mots croisés gagnés : <strong>${state.crossword.wins}</strong>
-      </div>
-
-      <div class="mode-grid">
-        <div class="mode-card">
-          <div class="mode-top"><div class="mode-title">📘 Mode Classique</div></div>
-          <div class="mode-desc">Choisis un thème et réponds aux questions. Les bonnes réponses sont exclues des catégories (sauf Mixte).</div>
-          <button class="btn" id="goClassic">▶️ CLASSIQUE</button>
+        <div class="mode-desc">
+          Choisis un thème et réponds aux questions (les bonnes réponses sont exclues des catégories, sauf Mixte).
         </div>
+        <button class="btn" id="goClassic">▶️ CLASSIQUE</button>
+      </div>
 
-        <div class="mode-card">
-          <div class="mode-top"><div class="mode-title">🗺️ Mode Aventure</div></div>
-          <div class="mode-desc">Progresse niveau par niveau. Bonne réponse = +1 ❤️, mauvaise = -1 ❤️ (sans limite de gain). Niveau actuel : <strong>${lvl}</strong>.</div>
-          <button class="btn gold" id="goAdventure">🗺️ AVENTURE</button>
+      <div class="mode-card">
+        <div class="mode-top">
+          <div class="mode-title">🗺️ Mode Aventure</div>
         </div>
-
-        <div class="mode-card">
-          <div class="mode-top"><div class="mode-title">🧩 Mode Mots croisés</div></div>
-          <div class="mode-desc">Grilles générées automatiquement depuis tes listes. Accents tolérés, espaces ignorés. +10 🪙 si 100% correct. Joker = position du prochain mot (2 🪙).</div>
-          <button class="btn" id="goCrossword">🧩 MOTS CROISÉS</button>
+        <div class="mode-desc">
+          Progresse niveau par niveau, gagne des étoiles ⭐ et des cœurs ❤️.
+          Niveau actuel : <strong>${adv.currentLevel}</strong>.
         </div>
+        <button class="btn gold" id="goAdventure">🗺️ AVENTURE</button>
       </div>
 
-      <div class="row">
-        <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
-        <button class="btn secondary" id="btnReset">🧼 Reset (local)</button>
+      <div class="mode-card">
+        <div class="mode-top">
+          <div class="mode-title">🧩 Mode Mots croisés</div>
+        </div>
+        <div class="mode-desc">
+          Grilles générées automatiquement. Accents tolérés. Gagne <strong>+10 🪙</strong> si 100% correct.
+        </div>
+        <button class="btn" id="goCrossword">🧩 MOTS CROISÉS</button>
       </div>
-    `;
+    </div>
 
-    $("#goClassic").onclick = ()=> renderClassicHome();
-    $("#goAdventure").onclick = ()=> renderAdventureMap();
-    $("#goCrossword").onclick = ()=> renderCrosswordHome();
-    $("#btnWins").onclick = ()=> renderSuccesses();
-    $("#btnReset").onclick = ()=>{
-      localStorage.removeItem(STORAGE_KEY);
-      state = defaultState();
-      renderModeMenu();
-    };
-  }
+    <div class="row">
+      <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
+      <button class="btn secondary" id="btnSave">💾 Sauvegarder</button>
+    </div>
 
-  /* ========= Successes ========= */
-  function renderSuccesses(){
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(false);
+    <div class="row">
+      <button class="btn secondary" id="btnImport">📥 Importer</button>
+      <input type="file" id="fileImport" accept="application/json" style="display:none;">
+    </div>
+  `;
 
-    const done = Object.keys(state.correctIds||{}).filter(id=>QUESTIONS.some(q=>q.id===id));
-    const doneQs = done.map(id=>QUESTIONS.find(q=>q.id===id)).filter(Boolean);
+  $("#goClassic").onclick = ()=> renderClassicHome();
+  $("#goAdventure").onclick = ()=> renderAdventureMap();
+  $("#goCrossword").onclick = ()=> renderCrosswordHome();
 
-    setHeader({type:"RÉUSSITES", theme:state.selectedTheme, diff:"—", counter:`${doneQs.length}/${QUESTIONS.length}`, media:"🏆", title:"Tes bonnes réponses"});
-    ui.trackDot.style.left = "50%";
+  $("#btnWins").onclick  = ()=> renderSuccesses();
+  $("#btnSave").onclick  = ()=> exportSave();
+  $("#btnImport").onclick = ()=> $("#fileImport").click();
+  $("#fileImport").onchange = (e)=>{
+    const f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(f) importSaveFile(f);
+  };
+}
 
-    if(!doneQs.length){
-      ui.gameArea.innerHTML = `
-        <div class="hint">Aucune question réussie pour le moment.</div>
-        <button class="btn" id="back">⬅️ Retour</button>
-      `;
-      $("#back").onclick = ()=> renderModeMenu();
-      return;
-    }
+/* ====== CLASSIQUE (inchangé) ====== */
+function renderClassicHome(){
+  updateTopBar();
+  const counts = computeCounts();
 
-    ui.gameArea.innerHTML = `
-      <div class="hint">Liste des questions validées (local).</div>
-      <div class="order-zone" style="max-height: 320px; overflow:auto;">
-        ${doneQs.map(q=>`
-          <div style="padding:10px; border-bottom:1px solid rgba(191,230,255,.7);">
-            <div style="font-weight:950">${esc(q.question)}</div>
-            <div style="font-size:12px; color:var(--muted); margin-top:4px;">✅ ${esc(q.answer)} • ${esc(q.reference||"")}</div>
-          </div>
-        `).join("")}
-      </div>
-      <button class="btn" id="back">⬅️ Retour</button>
-    `;
-    $("#back").onclick = ()=> renderModeMenu();
-  }
+  ui.qType.textContent = "CLASSIQUE";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "📘";
+  ui.qtext.textContent = `Mode Classique`;
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
 
-  /* ========= Classic ========= */
-  function renderClassicHome(){
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(false);
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      Total : <strong>${counts.totalAll}</strong>
+      • Réussies : <strong>${counts.doneAll}</strong>
+      • Restantes (global) : <strong>${counts.remainingAll}</strong>
+      • Pièces : <strong>${state.coins}</strong>
+    </div>
 
-    setHeader({type:"CLASSIQUE", theme:state.selectedTheme, diff:"—", counter:"—", media:"📘", title:"Choisis un thème"});
-    ui.trackDot.style.left = "50%";
+    <div class="hint" style="margin-top:12px;">Choisis un thème :</div>
+    <div class="themes" id="themesGrid"></div>
 
-    const counts = computeCounts();
+    <button class="btn" id="btnStart">▶️ COMMENCER</button>
+    <button class="btn secondary" id="backModes">⬅️ Retour modes</button>
+  `;
 
-    ui.gameArea.innerHTML = `
-      <div class="hint">En Mixte: toutes les questions. Dans une catégorie: les questions déjà réussies sont retirées.</div>
-      <div class="themes">
-        ${THEMES.map(t=>{
-          const c = t.key==="Mixte" ? {total:QUESTIONS.length, remaining:counts.remainingAll, done:counts.doneAll} : (counts.byTheme[t.key] || {total:0, remaining:0, done:0});
-          return `
-            <div class="theme-card ${state.selectedTheme===t.key?'selected':''}" data-key="${esc(t.key)}">
-              <div class="t-top">
-                <div class="t-name">${esc(t.label||t.key)}</div>
-                <div class="t-ico">${esc(t.icon||"📘")}</div>
-              </div>
-              <div class="t-sub">${esc(t.hint||"")}</div>
-              <div class="t-sub"><strong>${c.done}</strong> validées • <strong>${c.remaining}</strong> restantes • Total ${c.total}</div>
-            </div>
-          `;
-        }).join("")}
-      </div>
+  $("#backModes").onclick = ()=> renderModeMenu();
 
-      <div class="row">
-        <button class="btn gold" id="start">▶️ Démarrer</button>
-        <button class="btn secondary" id="back">⬅️ Retour</button>
-      </div>
-    `;
+  const grid = $("#themesGrid");
+  grid.innerHTML = "";
 
-    document.querySelectorAll(".theme-card").forEach(el=>{
-      el.onclick = ()=>{
-        const k = el.getAttribute("data-key");
-        state.selectedTheme = k;
-        saveState();
-        renderClassicHome();
-      };
-    });
+  THEMES.forEach(t=>{
+    const isSel = (state.selectedTheme || "Mixte") === t.key;
 
-    $("#back").onclick = ()=> renderModeMenu();
-    $("#start").onclick = ()=> startClassicSession();
-  }
-
-  function startClassicSession(){
-    const theme = state.selectedTheme || "Mixte";
-    const correct = state.correctIds || {};
-    let pool = QUESTIONS.slice();
-
-    if(theme !== "Mixte"){
-      pool = pool.filter(q => (q.theme||"Bible") === theme && !correct[q.id]);
+    let info = "";
+    if(t.key === "Mixte"){
+      info = `${t.hint} • ${counts.totalAll} questions`;
     }else{
-      pool = QUESTIONS.slice(); // Mixte = tout
+      const c = counts.byTheme[t.key] || {total:0, remaining:0};
+      info = `${t.hint} • ${c.remaining}/${c.total} restantes`;
     }
 
-    if(!pool.length){
-      ui.footer.innerHTML = "⚠️ Plus de questions disponibles dans ce thème (toutes validées).";
-      return;
-    }
-
-    const ids = shuffle(pool).map(q=>q.id);
-    state.session = { mode:"classic", ids, idx:0, usedJoker:false };
-    saveState();
-    renderQuestion();
-  }
-
-  /* ========= Adventure ========= */
-  function renderAdventureMap(){
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(true);
-
-    const current = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
-
-    setHeader({type:"AVENTURE", theme:"—", diff:"—", counter:"—", media:"🗺️", title:"Carte d’aventure"});
-    ui.trackDot.style.left = "50%";
-
-    ui.gameArea.innerHTML = `
-      <div class="adv-banner">
-        <div class="big">❤️ Cœurs : ${state.adventure.hearts}</div>
-        <div class="small">Bonne réponse = +1 ❤️ • Mauvaise = -1 ❤️ • (pas de limite de gain)</div>
+    const card = document.createElement("div");
+    card.className = "theme-card" + (isSel ? " selected" : "");
+    card.innerHTML = `
+      <div class="t-top">
+        <div class="t-name"><span class="t-ico">${t.icon}</span> ${esc(t.label)}</div>
+        <div>${isSel ? "✅" : ""}</div>
       </div>
-
-      <div class="map">
-        ${ADVENTURE_LEVELS.map(l=>{
-          const unlocked = l.n <= current;
-          const doneStars = Number((state.adventure.levelStars||{})[l.n]||0);
-          const lockTxt = unlocked ? "✅" : "🔒";
-          return `
-            <div class="lvl">
-              <div class="lvl-head" data-lvl="${l.n}">
-                <div class="lvl-left">
-                  <div class="badge">${l.n}</div>
-                  <div class="lvl-title">${esc(l.name)} ${l.boss ? "👑" : ""}</div>
-                </div>
-                <div class="lvl-right">
-                  <div class="stars">${doneStars ? ("⭐".repeat(Math.min(5, doneStars))) : ""}</div>
-                  <div class="lock">${lockTxt}</div>
-                </div>
-              </div>
-              <div class="lvl-body" ${unlocked ? "" : "hidden"}>
-                <div class="pill">Questions: <strong>${l.qCount}</strong></div>
-                <div class="pill">Difficulté: <strong>${l.minD}–${l.maxD}</strong></div>
-                <button class="btn gold" data-start="${l.n}" ${unlocked ? "" : "disabled"}>▶️ Jouer ce niveau</button>
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-
-      <div class="row">
-        <button class="btn secondary" id="back">⬅️ Retour</button>
-      </div>
+      <div class="t-sub">${esc(info)}</div>
     `;
-
-    document.querySelectorAll(".lvl-head").forEach(h=>{
-      h.onclick = ()=>{
-        const body = h.parentElement.querySelector(".lvl-body");
-        if(body) body.hidden = !body.hidden;
-      };
-    });
-
-    document.querySelectorAll("[data-start]").forEach(b=>{
-      b.onclick = ()=>{
-        const lvl = Number(b.getAttribute("data-start"));
-        startAdventureLevel(lvl);
-      };
-    });
-
-    $("#back").onclick = ()=> renderModeMenu();
-  }
-
-  function startAdventureLevel(levelN){
-    const current = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
-    if(levelN > current) return;
-
-    const cfg = ADVENTURE_LEVELS[levelN-1];
-    const pool = QUESTIONS.filter(q=>{
-      const d = Number(q.difficulty)||1;
-      const t = (q.type||"QCM").toUpperCase();
-      return d>=cfg.minD && d<=cfg.maxD && cfg.minTypes.includes(t);
-    });
-
-    if(!pool.length){
-      ui.footer.innerHTML = "⚠️ Pas assez de questions pour ce niveau (filtrage trop strict).";
-      return;
-    }
-
-    const ids = shuffle(pool).slice(0, cfg.qCount).map(q=>q.id);
-    state.session = { mode:"adventure", level: levelN, ids, idx:0 };
-    saveState();
-    renderQuestion();
-  }
-
-  /* ========= Questions runner ========= */
-  function currentQuestion(){
-    const sid = state.session?.ids?.[state.session.idx];
-    if(!sid) return null;
-    return QUESTIONS.find(q=>q.id===sid) || null;
-  }
-
-  function renderQuestion(){
-    updateTopBar();
-    clearFooter();
-
-    const q = currentQuestion();
-    if(!q){
-      if(state.session?.mode === "adventure") return endAdventureLevel(false);
-      state.session = null;
-      saveState();
-      return renderClassicHome();
-    }
-
-    const total = state.session.ids.length;
-    const idx = state.session.idx + 1;
-    const type = (q.type||"QCM").toUpperCase();
-    const diff = stars(q.difficulty||1);
-
-    setHeader({
-      type,
-      theme: (q.theme||state.selectedTheme||"Mixte"),
-      diff,
-      counter: `${idx}/${total}`,
-      media: pickMedia(q),
-      title: q.question
-    });
-
-    ui.ref.style.display = q.reference ? "block" : "none";
-    ui.ref.innerHTML = q.reference ? `📌 ${esc(q.reference)}` : "";
-
-    ui.controls.style.display = "flex";
-    ui.resultBox.style.display = "none";
-
-    const inClassic = state.session.mode === "classic";
-    ui.btnJoker.style.display = inClassic ? "block" : "none";
-
-    ui.btnSkip.onclick = ()=>{
-      state.session.idx++;
-      saveState();
-      renderQuestion();
-    };
-    ui.btnEnd.onclick = ()=>{
-      if(state.session.mode === "adventure") return endAdventureLevel(true);
-      state.session = null;
+    card.onclick = ()=>{
+      state.selectedTheme = t.key;
       saveState();
       renderClassicHome();
     };
+    grid.appendChild(card);
+  });
 
-    ui.btnJoker.onclick = ()=>{
-      if(!inClassic) return;
-      if(state.session.usedJoker){
-        ui.footer.innerHTML = "⚠️ Joker déjà utilisé dans cette session.";
-        return;
-      }
-      if(state.coins < JOKER_COST){
-        ui.footer.innerHTML = "⚠️ Pas assez de pièces.";
-        return;
-      }
-      state.coins -= JOKER_COST;
-      state.session.usedJoker = true;
-      saveState();
-      updateTopBar();
-      applyJokerRemoveOptions(q);
-    };
+  $("#btnStart").onclick = ()=> startClassicSession();
+}
 
-    if(type === "ORDRE"){
-      renderOrderQuestion(q);
-    }else if(type === "TROU"){
-      renderFillBlankQuestion(q);
-    }else{
-      renderChoiceQuestion(q);
+function getClassicPool(){
+  const key = state.selectedTheme || "Mixte";
+  if(key === "Mixte") return QUESTIONS.slice();
+  return QUESTIONS.filter(q => (q.theme||"Bible") === key && !state.correctIds[q.id]);
+}
+function startClassicSession(){
+  const pool = getClassicPool();
+  if(!pool.length){
+    ui.footer.innerHTML = "✅ Tu as déjà tout réussi dans cette catégorie ! (Mixte reste toujours disponible)";
+    return;
+  }
+  const ids = shuffle(pool.map(q=>q.id));
+  state.session = { ids, i:0, good:0, bad:0, orderState:null, mode:"classic", jokerUsed:false, answered:false };
+  saveState();
+  renderQuestion();
+}
+
+/* ====== AVENTURE (inchangé) ====== */
+function levelIsUnlocked(n){
+  const current = Number(state.adventure.currentLevel)||1;
+  return n <= current;
+}
+function getLevelStars(n){
+  return Number((state.adventure.levelStars||{})[n]) || 0;
+}
+function setLevelStars(n, s){
+  state.adventure.levelStars = state.adventure.levelStars || {};
+  state.adventure.levelStars[n] = s;
+}
+function advanceAdventureIfNeeded(completedLevel, earnedStars){
+  if(earnedStars >= 1){
+    const current = Number(state.adventure.currentLevel)||1;
+    if(completedLevel >= current && completedLevel < ADVENTURE_LEVELS.length){
+      state.adventure.currentLevel = completedLevel + 1;
     }
   }
+}
 
-  function awardAfterAnswer(isGood, q){
-    if(isGood){
-      state.coins += COINS_PER_GOOD;
-      state.correctIds[q.id] = true;
-    }
-    if(state.session?.mode === "adventure"){
-      if(isGood) state.adventure.hearts += 1;
-      else state.adventure.hearts = Math.max(0, state.adventure.hearts - 1);
-    }
-    saveState();
-    updateTopBar();
-  }
+function renderAdventureMap(){
+  updateTopBar();
+  ui.qType.textContent = "AVENTURE";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🗺️";
+  ui.qtext.textContent = "Carte d’aventure";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
 
-  function showResult(isGood, q, extraSmall=""){
-    ui.resultBox.style.display = "block";
-    ui.resultBox.className = "result " + (isGood ? "good":"bad");
-    ui.resultBox.innerHTML = `
-      <div class="title">${isGood ? "✅ Bonne réponse !" : "❌ Mauvaise réponse"}</div>
-      <div class="small"><strong>Réponse :</strong> ${esc(q.answer)}${q.reference ? `<br><strong>Référence :</strong> ${esc(q.reference)}` : ""}${extraSmall ? `<br>${extraSmall}` : ""}</div>
-    `;
-  }
+  const adv = getAdventureInfo();
 
-  function nextAfterDelay(){
-    setTimeout(()=>{
-      state.session.idx++;
-      saveState();
-      renderQuestion();
-    }, 550);
-  }
+  const mapHtml = ADVENTURE_LEVELS.map(cfg=>{
+    const unlocked = levelIsUnlocked(cfg.n);
+    const st = getLevelStars(cfg.n);
+    const stTxt = st ? "⭐".repeat(st) : "—";
+    const lockTxt = unlocked ? "" : "🔒";
+    const badge = cfg.boss ? "👑" : "🏁";
 
-  /* QCM/VF */
-  function buildOptionsFor(q){
-    const type = (q.type||"QCM").toUpperCase();
-    if(Array.isArray(q.options) && q.options.length){
-      const opts = q.options.slice();
-      if(!opts.some(x=>normalize(x)===normalize(q.answer))) opts.push(q.answer);
-      return shuffle(opts);
-    }
-    if(type==="VF") return ["Vrai","Faux"];
-    return shuffle([q.answer, "—", "—", "—"]).filter(Boolean);
-  }
-
-  let lastChoiceButtons = [];
-  function renderChoiceQuestion(q){
-    const opts = buildOptionsFor(q);
-
-    ui.gameArea.innerHTML = `
-      <div class="answers">
-        ${opts.map(o=>`<button class="ansbtn" data-ans="${esc(o)}">${esc(o)}</button>`).join("")}
+    return `
+      <div class="lvl" data-lvl="${cfg.n}">
+        <div class="lvl-head">
+          <div class="lvl-left">
+            <div class="badge">${badge}</div>
+            <div class="lvl-title">Niveau ${cfg.n} — ${esc(cfg.name)}</div>
+          </div>
+          <div class="lvl-right">
+            <div class="stars">${stTxt}</div>
+            <div class="lock">${lockTxt}</div>
+          </div>
+        </div>
+        <div class="lvl-body" hidden>
+          <div class="pill">Questions : <strong>${cfg.qCount}</strong></div>
+          <div class="pill">Difficulté : <strong>${cfg.minD} → ${cfg.maxD}</strong></div>
+          <div class="pill">Types min : <strong>${cfg.minTypes.join(", ")}</strong></div>
+          <button class="btn gold" ${unlocked ? "" : "disabled"} data-start="${cfg.n}">
+            ▶️ Jouer ce niveau
+          </button>
+        </div>
       </div>
     `;
+  }).join("");
 
-    lastChoiceButtons = Array.from(document.querySelectorAll(".ansbtn"));
+  ui.gameArea.innerHTML = `
+    <div class="adv-banner">
+      <div class="big">Ton aventure (Mixte)</div>
+      <div class="small">
+        Niveau actuel : <strong>${adv.currentLevel}</strong>
+        • Total étoiles : <strong>${adv.totalStars}</strong> ⭐
+        • Cœurs : <strong>❤️ ${state.adventure.hearts}</strong><br/>
+        ${esc(adv.nextGoal)}
+      </div>
+    </div>
 
-    lastChoiceButtons.forEach(btn=>{
-      btn.onclick = ()=>{
-        const chosen = btn.getAttribute("data-ans");
-        const good = normalize(chosen) === normalize(q.answer);
+    <div class="map" id="map">${mapHtml}</div>
+    <button class="btn secondary" id="backModes">⬅️ Retour modes</button>
+  `;
 
-        lastChoiceButtons.forEach(b=>b.disabled=true);
+  $("#backModes").onclick = ()=> renderModeMenu();
 
-        if(good){
-          btn.classList.add("correct");
-          awardAfterAnswer(true, q);
-          showResult(true, q);
+  [...document.querySelectorAll(".lvl")].forEach(box=>{
+    const head = box.querySelector(".lvl-head");
+    const body = box.querySelector(".lvl-body");
+    head.onclick = ()=>{ body.hidden = !body.hidden; };
+  });
+  [...document.querySelectorAll("[data-start]")].forEach(btn=>{
+    btn.onclick = ()=>{
+      const n = Number(btn.getAttribute("data-start"));
+      startAdventureLevel(n);
+    };
+  });
+}
+
+function buildAdventureSession(cfg){
+  const poolAll = QUESTIONS.slice();
+  let pool = poolAll.filter(q=>{
+    const d = Number(q.difficulty)||1;
+    return d >= cfg.minD && d <= cfg.maxD;
+  });
+  if(pool.length < cfg.qCount) pool = poolAll.slice();
+
+  const byType = {};
+  pool.forEach(q=>{
+    const t=(q.type||"QCM").toUpperCase();
+    (byType[t] ||= []).push(q);
+  });
+  Object.keys(byType).forEach(k=>shuffle(byType[k]));
+
+  const picked = [];
+  cfg.minTypes.forEach(t=>{
+    const T = t.toUpperCase();
+    if(byType[T] && byType[T].length){
+      const q = byType[T].pop();
+      if(q) picked.push(q);
+    }
+  });
+
+  const remainingPool = pool.slice().filter(q=>!picked.some(p=>p.id===q.id));
+  shuffle(remainingPool);
+  for(const q of remainingPool){
+    if(picked.length >= cfg.qCount) break;
+    picked.push(q);
+  }
+
+  if(picked.length < cfg.qCount){
+    const fallback = poolAll.slice().filter(q=>!picked.some(p=>p.id===q.id));
+    shuffle(fallback);
+    for(const q of fallback){
+      if(picked.length >= cfg.qCount) break;
+      picked.push(q);
+    }
+  }
+
+  return shuffle(picked.slice(0, cfg.qCount)).map(q=>q.id);
+}
+
+function startAdventureLevel(levelNumber){
+  const cfg = ADVENTURE_LEVELS.find(x=>x.n===levelNumber);
+  if(!cfg) return;
+  if(!levelIsUnlocked(cfg.n)) return;
+
+  const ids = buildAdventureSession(cfg);
+  if(!ids.length){
+    ui.footer.innerHTML = "⚠️ Pas assez de questions pour ce niveau (ajoute quelques questions et ça ira).";
+    return;
+  }
+
+  state.session = {
+    ids,
+    i:0,
+    good:0,
+    bad:0,
+    orderState:null,
+    mode:"adventure",
+    adv:{ level: cfg.n, levelCfg: cfg },
+    jokerUsed:false,
+    answered:false,
+  };
+  saveState();
+  renderQuestion();
+}
+
+/* ----- 🃏 JOKER (classique uniquement) ----- */
+function updateJokerButton(){
+  const s = state.session;
+  const inClassic = s && s.mode === "classic";
+  ui.btnJoker.style.display = inClassic ? "inline-block" : "none";
+  if(!inClassic) return;
+
+  const disabled = (state.coins < JOKER_COST) || !!s.jokerUsed || !!s.answered;
+  ui.btnJoker.disabled = disabled;
+  ui.btnJoker.textContent = `🃏 Joker (${JOKER_COST} 🪙)`;
+}
+
+function consumeJokerCoins(){
+  state.coins = Number(state.coins)||0;
+  state.coins = Math.max(0, state.coins - JOKER_COST);
+  saveState();
+  updateTopBar();
+}
+
+function applyJoker(){
+  const s = state.session;
+  if(!s || s.mode !== "classic") return;
+  if(s.jokerUsed || s.answered) return;
+  if(state.coins < JOKER_COST){
+    ui.footer.innerHTML = "⚠️ Pas assez de pièces pour le Joker.";
+    return;
+  }
+
+  const q = QUESTIONS.find(x=>x.id===s.ids[s.i]);
+  if(!q) return;
+
+  consumeJokerCoins();
+  s.jokerUsed = true;
+  saveState();
+  updateTopBar();
+  ui.footer.innerHTML = `🃏 Joker utilisé (-${JOKER_COST} 🪙)`;
+
+  const qt = (q.type||"QCM").toUpperCase();
+
+  if(qt === "QCM" || qt === "VF" || qt === "TROU"){
+    const btns = [...ui.gameArea.querySelectorAll(".ansbtn")];
+    if(btns.length){
+      const correctBtn = btns.find(b => normalize(b.textContent) === normalize(q.answer));
+      const wrongBtns = btns.filter(b => normalize(b.textContent) !== normalize(q.answer));
+      const keepWrong = wrongBtns.length ? wrongBtns[Math.floor(Math.random()*wrongBtns.length)] : null;
+
+      btns.forEach(b=>{
+        const isCorrect = correctBtn && b === correctBtn;
+        const isKeepWrong = keepWrong && b === keepWrong;
+        if(isCorrect || isKeepWrong){
+          b.disabled = false;
+          b.style.opacity = "1";
         }else{
-          btn.classList.add("wrong");
-          lastChoiceButtons.forEach(b=>{
-            if(normalize(b.getAttribute("data-ans")) === normalize(q.answer)) b.classList.add("correct");
-          });
-          awardAfterAnswer(false, q);
-          showResult(false, q);
+          b.disabled = true;
+          b.style.opacity = ".35";
         }
-        nextAfterDelay();
+      });
+    }
+
+    if(qt === "TROU"){
+      const inp = $("#fillInput");
+      if(inp){
+        const ans = String(q.answer || "");
+        const first = ans ? ans.trim().charAt(0) : "";
+        const len = ans.trim().length;
+        inp.placeholder = `Indice : commence par "${first}" • ${len} caractères`;
+      }
+    }
+
+    updateJokerButton();
+    return;
+  }
+
+  if(qt === "ORDRE"){
+    if(!s.orderState || !Array.isArray(s.orderState.correct) || !Array.isArray(s.orderState.pool) || !Array.isArray(s.orderState.built)){
+      updateJokerButton();
+      return;
+    }
+    const nextIndex = s.orderState.built.length;
+    const next = s.orderState.correct[nextIndex];
+    if(!next){
+      ui.footer.innerHTML = "🃏 Joker : l’ordre est déjà complet.";
+      updateJokerButton();
+      return;
+    }
+    const i = s.orderState.pool.findIndex(x => normalize(x) === normalize(next));
+    if(i >= 0){
+      s.orderState.built.push(s.orderState.pool[i]);
+      s.orderState.pool.splice(i,1);
+      saveState();
+      if(typeof s.orderState.render === "function") s.orderState.render();
+      ui.footer.innerHTML = `🃏 Joker : "${esc(next)}" placé au bon endroit !`;
+    }else{
+      ui.footer.innerHTML = "🃏 Joker : impossible de trouver l’élément suivant.";
+    }
+    updateJokerButton();
+    return;
+  }
+
+  updateJokerButton();
+}
+
+/* ----- Rendu questions (commun) ----- */
+function renderQuestion(){
+  const s = state.session;
+  if(!s){ renderModeMenu(); return; }
+
+  updateTopBar();
+  ui.controls.style.display="flex";
+  ui.resultBox.style.display="none";
+  ui.ref.style.display="none";
+  ui.footer.innerHTML = "";
+
+  s.jokerUsed = false;
+  s.answered = false;
+
+  const total = s.ids.length;
+  const idx = s.i;
+  const q = QUESTIONS.find(x=>x.id===s.ids[idx]);
+  if(!q){ endSession(); return; }
+
+  ui.trackDot.style.left = `${total<=1?50:Math.max(8,Math.min(92,(idx/(total-1))*100))}%`;
+  ui.counter.textContent = `${idx+1}/${total}`;
+  ui.qType.textContent = (s.mode==="adventure")
+    ? `AVENTURE • Niv ${s.adv?.level || "?"}`
+    : (q.type||"QCM").toUpperCase();
+  ui.diffStars.textContent = stars(q.difficulty);
+  ui.qmedia.textContent = (s.mode==="adventure") ? (s.adv?.levelCfg?.boss ? "👑" : "🗺️") : pickMedia(q);
+  ui.qtext.textContent = q.question;
+
+  const qt = (q.type||"QCM").toUpperCase();
+  if(qt==="ORDRE") renderOrder(q);
+  else if(qt==="VF") renderVF(q);
+  else if(qt==="TROU") renderTrou(q);
+  else renderQcm(q);
+
+  ui.btnJoker.onclick = ()=> applyJoker();
+  ui.btnSkip.onclick = ()=> validateAnswer(null, true);
+  ui.btnEnd.onclick  = ()=> endSession();
+
+  updateJokerButton();
+}
+
+/* Réponses */
+function buildChoices(q){
+  let opts = Array.isArray(q.options) ? q.options.slice() : [];
+  opts = opts.map(x=>String(x).trim()).filter(Boolean);
+  if(!opts.some(x=>normalize(x)===normalize(q.answer))) opts.unshift(String(q.answer).trim());
+  opts = shuffle([...new Set(opts)]);
+  while(opts.length < 4) opts.push("Je ne sais pas");
+  return opts.slice(0,4);
+}
+function renderQcm(q){
+  const choices = buildChoices(q);
+  ui.gameArea.innerHTML = `<div class="answers" id="answers"></div>`;
+  const answersEl = $("#answers");
+  answersEl.dataset.locked="0";
+  choices.forEach(txt=>{
+    const b=document.createElement("button");
+    b.className="ansbtn";
+    b.textContent=txt;
+    b.onclick=()=>{
+      if(answersEl.dataset.locked==="1") return;
+      answersEl.dataset.locked="1";
+      validateAnswer(txt,false);
+    };
+    answersEl.appendChild(b);
+  });
+}
+function renderVF(q){
+  ui.gameArea.innerHTML = `<div class="answers" id="answers"></div>`;
+  const answersEl = $("#answers");
+  answersEl.dataset.locked="0";
+  ["Vrai","Faux"].forEach(txt=>{
+    const b=document.createElement("button");
+    b.className="ansbtn";
+    b.textContent=txt;
+    b.onclick=()=>{
+      if(answersEl.dataset.locked==="1") return;
+      answersEl.dataset.locked="1";
+      validateAnswer(txt,false);
+    };
+    answersEl.appendChild(b);
+  });
+}
+function renderTrou(q){
+  const choices = buildChoices(q);
+  ui.gameArea.innerHTML = `
+    <div class="hint">Écris la réponse ou choisis une proposition :</div>
+    <div class="form" style="margin-top:10px;">
+      <div class="field">
+        <div class="label">Ta réponse</div>
+        <input class="input" id="fillInput" placeholder="Écris ici..." />
+      </div>
+      <button class="btn secondary" id="btnValidateFill">✅ Valider ce que j’ai écrit</button>
+    </div>
+    <div class="answers" id="answers" style="margin-top:12px;"></div>
+  `;
+  $("#btnValidateFill").onclick = ()=>{
+    const v = ($("#fillInput").value || "").trim();
+    if(!v){ ui.footer.innerHTML = "⚠️ Écris une réponse (ou clique sur une proposition)."; return; }
+    validateAnswer(v,false);
+  };
+  const answersEl = $("#answers");
+  answersEl.dataset.locked="0";
+  choices.forEach(txt=>{
+    const b=document.createElement("button");
+    b.className="ansbtn";
+    b.textContent=txt;
+    b.onclick=()=>{
+      if(answersEl.dataset.locked==="1") return;
+      answersEl.dataset.locked="1";
+      validateAnswer(txt,false);
+    };
+    answersEl.appendChild(b);
+  });
+}
+function renderOrder(q){
+  const s = state.session;
+  const correct = splitOrderAnswer(q.answer);
+  s.orderState = { correct, pool: shuffle(correct.slice()), built: [], render:null };
+  saveState();
+
+  ui.gameArea.innerHTML = `
+    <div class="order-wrap">
+      <div class="order-zone">
+        <div class="order-title">Éléments disponibles (clique pour ajouter)</div>
+        <div class="chips" id="poolChips"></div>
+      </div>
+      <div class="order-zone">
+        <div class="order-title">Ton ordre (clique pour retirer)</div>
+        <div class="chips" id="builtChips"></div>
+      </div>
+      <button class="btn" id="btnValidateOrder">✅ Valider</button>
+    </div>
+  `;
+  const poolEl=$("#poolChips"), builtEl=$("#builtChips");
+  function renderChips(){
+    poolEl.innerHTML=""; builtEl.innerHTML="";
+    s.orderState.pool.forEach((w,i)=>{
+      const b=document.createElement("button");
+      b.className="chipbtn"; b.textContent=w;
+      b.onclick=()=>{
+        s.orderState.built.push(w);
+        s.orderState.pool.splice(i,1);
+        saveState(); renderChips();
       };
+      poolEl.appendChild(b);
+    });
+    s.orderState.built.forEach((w,i)=>{
+      const b=document.createElement("button");
+      b.className="chipbtn"; b.textContent=w;
+      b.onclick=()=>{
+        s.orderState.pool.push(w);
+        s.orderState.built.splice(i,1);
+        saveState(); renderChips();
+      };
+      builtEl.appendChild(b);
+    });
+  }
+  s.orderState.render = renderChips;
+  renderChips();
+  $("#btnValidateOrder").onclick=()=> validateAnswer(s.orderState.built.slice(), false);
+}
+
+/* Marquer réussite (global) */
+function markCorrect(q){
+  if(!q || !q.id) return;
+  state.correctIds[q.id] = true;
+  saveState();
+}
+
+/* ❤️ Appliquer gain/perte de cœurs (aventure seulement) */
+function applyAdventureHearts(delta){
+  state.adventure.hearts = Number(state.adventure.hearts) || 0;
+  state.adventure.hearts += delta;
+  if(state.adventure.hearts < 0) state.adventure.hearts = 0;
+  saveState();
+  updateTopBar();
+}
+
+/* Validation */
+function validateAnswer(userAnswer, isSkip=false){
+  const s = state.session;
+  if(!s) return;
+
+  const q = QUESTIONS.find(x=>x.id===s.ids[s.i]);
+  const qtype = (q.type||"QCM").toUpperCase();
+
+  let ok=false;
+  if(qtype==="ORDRE"){
+    const correct = splitOrderAnswer(q.answer);
+    const built = Array.isArray(userAnswer) ? userAnswer : [];
+    ok = normalize(built.join(" | ")) === normalize(correct.join(" | "));
+  }else{
+    ok = (!isSkip && userAnswer && normalize(userAnswer)===normalize(q.answer));
+  }
+
+  if(ok){
+    s.good++;
+    state.coins += COINS_PER_GOOD;
+    markCorrect(q);
+  }else{
+    s.bad++;
+  }
+
+  if(s.mode === "adventure"){
+    if(ok) applyAdventureHearts(+1);
+    else if(!isSkip) applyAdventureHearts(-1);
+  }
+
+  s.answered = true;
+  saveState();
+  updateTopBar();
+  updateJokerButton();
+
+  [...ui.gameArea.querySelectorAll(".ansbtn")].forEach(b=>b.disabled=true);
+  [...ui.gameArea.querySelectorAll(".chipbtn")].forEach(b=>b.disabled=true);
+  const fill = $("#fillInput");
+  if(fill) fill.disabled = true;
+  const fillBtn = $("#btnValidateFill");
+  if(fillBtn) fillBtn.disabled = true;
+
+  if(qtype!=="ORDRE"){
+    const btns=[...ui.gameArea.querySelectorAll(".ansbtn")];
+    btns.forEach(b=>{
+      if(normalize(b.textContent)===normalize(q.answer)) b.classList.add("correct");
+      else if(userAnswer && normalize(b.textContent)===normalize(userAnswer) && !ok) b.classList.add("wrong");
     });
   }
 
-  function applyJokerRemoveOptions(q){
-    if(!lastChoiceButtons?.length){
-      ui.footer.innerHTML = "⚠️ Joker dispo seulement sur QCM/VF.";
-      return;
-    }
-    let removed = 0;
-    for(const b of lastChoiceButtons){
-      if(removed>=2) break;
-      const val = b.getAttribute("data-ans");
-      if(normalize(val) !== normalize(q.answer)){
-        b.disabled = true;
-        b.style.opacity = "0.35";
-        removed++;
-      }
-    }
-    ui.footer.innerHTML = "🃏 Joker utilisé : 2 mauvaises réponses retirées.";
-  }
+  ui.ref.style.display="block";
+  ui.ref.innerHTML = `Référence : <strong>${esc(q.reference || "—")}</strong>`;
 
-  /* TROU */
-  function renderFillBlankQuestion(q){
-    ui.gameArea.innerHTML = `
-      <div class="form">
-        <div class="field">
-          <div class="label">Ta réponse</div>
-          <input class="input" id="inpFill" placeholder="Écris le mot..." />
-        </div>
-        <button class="btn gold" id="submit">✅ Valider</button>
-      </div>
-    `;
-    const inp = $("#inpFill");
-    inp.focus();
+  ui.resultBox.style.display="block";
+  ui.resultBox.className = "result " + (ok ? "good" : "bad");
 
-    $("#submit").onclick = ()=>{
-      const val = (inp.value||"").trim();
-      const good = normalize(val) === normalize(q.answer);
-      $("#submit").disabled = true;
-      inp.disabled = true;
+  const heartLine = (s.mode === "adventure" && !isSkip)
+    ? `<div class="small">❤️ Cœurs : <strong>${state.adventure.hearts}</strong></div>`
+    : "";
 
-      awardAfterAnswer(good, q);
-      showResult(good, q);
-      nextAfterDelay();
-    };
-  }
+  const goodTitle = `✅ Bonne réponse ! (+${COINS_PER_GOOD} 🪙)`;
+  const badTitle = isSkip ? "⏭️ Passé." : "❌ Incorrect.";
 
-  /* ORDRE */
-  function renderOrderQuestion(q){
-    const target = splitOrderAnswer(q.answer);
-    const pool = shuffle(target);
+  ui.resultBox.innerHTML = `
+    <div class="title">${ok ? goodTitle : badTitle}</div>
+    <div style="margin-top:6px"><strong>Bonne réponse :</strong> ${esc(q.answer)}</div>
+    <div class="small">📖 ${esc(q.reference || "—")}</div>
+    ${heartLine}
+    <button class="btn" id="nextBtn" style="margin-top:10px;">➡️ Question suivante</button>
+  `;
 
-    let chosen = [];
-    function draw(){
-      ui.gameArea.innerHTML = `
-        <div class="order-wrap">
-          <div class="order-zone">
-            <div class="order-title">Clique les éléments dans le bon ordre</div>
-            <div class="chips" id="pool">
-              ${pool.map((w,i)=>`<button class="chipbtn" data-i="${i}" ${chosen.includes(i) ? "disabled":""}>${esc(w)}</button>`).join("")}
-            </div>
-          </div>
+  $("#nextBtn").onclick=()=>{
+    s.i++;
+    s.orderState=null;
+    saveState();
+    if(s.i >= s.ids.length) endSession();
+    else renderQuestion();
+  };
+}
 
-          <div class="order-zone">
-            <div class="order-title">Ton ordre</div>
-            <div class="chips" id="pick">
-              ${chosen.map(i=>`<span class="pill">${esc(pool[i])}</span>`).join("") || `<span class="hint">—</span>`}
-            </div>
-          </div>
+function computeStarsFromScore(percent){
+  if(percent >= 90) return 3;
+  if(percent >= 70) return 2;
+  if(percent >= 50) return 1;
+  return 0;
+}
 
-          <div class="row">
-            <button class="btn secondary" id="undo" ${chosen.length? "":"disabled"}>↩️ Annuler</button>
-            <button class="btn gold" id="submit" ${chosen.length===target.length? "":"disabled"}>✅ Valider</button>
-          </div>
-        </div>
-      `;
+function endSession(){
+  const s = state.session;
+  if(!s){ renderModeMenu(); return; }
 
-      document.querySelectorAll(".chipbtn").forEach(b=>{
-        b.onclick = ()=>{
-          const i = Number(b.getAttribute("data-i"));
-          if(chosen.includes(i)) return;
-          chosen.push(i);
-          draw();
-        };
-      });
+  const total = s.ids.length || 1;
+  const good = s.good || 0;
+  const percent = Math.round((good/total)*100);
 
-      $("#undo").onclick = ()=>{
-        chosen.pop();
-        draw();
-      };
+  if(s.mode === "adventure"){
+    const lvl = s.adv?.level || 1;
+    const cfg = s.adv?.levelCfg || ADVENTURE_LEVELS[lvl-1];
+    const earnedStars = computeStarsFromScore(percent);
 
-      $("#submit").onclick = ()=>{
-        const attempt = chosen.map(i=>pool[i]);
-        const good = attempt.map(normalize).join("|") === target.map(normalize).join("|");
-        awardAfterAnswer(good, q);
-        showResult(good, q, good ? "⭐ Bien joué !" : "💡 Astuce : relis la liste et recommence au prochain.");
-        nextAfterDelay();
-      };
-    }
-    draw();
-  }
+    const bonus = earnedStars ? (cfg.bonusStars[earnedStars-1] || 0) : 0;
+    state.coins += bonus;
 
-  function endAdventureLevel(force=false){
-    const sess = state.session;
-    if(!sess || sess.mode!=="adventure"){
-      state.session = null;
-      saveState();
-      return renderModeMenu();
-    }
+    const prev = getLevelStars(lvl);
+    if(earnedStars > prev) setLevelStars(lvl, earnedStars);
 
-    const total = sess.ids.length;
-    const answered = Math.min(total, Math.max(0, sess.idx));
-    const ratio = total ? (answered/total) : 0;
-    const starsEarned = ratio >= .9 ? 5 : ratio >= .75 ? 4 : ratio >= .6 ? 3 : ratio >= .4 ? 2 : 1;
-
-    const lvl = sess.level || 1;
-    state.adventure.levelStars[lvl] = Math.max(Number(state.adventure.levelStars[lvl]||0), starsEarned);
-
-    if(!force){
-      state.adventure.currentLevel = Math.max(state.adventure.currentLevel, Math.min(ADVENTURE_LEVELS.length, lvl+1));
-    }
+    advanceAdventureIfNeeded(lvl, earnedStars);
 
     state.session = null;
     saveState();
+    renderAdventureEnd(lvl, percent, earnedStars, bonus, cfg);
+    return;
+  }
 
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(true);
+  state.session = null;
+  saveState();
+  renderClassicHome();
+}
 
-    setHeader({type:"AVENTURE", theme:"—", diff:"—", counter:"—", media:"🏁", title:`Niveau ${lvl} terminé`});
-    ui.trackDot.style.left = "50%";
+function renderAdventureEnd(level, percent, earnedStars, bonus, cfg){
+  updateTopBar();
+  ui.qType.textContent = `AVENTURE • FIN`;
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = cfg.boss ? "👑" : "🏁";
+  ui.qtext.textContent = `Niveau ${level} terminé !`;
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
 
-    ui.gameArea.innerHTML = `
-      <div class="result good">
-        <div class="title">⭐ Étoiles gagnées : ${"⭐".repeat(starsEarned)}</div>
-        <div class="small">Cœurs actuels : ❤️ ${state.adventure.hearts}</div>
+  const starTxt = earnedStars ? "⭐".repeat(earnedStars) : "—";
+  const unlockMsg = (earnedStars>=1)
+    ? (level < ADVENTURE_LEVELS.length ? "✅ Niveau suivant débloqué !" : "🏆 Aventure terminée !")
+    : "❗ Niveau non validé (il faut au moins 50%).";
+
+  ui.gameArea.innerHTML = `
+    <div class="adv-banner">
+      <div class="big">Résultat</div>
+      <div class="small">
+        Score : <strong>${percent}%</strong> • Étoiles : <strong>${starTxt}</strong> • Bonus : <strong>+${bonus} 🪙</strong><br/>
+        Cœurs : <strong>❤️ ${state.adventure.hearts}</strong><br/>
+        ${esc(unlockMsg)}
       </div>
-      <div class="row">
-        <button class="btn gold" id="backMap">🗺️ Retour carte</button>
-        <button class="btn secondary" id="home">🏠 Accueil</button>
+    </div>
+
+    <div class="row">
+      <button class="btn gold" id="btnReplayLevel">🔁 Rejouer le niveau</button>
+      <button class="btn secondary" id="btnMap">🗺️ Carte</button>
+    </div>
+
+    <button class="btn secondary" id="btnModes">⬅️ Retour modes</button>
+  `;
+
+  $("#btnReplayLevel").onclick = ()=> startAdventureLevel(level);
+  $("#btnMap").onclick = ()=> renderAdventureMap();
+  $("#btnModes").onclick = ()=> renderModeMenu();
+}
+
+/* Mes réussites (simple) */
+function renderSuccesses(){
+  updateTopBar();
+  ui.qType.textContent = "RÉUSSITES";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "📖";
+  ui.qtext.textContent = "Mes questions réussies";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const correctIds = state.correctIds || {};
+  const ids = Object.keys(correctIds).filter(id => QUESTIONS.some(q=>q.id===id));
+
+  if(!ids.length){
+    ui.gameArea.innerHTML = `
+      <div class="hint">Aucune question réussie pour le moment.</div>
+      <button class="btn" id="backModes">⬅️ Retour modes</button>
+    `;
+    $("#backModes").onclick=()=>renderModeMenu();
+    return;
+  }
+
+  const groups = {};
+  ids.forEach(id=>{
+    const q = QUESTIONS.find(x=>x.id===id);
+    const th = q.theme || "Autre";
+    (groups[th] ||= []).push(q);
+  });
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">Total réussies : <strong>${ids.length}</strong></div>
+    <div id="acc"></div>
+    <button class="btn secondary" id="backModes">⬅️ Retour modes</button>
+  `;
+  $("#backModes").onclick=()=>renderModeMenu();
+
+  const acc=$("#acc");
+  Object.keys(groups).forEach(th=>{
+    const list = groups[th].slice().sort((a,b)=>a.question.localeCompare(b.question));
+    const box=document.createElement("div");
+    box.style.marginTop="10px";
+    box.innerHTML = `<div class="hint"><strong>${esc(th)}</strong> — ${list.length}</div>`;
+    list.forEach(q=>{
+      const it=document.createElement("div");
+      it.className="result good";
+      it.style.marginTop="8px";
+      it.innerHTML = `<div class="title">✅ ${esc(q.question)}</div>
+                      <div class="small"><b>Réponse :</b> ${esc(q.answer)} • <b>Réf :</b> ${esc(q.reference||"—")}</div>`;
+      box.appendChild(it);
+    });
+    acc.appendChild(box);
+  });
+}
+
+/* =======================
+   MODE MOTS CROISÉS
+   ======================= */
+
+function renderCrosswordHome(){
+  updateTopBar();
+  ui.qType.textContent = "MOTS CROISÉS";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🧩";
+  ui.qtext.textContent = "Mode Mots croisés";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const selectedKey = state.crossword.selectedBank || "grille1";
+  const banksHtml = CROSSWORD_BANKS.map(b=>{
+    const sel = b.key === selectedKey;
+    return `
+      <div class="theme-card ${sel ? "selected" : ""}" data-bank="${esc(b.key)}">
+        <div class="t-top">
+          <div class="t-name"><span class="t-ico">🧩</span> ${esc(b.title)}</div>
+          <div>${sel ? "✅" : ""}</div>
+        </div>
+        <div class="t-sub">${esc(b.subtitle)} • ${b.items.length} mots</div>
       </div>
     `;
-    $("#backMap").onclick = ()=> renderAdventureMap();
-    $("#home").onclick = ()=> renderModeMenu();
-  }
+  }).join("");
 
-  /* ========= Mots croisés ========= */
-  function getSelectedBank(){
-    const key = state.crossword.selectedBank;
-    return CROSSWORD_BANKS.find(b=>b.key===key) || CROSSWORD_BANKS[0] || null;
-  }
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      <strong>Les mots croisés vont vous donner le plaisir le lire la Bible différemment car pour ce mode de jeu ci, votre Bible vous sera très utile. Bon amusement.</strong>
+    </div>
 
-  function renderCrosswordHome(){
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(false);
+    <div class="hint" style="margin-top:10px;">
+      Grille générée automatiquement depuis ta liste. • Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
+    </div>
 
-    setHeader({type:"MOTS CROISÉS", theme:"—", diff:"—", counter:"—", media:"🧩", title:"Choisis une grille"});
-    ui.trackDot.style.left = "50%";
+    <div class="hint" style="margin-top:10px;">
+      Choisis ta grille :
+    </div>
 
-    ui.gameArea.innerHTML = `
-      <div class="hint">
-        Les mots croisés vont vous donner le plaisir de lire la Bible différemment car pour ce mode de jeu ci, votre Bible vous sera très utile. Bon amusement.<br>
-        <strong>Grille générée automatiquement depuis ta liste.</strong> • Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
-      </div>
+    <div class="themes" id="xwBanks">
+      ${banksHtml}
+    </div>
 
-      <div class="form">
-        <div class="field">
-          <div class="label">Grille</div>
-          <select class="input" id="bankSel">
-            ${CROSSWORD_BANKS.map(b=>`<option value="${esc(b.key)}" ${b.key===state.crossword.selectedBank?"selected":""}>${esc(b.title)} — ${esc(b.subtitle||"")}</option>`).join("")}
-          </select>
-        </div>
-        <button class="btn gold" id="startXW">▶️ Démarrer la grille</button>
-        <button class="btn secondary" id="back">⬅️ Retour</button>
-      </div>
-    `;
+    <div class="row">
+      <button class="btn gold" id="btnNewXW">🧩 Générer une grille</button>
+      <button class="btn secondary" id="btnBackModes">⬅️ Retour modes</button>
+    </div>
 
-    $("#bankSel").onchange = (e)=>{
-      state.crossword.selectedBank = e.target.value;
-      saveState();
-    };
-    $("#startXW").onclick = ()=> startCrossword();
-    $("#back").onclick = ()=> renderModeMenu();
-  }
+    <div class="hint" style="margin-top:12px;">
+      Mots croisés gagnés : <strong>${state.crossword.wins}</strong>
+    </div>
+  `;
 
-  function startCrossword(){
-    const bank = getSelectedBank();
-    if(!bank || !bank.items?.length){
-      ui.footer.innerHTML = "⚠️ Grille vide.";
-      return;
-    }
+  $("#btnBackModes").onclick = ()=> renderModeMenu();
 
-    const entries = bank.items.map((it, idx)=>({
-      id: it.id || ("xw_"+idx),
-      clue: it.clue || "",
-      answerRaw: it.answer || "",
-      answer: normalizeLettersOnly(it.answer || "")
-    })).filter(e=>e.answer.length>=2);
-
-    entries.sort((a,b)=>b.answer.length - a.answer.length);
-
-    const gridSize = Math.max(13, Math.min(19, Math.max(...entries.map(e=>e.answer.length)) + 4));
-    const grid = Array.from({length:gridSize}, ()=>Array.from({length:gridSize}, ()=>null));
-    const placed = [];
-
-    function canPlace(word, r, c, dir){
-      for(let i=0;i<word.length;i++){
-        const rr = r + (dir==='D'?i:0);
-        const cc = c + (dir==='A'?i:0);
-        if(rr<0||cc<0||rr>=gridSize||cc>=gridSize) return false;
-        const cur = grid[rr][cc];
-        if(cur && cur !== word[i]) return false;
-      }
-      return true;
-    }
-
-    function placeWord(entry, r, c, dir){
-      for(let i=0;i<entry.answer.length;i++){
-        const rr = r + (dir==='D'?i:0);
-        const cc = c + (dir==='A'?i:0);
-        grid[rr][cc] = entry.answer[i];
-      }
-      placed.push({entry, r, c, dir});
-    }
-
-    const first = entries[0];
-    const r0 = Math.floor(gridSize/2);
-    const c0 = Math.floor((gridSize - first.answer.length)/2);
-    placeWord(first, r0, c0, 'A');
-
-    for(let k=1;k<entries.length;k++){
-      const entry = entries[k];
-      let ok = false;
-
-      for(let pi=0; pi<placed.length && !ok; pi++){
-        const p = placed[pi];
-        const w = p.entry.answer;
-
-        for(let i=0;i<entry.answer.length && !ok;i++){
-          const ch = entry.answer[i];
-
-          for(let j=0;j<w.length && !ok;j++){
-            if(w[j] !== ch) continue;
-
-            const rr = p.r + (p.dir==='D'?j:0);
-            const cc = p.c + (p.dir==='A'?j:0);
-
-            const dir = (p.dir==='A') ? 'D' : 'A';
-            const r = rr - (dir==='D'?i:0);
-            const c = cc - (dir==='A'?i:0);
-
-            if(canPlace(entry.answer, r, c, dir)){
-              placeWord(entry, r, c, dir);
-              ok = true;
-            }
-          }
-        }
-      }
-
-      if(!ok){
-        for(let tries=0; tries<250 && !ok; tries++){
-          const dir = Math.random()<0.5?'A':'D';
-          const r = Math.floor(Math.random()*gridSize);
-          const c = Math.floor(Math.random()*gridSize);
-          if(canPlace(entry.answer, r, c, dir)){
-            placeWord(entry, r, c, dir);
-            ok = true;
-          }
-        }
-      }
-    }
-
-    let minR=gridSize, minC=gridSize, maxR=0, maxC=0;
-    for(let r=0;r<gridSize;r++){
-      for(let c=0;c<gridSize;c++){
-        if(grid[r][c]){
-          minR=Math.min(minR,r); minC=Math.min(minC,c);
-          maxR=Math.max(maxR,r); maxC=Math.max(maxC,c);
-        }
-      }
-    }
-    minR=Math.max(0,minR-1); minC=Math.max(0,minC-1);
-    maxR=Math.min(gridSize-1,maxR+1); maxC=Math.min(gridSize-1,maxC+1);
-
-    const H = maxR-minR+1;
-    const W = maxC-minC+1;
-
-    const cropped = Array.from({length:H}, (_,rr)=>Array.from({length:W}, (_,cc)=>grid[minR+rr][minC+cc]));
-    const placements = placed.map(p=>({
-      id: p.entry.id,
-      clue: p.entry.clue,
-      answer: p.entry.answer,
-      dir: p.dir,
-      r: p.r - minR,
-      c: p.c - minC,
-      len: p.entry.answer.length
-    }));
-
-    const nums = Array.from({length:H}, ()=>Array.from({length:W}, ()=>0));
-    let num=1;
-    const across = [];
-    const down = [];
-
-    function isLetter(rr,cc){ return !!cropped[rr]?.[cc]; }
-    function startsAcross(rr,cc){
-      if(!isLetter(rr,cc)) return false;
-      const left = cc===0 ? false : isLetter(rr,cc-1);
-      const right = cc+1<W ? isLetter(rr,cc+1) : false;
-      return (!left && right);
-    }
-    function startsDown(rr,cc){
-      if(!isLetter(rr,cc)) return false;
-      const up = rr===0 ? false : isLetter(rr-1,cc);
-      const downn = rr+1<H ? isLetter(rr+1,cc) : false;
-      return (!up && downn);
-    }
-
-    const byStart = new Map();
-    for(const pl of placements){
-      byStart.set(`${pl.r},${pl.c},${pl.dir}`, pl);
-    }
-
-    for(let r=0;r<H;r++){
-      for(let c=0;c<W;c++){
-        const a = startsAcross(r,c);
-        const d = startsDown(r,c);
-        if(a || d){
-          nums[r][c] = num;
-
-          if(a){
-            const pl = byStart.get(`${r},${c},A`);
-            if(pl) across.push({n:num, clue: pl.clue, id: pl.id, len: pl.len});
-          }
-          if(d){
-            const pl = byStart.get(`${r},${c},D`);
-            if(pl) down.push({n:num, clue: pl.clue, id: pl.id, len: pl.len});
-          }
-          num++;
-        }
-      }
-    }
-
-    const user = Array.from({length:H}, ()=>Array.from({length:W}, ()=>""));
-    state.session = { mode:"crossword", xw:{H,W,grid:cropped,nums,across,down,user} };
-    saveState();
-    renderCrosswordGame();
-  }
-
-  function renderCrosswordGame(){
-    updateTopBar();
-    clearFooter();
-    setHeartsVisible(false);
-
-    const xw = state.session?.xw;
-    if(!xw){ return renderCrosswordHome(); }
-
-    setHeader({type:"MOTS CROISÉS", theme:"—", diff:"—", counter:"", media:"🧩", title:"Complète la grille"});
-    ui.trackDot.style.left = "50%";
-
-    const {H,W,grid,nums,across,down,user} = xw;
-
-    ui.gameArea.innerHTML = `
-      <div class="xw-wrap">
-        <div class="xw-toprow">
-          <div class="xw-stats">
-            <span class="pill">Cases: <strong>${H*W}</strong></span>
-            <span class="pill">Mots: <strong>${across.length + down.length}</strong></span>
-          </div>
-          <div class="row" style="margin:0;">
-            <button class="btn secondary" id="xwBack" style="margin:0; min-width:120px;">⬅️ Retour</button>
-            <button class="btn" id="xwJoker" style="margin:0; min-width:120px;">🃏 Joker (2 🪙)</button>
-            <button class="btn gold" id="xwCheck" style="margin:0; min-width:120px;">✅ Vérifier</button>
-          </div>
-        </div>
-
-        <div class="xw-grid" id="xwGrid" style="grid-template-columns: repeat(${W}, 1fr);">
-          ${Array.from({length:H}, (_,r)=>Array.from({length:W}, (_,c)=>{
-            if(!grid[r][c]) return `<div class="xw-cell block"></div>`;
-            const n = nums[r][c] ? `<div class="num">${nums[r][c]}</div>` : "";
-            const val = esc(user[r][c]||"");
-            return `
-              <div class="xw-cell" data-r="${r}" data-c="${c}">
-                ${n}
-                <input maxlength="1" inputmode="text" value="${val}" />
-              </div>
-            `;
-          }).join("")).join("")}
-        </div>
-
-        <div class="xw-clues">
-          <div class="xw-panel">
-            <h3>➡️ Horizontal</h3>
-            <div class="xw-cluelist">
-              ${across.map(it=>`<div class="xw-clue"><span class="n">${it.n}.</span> ${esc(it.clue)}</div>`).join("") || `<div class="xw-footnote">—</div>`}
-            </div>
-          </div>
-          <div class="xw-panel">
-            <h3>⬇️ Vertical</h3>
-            <div class="xw-cluelist">
-              ${down.map(it=>`<div class="xw-clue"><span class="n">${it.n}.</span> ${esc(it.clue)}</div>`).join("") || `<div class="xw-footnote">—</div>`}
-            </div>
-          </div>
-        </div>
-
-        <div class="xw-footnote">
-          Grille générée automatiquement depuis ta liste. • Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
-        </div>
-      </div>
-    `;
-
-    $("#xwBack").onclick = ()=>{
-      state.session = null;
+  [...document.querySelectorAll("#xwBanks [data-bank]")].forEach(card=>{
+    card.onclick = ()=>{
+      const k = card.getAttribute("data-bank");
+      state.crossword.selectedBank = k;
       saveState();
       renderCrosswordHome();
     };
+  });
 
-    // inputs
-    document.querySelectorAll("#xwGrid .xw-cell input").forEach(inp=>{
-      inp.addEventListener("input", ()=>{
-        const cell = inp.closest(".xw-cell");
-        if(!cell) return;
-        const r = Number(cell.getAttribute("data-r"));
-        const c = Number(cell.getAttribute("data-c"));
-        const ch = normalizeLettersOnly(inp.value || "");
-        inp.value = ch ? ch[0] : "";
-        xw.user[r][c] = inp.value;
-        saveState();
+  $("#btnNewXW").onclick = ()=> startCrossword();
+}
 
-        if(inp.value){
-          const next = cell.nextElementSibling;
-          if(next && next.classList.contains("xw-cell") && !next.classList.contains("block")){
-            const ni = next.querySelector("input");
-            if(ni) ni.focus();
-          }
+function startCrossword(){
+  const selectedKey = state.crossword.selectedBank || "grille1";
+  const bank = CROSSWORD_BANKS.find(b=>b.key===selectedKey) || CROSSWORD_BANKS[0];
+
+  const items = bank.items.map(x=>({
+    id:x.id,
+    clue:x.clue,
+    answerRaw:x.answer,
+    answer: normalizeLettersOnly(x.answer)
+  })).filter(x=>x.answer.length >= 2);
+
+  const gridSize = 17;
+  const gen = generateCrossword(items, gridSize, 120);
+
+  state.crossword.last = {
+    gridSize,
+    placements: gen.placements,
+    grid: gen.grid,
+    blocks: gen.blocks,
+    meta: {
+      placed: gen.placements.length,
+      total: items.length,
+      at: Date.now(),
+      bankKey: bank.key,
+      bankTitle: bank.title,
+      won: false,
+    }
+  };
+  saveState();
+  renderCrosswordGame();
+}
+
+function renderCrosswordGame(){
+  const last = state.crossword.last;
+  if(!last){ renderCrosswordHome(); return; }
+
+  updateTopBar();
+  ui.qType.textContent = "MOTS CROISÉS";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🧩";
+  ui.qtext.textContent = "Complète la grille";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const size = last.gridSize;
+  const blocks = last.blocks;
+  const solution = last.grid;
+  const placements = last.placements;
+
+  const bankTotal = (last.meta && typeof last.meta.total === "number") ? last.meta.total : placements.length;
+  const bankTitle = last.meta?.bankTitle ? last.meta.bankTitle : "Grille";
+
+  const numbering = buildCrosswordNumbering(solution, blocks);
+  const { across, down } = numbering.clues;
+  const numGrid = numbering.numGrid;
+
+  const itemByKey = {};
+  placements.forEach(p=>{
+    itemByKey[`${p.x},${p.y},${p.dir}`] = p.clue;
+  });
+
+  const acrossHtml = across.map(c=>{
+    const clue = itemByKey[`${c.x},${c.y},A`] || "(définition)";
+    return `<div class="xw-clue"><span class="n">${c.n}.</span> ${esc(clue)}</div>`;
+  }).join("");
+  const downHtml = down.map(c=>{
+    const clue = itemByKey[`${c.x},${c.y},D`] || "(définition)";
+    return `<div class="xw-clue"><span class="n">${c.n}.</span> ${esc(clue)}</div>`;
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="xw-wrap">
+      <div class="xw-toprow">
+        <div class="xw-stats">
+          <span class="hud-pill" style="background:rgba(0,0,0,.06); border-color: rgba(191,230,255,.8); color: var(--ink);">
+            🧩 <strong>${placements.length}</strong> / ${bankTotal} mots placés • <strong>${esc(bankTitle)}</strong>
+          </span>
+          <span class="hud-pill" style="background:rgba(0,0,0,.06); border-color: rgba(191,230,255,.8); color: var(--ink);">
+            🎁 Gain: <strong>+10 🪙</strong> si 100% correct
+          </span>
+        </div>
+        <div class="row" style="margin-top:0;">
+          <button class="btn secondary" id="xwNew" style="min-width:160px;">🔁 Nouvelle grille</button>
+          <button class="btn gold" id="xwCheck" style="min-width:160px;">✅ Vérifier</button>
+        </div>
+      </div>
+
+      <div class="xw-grid" id="xwGrid" style="grid-template-columns: repeat(${size}, max-content);"></div>
+
+      <div class="xw-clues">
+        <div class="xw-panel">
+          <h3>➡️ Horizontales</h3>
+          <div class="xw-cluelist">${acrossHtml || `<div class="hint">Aucune définition (grille vide)</div>`}</div>
+        </div>
+        <div class="xw-panel">
+          <h3>⬇️ Verticales</h3>
+          <div class="xw-cluelist">${downHtml || `<div class="hint">Aucune définition (grille vide)</div>`}</div>
+        </div>
+      </div>
+
+      <div class="xw-footnote">
+        Astuce : clique une case puis tape. Les accents sont tolérés (É = E). Les réponses avec espaces sont enchaînées.
+      </div>
+
+      <button class="btn secondary" id="xwBack">⬅️ Retour modes</button>
+    </div>
+  `;
+
+  $("#xwBack").onclick = ()=> renderModeMenu();
+  $("#xwNew").onclick = ()=> startCrossword();
+
+  const gridEl = $("#xwGrid");
+  const inputs = [];
+  let selected = { x: -1, y: -1, dir: "A" };
+
+  function setSelected(x,y){
+    selected.x = x; selected.y = y;
+    refreshSelected();
+  }
+  function refreshSelected(){
+    gridEl.querySelectorAll(".xw-cell").forEach(c=>c.classList.remove("selected"));
+    const idx = selected.y*size + selected.x;
+    const cell = gridEl.children[idx];
+    if(cell && cell.classList.contains("xw-cell") && !cell.classList.contains("block")){
+      cell.classList.add("selected");
+    }
+  }
+
+  function nextCell(x,y,dir){ return dir==="A" ? {x:x+1, y} : {x, y:y+1}; }
+  function prevCell(x,y,dir){ return dir==="A" ? {x:x-1, y} : {x, y:y-1}; }
+  function isIn(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+  function isBlock(x,y){ return !isIn(x,y) || blocks[y][x]; }
+
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const isBlk = blocks[y][x];
+      const cell = document.createElement("div");
+      cell.className = "xw-cell" + (isBlk ? " block" : "");
+      if(!isBlk){
+        const n = numGrid[y][x];
+        if(n){
+          const num = document.createElement("div");
+          num.className="num";
+          num.textContent = String(n);
+          cell.appendChild(num);
         }
-      });
+        const inp = document.createElement("input");
+        inp.setAttribute("inputmode","text");
+        inp.setAttribute("autocomplete","off");
+        inp.setAttribute("autocapitalize","characters");
+        inp.maxLength = 1;
+        inp.dataset.x = String(x);
+        inp.dataset.y = String(y);
+        inp.value = "";
+
+        inp.addEventListener("focus", ()=> setSelected(x,y));
+
+        inp.addEventListener("click", ()=>{
+          if(selected.x===x && selected.y===y){
+            selected.dir = (selected.dir==="A") ? "D" : "A";
+          }else{
+            selected.dir = "A";
+          }
+          setSelected(x,y);
+        });
+
+        inp.addEventListener("keydown", (e)=>{
+          const key = e.key;
+          if(key === "Backspace"){
+            e.preventDefault();
+            if(inp.value){
+              inp.value = "";
+            }else{
+              const p = prevCell(x,y,selected.dir);
+              if(!isBlock(p.x,p.y)){
+                const prev = inputs.find(z=>z.x===p.x && z.y===p.y)?.inp;
+                if(prev){ prev.focus(); prev.value=""; }
+              }
+            }
+            return;
+          }
+          if(key === "ArrowRight"){ e.preventDefault(); selected.dir="A"; const p=nextCell(x,y,"A"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
+          if(key === "ArrowLeft"){ e.preventDefault(); selected.dir="A"; const p=prevCell(x,y,"A"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
+          if(key === "ArrowDown"){ e.preventDefault(); selected.dir="D"; const p=nextCell(x,y,"D"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
+          if(key === "ArrowUp"){ e.preventDefault(); selected.dir="D"; const p=prevCell(x,y,"D"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
+        });
+
+        inp.addEventListener("input", ()=>{
+          const v = normalizeLettersOnly(inp.value).slice(0,1);
+          inp.value = v;
+          const p = nextCell(x,y,selected.dir);
+          if(!isBlock(p.x,p.y)){
+            inputs.find(z=>z.x===p.x && z.y===p.y)?.inp?.focus();
+          }
+        });
+
+        cell.appendChild(inp);
+        inputs.push({x,y,inp});
+      }
+      gridEl.appendChild(cell);
+    }
+  }
+
+  const first = inputs[0]?.inp;
+  if(first){ first.focus(); setSelected(Number(first.dataset.x), Number(first.dataset.y)); }
+
+  $("#xwCheck").onclick = ()=>{
+    gridEl.querySelectorAll(".xw-cell").forEach(c=>{
+      c.classList.remove("bad","good");
     });
 
-    // -------- Joker crossword : position du mot suivant --------
-    function wordSolved(pl){
-      for(let i=0;i<pl.len;i++){
-        const rr = pl.r + (pl.dir==='D'?i:0);
-        const cc = pl.c + (pl.dir==='A'?i:0);
-        const expected = grid[rr][cc];
-        const got = (xw.user[rr][cc]||"").toUpperCase();
-        if(got !== expected) return false;
+    let totalLetters = 0;
+    let goodLetters = 0;
+
+    for(const it of inputs){
+      const x = it.x, y = it.y;
+      const sol = solution[y][x] || "";
+      if(!sol) continue;
+      totalLetters++;
+      const typed = normalizeLettersOnly(it.inp.value || "");
+      if(typed === sol){
+        goodLetters++;
+        const idx = y*size + x;
+        gridEl.children[idx].classList.add("good");
+      }else{
+        const idx = y*size + x;
+        gridEl.children[idx].classList.add("bad");
       }
-      return true;
     }
 
-    function getPlacementsFromGrid(){
-      const placements = [];
-      function isLetter(rr,cc){ return !!grid[rr]?.[cc]; }
+    const percent = totalLetters ? Math.round((goodLetters/totalLetters)*100) : 0;
+    const complete = (totalLetters > 0 && goodLetters === totalLetters);
 
-      // Across
-      for(let r=0;r<H;r++){
-        for(let c=0;c<W;c++){
-          if(!isLetter(r,c)) continue;
-          const left = (c>0) ? isLetter(r,c-1) : false;
-          const right = (c+1<W) ? isLetter(r,c+1) : false;
-          if(!left && right){
-            let len=1;
-            while(c+len<W && isLetter(r,c+len)) len++;
-            placements.push({ r, c, dir:'A', len });
-          }
-        }
-      }
-      // Down
-      for(let r=0;r<H;r++){
-        for(let c=0;c<W;c++){
-          if(!isLetter(r,c)) continue;
-          const up = (r>0) ? isLetter(r-1,c) : false;
-          const downn = (r+1<H) ? isLetter(r+1,c) : false;
-          if(!up && downn){
-            let len=1;
-            while(r+len<H && isLetter(r+len,c)) len++;
-            placements.push({ r, c, dir:'D', len });
-          }
-        }
-      }
-      return placements;
-    }
+    ui.resultBox.style.display = "block";
+    ui.resultBox.className = "result " + (complete ? "good" : "bad");
+    ui.resultBox.innerHTML = `
+      <div class="title">${complete ? "🎉 Grille correcte !" : "🧠 Continue !"}</div>
+      <div class="small">Lettres correctes : <strong>${goodLetters}</strong> / ${totalLetters} (${percent}%)</div>
+      ${complete ? `<div class="small">Récompense : <strong>+10 🪙</strong></div>` : `<div class="small">Astuce : les accents sont tolérés (É = E).</div>`}
+    `;
 
-    function clearHint(){
-      document.querySelectorAll("#xwGrid .xw-cell.hint").forEach(el=>el.classList.remove("hint"));
-    }
-
-    function hintPlacement(pl){
-      clearHint();
-      const cell = document.querySelector(`#xwGrid .xw-cell[data-r="${pl.r}"][data-c="${pl.c}"]`);
-      if(cell){
-        cell.classList.add("hint");
-        const inp = cell.querySelector("input");
-        if(inp) inp.focus();
-      }
-
-      const n = (nums[pl.r][pl.c]||"?");
-      const dirTxt = pl.dir === 'A' ? "Horizontal ➡️" : "Vertical ⬇️";
-
-      ui.footer.innerHTML = `🃏 Position du mot suivant : <strong>${n}</strong> (${dirTxt}) — départ sur la case surlignée.`;
-      setTimeout(()=>{ clearHint(); }, 2500);
-    }
-
-    $("#xwJoker").onclick = ()=>{
-      const cost = 2;
-      if(state.coins < cost){
-        ui.footer.innerHTML = "⚠️ Pas assez de pièces pour le joker.";
-        return;
-      }
-
-      const placements = getPlacementsFromGrid();
-      placements.sort((p1,p2)=>{
-        const n1 = nums[p1.r][p1.c] || 9999;
-        const n2 = nums[p2.r][p2.c] || 9999;
-        if(n1!==n2) return n1-n2;
-        if(p1.dir!==p2.dir) return (p1.dir==='A' ? -1 : 1);
-        return 0;
-      });
-
-      const next = placements.find(pl => !wordSolved(pl));
-      if(!next){
-        ui.footer.innerHTML = "✅ Tous les mots semblent déjà complétés. (Tu peux vérifier !)";
-        return;
-      }
-
-      state.coins -= cost;
-      saveState();
-      updateTopBar();
-      hintPlacement(next);
-    };
-    // ----------------------------------------------------------
-
-    $("#xwCheck").onclick = ()=>{
-      let totalLetters=0, goodLetters=0;
-      document.querySelectorAll("#xwGrid .xw-cell").forEach(cell=>{
-        cell.classList.remove("bad","good");
-        if(cell.classList.contains("block")) return;
-        const r = Number(cell.getAttribute("data-r"));
-        const c = Number(cell.getAttribute("data-c"));
-        const expected = grid[r][c];
-        const got = (xw.user[r][c]||"").toUpperCase();
-        totalLetters++;
-        if(got && got === expected){
-          goodLetters++;
-          cell.classList.add("good");
-        }else{
-          if(got) cell.classList.add("bad");
-        }
-      });
-
-      const pct = totalLetters ? Math.round((goodLetters/totalLetters)*100) : 0;
-
-      ui.resultBox.style.display = "block";
-      ui.resultBox.className = "result " + (pct===100 ? "good":"bad");
-      ui.resultBox.innerHTML = `
-        <div class="title">${pct===100 ? "🎉 Grille complète !" : "🔎 Résultat"}</div>
-        <div class="small">Lettres correctes : <strong>${goodLetters}</strong> / ${totalLetters} (${pct}%).</div>
-      `;
-
-      if(pct === 100){
+    if(complete){
+      if(!last.meta || !last.meta.won){
         state.coins += 10;
-        state.crossword.wins += 1;
-        updateTopBar();
+        state.crossword.wins = (Number(state.crossword.wins)||0) + 1;
+        last.meta = last.meta || {};
+        last.meta.won = true;
+        state.crossword.last = last;
         saveState();
+        updateTopBar();
       }
-    };
+    }
+  };
+}
+
+/* Génération mots croisés (placement automatique) */
+function generateCrossword(items, size, maxTries=120){
+  function makeGrid(){
+    const g = Array.from({length:size}, ()=>Array.from({length:size}, ()=>""));
+    const b = Array.from({length:size}, ()=>Array.from({length:size}, ()=>true));
+    return {g,b};
+  }
+  function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+
+  function canPlace(grid, blocks, word, x, y, dir){
+    const dx = dir==="A" ? 1 : 0;
+    const dy = dir==="D" ? 1 : 0;
+
+    const bx = x - dx, by = y - dy;
+    const ax = x + dx*word.length, ay = y + dy*word.length;
+    if(inb(bx,by) && !blocks[by][bx]) return false;
+    if(inb(ax,ay) && !blocks[ay][ax]) return false;
+
+    for(let i=0;i<word.length;i++){
+      const cx = x + dx*i;
+      const cy = y + dy*i;
+      if(!inb(cx,cy)) return false;
+
+      const ch = word[i];
+      const existing = grid[cy][cx];
+      if(existing && existing !== ch) return false;
+
+      const left  = dir==="A" ? null : {x:cx-1,y:cy};
+      const right = dir==="A" ? null : {x:cx+1,y:cy};
+      const up    = dir==="D" ? null : {x:cx,y:cy-1};
+      const down  = dir==="D" ? null : {x:cx,y:cy+1};
+
+      if(left && inb(left.x,left.y) && !blocks[left.y][left.x] && !grid[cy][cx]) return false;
+      if(right && inb(right.x,right.y) && !blocks[right.y][right.x] && !grid[cy][cx]) return false;
+      if(up && inb(up.x,up.y) && !blocks[up.y][up.x] && !grid[cy][cx]) return false;
+      if(down && inb(down.x,down.y) && !blocks[down.y][down.x] && !grid[cy][cx]) return false;
+    }
+    return true;
   }
 
-  /* ========= Boot ========= */
-  function boot(){
-    if(!THEMES.length || !QUESTIONS.length){
-      setHeader({type:"ERREUR", theme:"—", diff:"—", counter:"—", media:"⚠️", title:"Données introuvables"});
-      ui.gameArea.innerHTML = `
-        <div class="hint">
-          Je ne trouve pas <strong>questions.js</strong> (ou il est vide).<br>
-          Mets <strong>index.html</strong>, <strong>questions.js</strong>, <strong>crosswords.js</strong> dans le même dossier.
-        </div>
-      `;
-      return;
+  function place(grid, blocks, word, x, y, dir){
+    const dx = dir==="A" ? 1 : 0;
+    const dy = dir==="D" ? 1 : 0;
+    for(let i=0;i<word.length;i++){
+      const cx = x + dx*i;
+      const cy = y + dy*i;
+      grid[cy][cx] = word[i];
+      blocks[cy][cx] = false;
+    }
+  }
+
+  function allLetterPositions(grid){
+    const pos = [];
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(grid[y][x]) pos.push({x,y,ch:grid[y][x]});
+      }
+    }
+    return pos;
+  }
+
+  let best = null;
+
+  for(let attempt=0; attempt<maxTries; attempt++){
+    const {g:grid, b:blocks} = makeGrid();
+    const bag = shuffle(items.slice()).sort((a,b)=>b.answer.length - a.answer.length);
+    const placements = [];
+
+    const first = bag.shift();
+    if(!first) break;
+
+    const startX = Math.floor((size - first.answer.length)/2);
+    const startY = Math.floor(size/2);
+    if(startX < 0) continue;
+
+    place(grid, blocks, first.answer, startX, startY, "A");
+    placements.push({x:startX,y:startY,dir:"A",answer:first.answer, clue:first.clue, id:first.id});
+
+    for(const it of bag){
+      const word = it.answer;
+      const letters = allLetterPositions(grid);
+      let placed = false;
+
+      const candidates = [];
+      for(let i=0;i<word.length;i++){
+        const ch = word[i];
+        for(const L of letters){
+          if(L.ch !== ch) continue;
+          candidates.push({x: L.x - i, y: L.y, dir:"A"});
+          candidates.push({x: L.x, y: L.y - i, dir:"D"});
+        }
+      }
+      shuffle(candidates);
+
+      for(const c of candidates){
+        if(canPlace(grid, blocks, word, c.x, c.y, c.dir)){
+          place(grid, blocks, word, c.x, c.y, c.dir);
+          placements.push({x:c.x,y:c.y,dir:c.dir,answer:word, clue:it.clue, id:it.id});
+          placed = true;
+          break;
+        }
+      }
+
+      if(!placed){
+        const tries = 80;
+        for(let t=0;t<tries;t++){
+          const dir = Math.random()<0.5 ? "A" : "D";
+          const x = Math.floor(Math.random()*size);
+          const y = Math.floor(Math.random()*size);
+          if(canPlace(grid, blocks, word, x, y, dir)){
+            place(grid, blocks, word, x, y, dir);
+            placements.push({x,y,dir,answer:word, clue:it.clue, id:it.id});
+            placed = true;
+            break;
+          }
+        }
+      }
     }
 
-    updateTopBar();
-    if(!state.profile) renderProfileGate();
-    else if(state.session?.mode === "crossword") renderCrosswordGame();
-    else if(state.session?.ids?.length) renderQuestion();
-    else renderModeMenu();
+    if(!best || placements.length > best.placements.length){
+      best = {grid, blocks, placements};
+      if(best.placements.length === items.length) break;
+    }
   }
-  boot();
-  </script>
+
+  if(!best){
+    const {g,b} = makeGrid();
+    return {grid:g, blocks:b, placements:[]};
+  }
+  return best;
+}
+
+function buildCrosswordNumbering(solution, blocks){
+  const size = solution.length;
+  const numGrid = Array.from({length:size}, ()=>Array.from({length:size}, ()=>0));
+  const across = [];
+  const down = [];
+  let n = 0;
+
+  function isBlock(x,y){ return blocks[y][x]; }
+  function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(isBlock(x,y)) continue;
+      const startA = (!inb(x-1,y) || isBlock(x-1,y)) && inb(x+1,y) && !isBlock(x+1,y);
+      const startD = (!inb(x,y-1) || isBlock(x,y-1)) && inb(x,y+1) && !isBlock(x,y+1);
+
+      if(startA || startD){
+        n++;
+        numGrid[y][x]=n;
+        if(startA) across.push({n, x, y});
+        if(startD) down.push({n, x, y});
+      }
+    }
+  }
+
+  return { numGrid, clues: { across, down } };
+}
+
+/* Boot */
+function boot(){
+  updateTopBar();
+  if(!state.profile) renderProfileGate();
+  else if(state.session && state.session.ids && state.session.ids.length) renderQuestion();
+  else renderModeMenu();
+}
+boot();
+</script>
 </body>
 </html>
