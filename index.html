@@ -1,5 +1,6 @@
 
 
+
 <!doctype html>
 <html lang="fr">
 <head>
@@ -563,7 +564,203 @@
       color:var(--muted);
       line-height:1.35;
     }
-  </style>
+  
+
+/* ===== CLAVIER MOTS CROISÉS – VERSION LISIBLE & RESPONSIVE ===== */
+.xw-kb{
+  margin-top:12px;
+  display:grid;
+  gap:6px;
+}
+/* Chaque ligne du clavier */
+.xw-kb-row{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:nowrap;          /* empêche le retour à la ligne */
+  overflow-x:auto;           /* scroll si nécessaire */
+  padding:2px 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width:none;
+}
+.xw-kb-row::-webkit-scrollbar{ display:none; }
+/* Touches */
+.xw-key{
+  min-width:32px;            /* plus compact */
+  height:36px;
+  padding:0 8px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:900;
+  line-height:36px;
+  border:1px solid rgba(0,0,0,.10);
+  background: linear-gradient(180deg, #ffffff, #eaf7ff);
+  box-shadow: var(--shadowSoft);
+  color:var(--ink);
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+}
+.xw-key:active{ transform:scale(.97); }
+/* Touches larges (Effacer / Entrée) */
+.xw-key.wide{ min-width:64px; }
+/* Mobile très étroit */
+@media (max-width: 420px){
+  .xw-key{
+    min-width:28px;
+    height:32px;
+    font-size:13px;
+    line-height:32px;
+    border-radius:9px;
+  }
+  .xw-key.wide{ min-width:56px; }
+}
+
+/* ===== Mots croisés (layout type app + clavier AZERTY) ===== */
+.xw-appbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin-top:12px;
+}
+.xw-appbar .left, .xw-appbar .right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.xw-iconbtn{
+  border:1px solid rgba(191,230,255,.9);
+  background: rgba(255,255,255,.85);
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:950;
+  color:var(--ink);
+  box-shadow: var(--shadowSoft);
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+}
+.xw-iconbtn:active{transform:scale(.99);}
+.xw-iconbtn.gold{
+  border-color: rgba(255,206,92,.75);
+  background: linear-gradient(180deg, #fff8d9, #ffeaa9);
+}
+
+.xw-stage-app{
+  margin-top:10px;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius: 16px;
+  background: rgba(18,48,74,.92);
+  box-shadow: var(--shadowSoft);
+  padding:12px;
+  overflow:auto;
+}
+.xw-grid-app{
+  display:grid;
+  gap:6px;
+  width:max-content;
+  margin:0 auto;
+}
+.xw-cell-app{
+  width:44px; height:44px;
+  border-radius:10px;
+  background:#f7fbff;
+  border:1px solid rgba(191,230,255,.65);
+  display:grid; place-items:center;
+  position:relative;
+  user-select:none;
+  cursor:pointer;
+}
+.xw-cell-app.block{
+  background: rgba(0,0,0,.55);
+  border-color: rgba(0,0,0,.35);
+  cursor:default;
+}
+.xw-cell-app .num{
+  position:absolute;
+  top:2px; left:4px;
+  font-size:10px; font-weight:950;
+  color: rgba(18,48,74,.70);
+  pointer-events:none;
+}
+.xw-cell-app .ch{
+  font-size:18px;
+  font-weight:950;
+  color:var(--ink);
+}
+.xw-cell-app.active{
+  background: rgba(58,166,255,.22);
+  box-shadow: inset 0 0 0 3px rgba(58,166,255,.85);
+}
+.xw-cell-app.cursor{
+  background: rgba(255,206,92,.22);
+  box-shadow: inset 0 0 0 3px rgba(255,206,92,.92);
+}
+@media (max-width: 480px){
+  .xw-cell-app{width:36px;height:36px;}
+  .xw-cell-app .ch{font-size:16px;}
+}
+
+.xw-cluebar-app{
+  margin-top:10px;
+  border:1px solid rgba(0,0,0,.10);
+  background: #ffffff;
+  border-radius: 16px;
+  padding:10px;
+  box-shadow: var(--shadowSoft);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.xw-cluebar-app .arrow{
+  width:44px; height:44px;
+  border-radius:14px;
+  border:1px solid rgba(191,230,255,.85);
+  background: rgba(58,166,255,.08);
+  display:grid;
+  place-items:center;
+  font-size:20px;
+  font-weight:950;
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+}
+.xw-cluebar-app .arrow:active{transform:scale(.99);}
+.xw-cluebar-app .text{flex:1; text-align:center; line-height:1.2;}
+.xw-cluebar-app .sub{display:block; font-size:12px; font-weight:900; color:var(--muted); margin-bottom:4px;}
+.xw-cluebar-app .main{font-weight:950; color:var(--ink);}
+
+.xw-answer-tiles{
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.xw-tile{
+  width:44px; height:44px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.10);
+  background: rgba(58,166,255,.92);
+  box-shadow: 0 10px 18px rgba(0,0,0,.16);
+  display:grid; place-items:center;
+  color:#fff;
+  font-weight:950;
+  font-size:18px;
+  user-select:none;
+  cursor:pointer;
+}
+.xw-tile.empty{
+  background: rgba(18,48,74,.10);
+  color: rgba(18,48,74,.55);
+  box-shadow:none;
+}
+.xw-tile.cursor{
+  outline: 3px solid rgba(255,206,92,.92);
+  outline-offset: 0px;
+}
+@media (max-width: 480px){
+  .xw-tile{width:38px;height:38px;border-radius:10px;font-size:16px;}
+}
+
+/* (clavier mots croisés défini plus haut) */
+
+</style>
 </head>
 
 <body>
@@ -770,6 +967,15 @@ function normalizeLettersOnly(s){
     .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
     .replace(/[^A-Z]/g,"");
   return t;
+}
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
 }
 function esc(s){
   return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -1918,37 +2124,79 @@ function renderCrosswordHome(){
   $("#btnNewXW").onclick = ()=> startCrossword();
 }
 
-function startCrossword(){
+function startCrossword(opts = {}){
   const selectedKey = state.crossword.selectedBank || "grille1";
   const bank = CROSSWORD_BANKS.find(b=>b.key===selectedKey) || CROSSWORD_BANKS[0];
+  if(!bank || !bank.items || !bank.items.length){
+    ui.footer.innerHTML = "⚠️ Grille vide.";
+    return;
+  }
 
-  const items = bank.items.map(x=>({
+  // Seed pour varier la génération
+  const seed = Number(opts.seed ?? Date.now());
+  const rng = mulberry32(seed);
+  const rand = ()=>rng();
+
+  function shuffleSeeded(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(rand()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  const baseItems = bank.items.map(x=>({
     id:x.id,
     clue:x.clue,
     answerRaw:x.answer,
     answer: normalizeLettersOnly(x.answer)
   })).filter(x=>x.answer.length >= 2);
 
-  const gridSize = 17;
-  const gen = generateCrossword(items, gridSize, 120);
+  // On tente plusieurs générations et on garde la meilleure (le plus de mots placés)
+  let best = null;
+  const tries = 10;
+  for(let t=0;t<tries;t++){
+    const items = shuffleSeeded(baseItems).sort((a,b)=>b.answer.length-a.answer.length); // longs d'abord + shuffle
+    const gridSize = 15 + Math.floor(rand()*5); // 15..19
+    const gen = generateCrossword(items, gridSize, 240);
+
+    if(!best || (gen.placements?.length||0) > (best.gen.placements?.length||0)){
+      best = { gridSize, gen };
+    }
+    // Si on a tout placé, on stop
+    if((gen.placements?.length||0) >= baseItems.length) break;
+  }
+
+  const gridSize = best.gridSize;
+  const gen = best.gen;
+
+  // IMPORTANT: generateCrossword() returns an internal "blocks" helper matrix,
+  // but the UI expects: true = usable cell (letter), false = black block.
+  // We derive the usable-cells matrix directly from the generated grid.
+  const openCells = gen.grid.map(row => row.map(ch => !!ch));
 
   state.crossword.last = {
+    seed,
     gridSize,
     placements: gen.placements,
     grid: gen.grid,
-    blocks: gen.blocks,
+    blocks: openCells,
     meta: {
       placed: gen.placements.length,
-      total: items.length,
+      total: baseItems.length,
       at: Date.now(),
       bankKey: bank.key,
       bankTitle: bank.title,
       won: false,
     }
   };
+  // reset user grid
+  state.crossword.userGrid = null;
   saveState();
   renderCrosswordGame();
 }
+
 
 function renderCrosswordGame(){
   const last = state.crossword.last;
@@ -1960,7 +2208,7 @@ function renderCrosswordGame(){
   ui.counter.textContent = "—";
   ui.trackDot.style.left = "50%";
   ui.qmedia.textContent = "🧩";
-  ui.qtext.textContent = "Complète la grille";
+  ui.qtext.textContent = "Mots croisés";
   ui.ref.style.display="none";
   ui.resultBox.style.display="none";
   ui.controls.style.display="none";
@@ -1968,215 +2216,296 @@ function renderCrosswordGame(){
   setHeartsVisible(false);
 
   const size = last.gridSize;
-  const blocks = last.blocks;
-  const solution = last.grid;
-  const placements = last.placements;
+  const solution = last.grid;     // lettres solution
+  const blocks = last.blocks;     // true=case utilisable, false=block
 
-  const bankTotal = (last.meta && typeof last.meta.total === "number") ? last.meta.total : placements.length;
-  const bankTitle = last.meta?.bankTitle ? last.meta.bankTitle : "Grille";
+  // Grille joueur persistée
+  if(!state.crossword.userGrid || state.crossword.userGrid.length !== size){
+    state.crossword.userGrid = Array.from({length:size}, ()=>Array.from({length:size}, ()=>""));
+    saveState();
+  }
+  const user = state.crossword.userGrid;
 
+  const placements = last.placements || [];
   const numbering = buildCrosswordNumbering(solution, blocks);
-  const { across, down } = numbering.clues;
   const numGrid = numbering.numGrid;
+  const acrossStarts = numbering.clues.across || [];
+  const downStarts   = numbering.clues.down || [];
 
-  const itemByKey = {};
+  // Map clue par (x,y,dir)
+  const clueByKey = {};
   placements.forEach(p=>{
-    itemByKey[`${p.x},${p.y},${p.dir}`] = p.clue;
+    clueByKey[`${p.x},${p.y},${p.dir}`] = p.clue;
   });
 
-  const acrossHtml = across.map(c=>{
-    const clue = itemByKey[`${c.x},${c.y},A`] || "(définition)";
-    return `<div class="xw-clue"><span class="n">${c.n}.</span> ${esc(clue)}</div>`;
-  }).join("");
-  const downHtml = down.map(c=>{
-    const clue = itemByKey[`${c.x},${c.y},D`] || "(définition)";
-    return `<div class="xw-clue"><span class="n">${c.n}.</span> ${esc(clue)}</div>`;
-  }).join("");
+  function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+  function isOpen(x,y){ return inb(x,y) && blocks[y][x]; }
 
+  function extractWord(x,y,dir){
+    const dx = dir==="A" ? 1 : 0;
+    const dy = dir==="D" ? 1 : 0;
+    let letters = "";
+    let len = 0;
+    while(inb(x+dx*len, y+dy*len) && blocks[y+dy*len][x+dx*len]){
+      letters += String(solution[y+dy*len][x+dx*len] || "").toUpperCase();
+      len++;
+      // stop if solution empty (shouldn't happen)
+      if(!solution[y+dy*len-1][x+dx*len-1]) break;
+    }
+    return {letters, len};
+  }
+
+  // Build playable word list from actual placements (ensures every placed word is selectable)
+  const words = (placements || [])
+    .map(p=>{
+      const letters = String(p.answer || "").toUpperCase();
+      const len = letters.length;
+      const n = (numGrid[p.y] && numGrid[p.y][p.x]) ? numGrid[p.y][p.x] : 0;
+      const dirLabel = (p.dir === "A") ? "Horizontal ➡️" : "Vertical ⬇️";
+      return {
+        n, dir: p.dir, dirLabel,
+        x: p.x, y: p.y,
+        len, letters,
+        clue: clueByKey[`${p.x},${p.y},${p.dir}`] || p.clue || "(définition)"
+      };
+    })
+    .filter(w => w.len >= 2)
+    .sort((a,b)=> ((a.n||9999)-(b.n||9999)) || (a.dir==="A"?-1:1) || (b.len-a.len));
+
+  // Init play state
+  if(!state.crossword.play || state.crossword.play.size !== size || state.crossword.play.seed !== last.seed){
+    state.crossword.play = { size, seed:last.seed, wi:0, cursor:0 };
+    saveState();
+  }
+  const play = state.crossword.play;
+
+  if(!words.length){
+    ui.gameArea.innerHTML = `<div class="result bad"><div class="title">⚠️ Aucun mot placé</div><div class="small">Essaie “Grille aléatoire”.</div></div>`;
+    return;
+  }
+
+  play.wi = Math.max(0, Math.min(words.length-1, play.wi|0));
+  const cur = words[play.wi];
+
+  // Helpers cells of word
+  function cellsOf(word){
+    const dx = word.dir==="A" ? 1 : 0;
+    const dy = word.dir==="D" ? 1 : 0;
+    const arr = [];
+    for(let i=0;i<word.len;i++){
+      arr.push({x:word.x+dx*i, y:word.y+dy*i, i});
+    }
+    return arr;
+  }
+  const curCells = cellsOf(cur);
+  play.cursor = Math.max(0, Math.min(cur.len-1, play.cursor|0));
+  const curCell = curCells[play.cursor];
+
+  // Build UI
   ui.gameArea.innerHTML = `
-    <div class="xw-wrap">
-      <div class="xw-toprow">
-        <div class="xw-stats">
-          <span class="hud-pill" style="background:rgba(0,0,0,.06); border-color: rgba(191,230,255,.8); color: var(--ink);">
-            🧩 <strong>${placements.length}</strong> / ${bankTotal} mots placés • <strong>${esc(bankTitle)}</strong>
-          </span>
-          <span class="hud-pill" style="background:rgba(0,0,0,.06); border-color: rgba(191,230,255,.8); color: var(--ink);">
-            🎁 Gain: <strong>+10 🪙</strong> si 100% correct
-          </span>
-        </div>
-        <div class="row" style="margin-top:0;">
-          <button class="btn secondary" id="xwNew" style="min-width:160px;">🔁 Nouvelle grille</button>
-          <button class="btn gold" id="xwCheck" style="min-width:160px;">✅ Vérifier</button>
-        </div>
+    <div class="xw-appbar">
+      <div class="left">
+        <button class="xw-iconbtn" id="xwBack" title="Retour">⬅️</button>
+        <button class="xw-iconbtn" id="xwMenu" title="Menu">☰</button>
       </div>
-
-      <div class="xw-grid" id="xwGrid" style="grid-template-columns: repeat(${size}, max-content);"></div>
-
-      <div class="xw-clues">
-        <div class="xw-panel">
-          <h3>➡️ Horizontales</h3>
-          <div class="xw-cluelist">${acrossHtml || `<div class="hint">Aucune définition (grille vide)</div>`}</div>
-        </div>
-        <div class="xw-panel">
-          <h3>⬇️ Verticales</h3>
-          <div class="xw-cluelist">${downHtml || `<div class="hint">Aucune définition (grille vide)</div>`}</div>
-        </div>
+      <div class="right">
+        <button class="xw-iconbtn" id="xwRandom" title="Grille aléatoire">🎲</button>
+        <button class="xw-iconbtn gold" id="xwHint" title="Indice (2 pièces)">Indice</button>
+        <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier">✅</button>
       </div>
+    </div>
 
-      <div class="xw-footnote">
-        Astuce : clique une case puis tape. Les accents sont tolérés (É = E). Les réponses avec espaces sont enchaînées.
+    <div class="xw-stage-app">
+      <div class="xw-grid-app" id="xwGrid" style="grid-template-columns: repeat(${size}, max-content);">
+        ${Array.from({length:size}, (_,y)=>Array.from({length:size}, (_,x)=>{
+          if(!blocks[y][x]) return `<div class="xw-cell-app block"></div>`;
+          const n = numGrid[y][x] ? `<div class="num">${numGrid[y][x]}</div>` : "";
+          const ch = esc((user[y][x] || "").toUpperCase());
+          const isInWord = curCells.some(c=>c.x===x && c.y===y);
+          const isCursor = (curCell && curCell.x===x && curCell.y===y);
+          const cls = ["xw-cell-app", isInWord ? "active":"", isCursor ? "cursor":""].filter(Boolean).join(" ");
+          return `<div class="${cls}" data-x="${x}" data-y="${y}">${n}<div class="ch">${ch}</div></div>`;
+        }).join("")).join("")}
       </div>
+    </div>
 
-      <button class="btn secondary" id="xwBack">⬅️ Retour modes</button>
+    <div class="xw-cluebar-app">
+      <div class="arrow" id="xwPrev">‹</div>
+      <div class="text">
+        <span class="sub">${cur.n}. ${cur.dirLabel}</span>
+        <div class="main">${esc(cur.clue)}</div>
+      </div>
+      <div class="arrow" id="xwNext">›</div>
+    </div>
+
+    <div class="xw-answer-tiles" id="xwTiles">
+      ${curCells.map(({x,y,i})=>{
+        const v = (user[y][x]||"").toUpperCase();
+        const cls = ["xw-tile", v ? "" : "empty", (i===play.cursor) ? "cursor" : ""].filter(Boolean).join(" ");
+        return `<div class="${cls}" data-i="${i}">${esc(v||"")}</div>`;
+      }).join("")}
+    </div>
+
+    <div class="xw-kb" aria-label="Clavier AZERTY">
+      <div class="xw-kb-row">
+        ${"AZERTYUIOP".split("").map(k=>`<button class="xw-key" data-k="${k}">${k}</button>`).join("")}
+      </div>
+      <div class="xw-kb-row">
+        ${"QSDFGHJKLM".split("").map(k=>`<button class="xw-key" data-k="${k}">${k}</button>`).join("")}
+      </div>
+      <div class="xw-kb-row">
+        <button class="xw-key wide gold" id="xwBksp">⌫</button>
+        ${"WXCVBN".split("").map(k=>`<button class="xw-key" data-k="${k}">${k}</button>`).join("")}
+        <button class="xw-key wide" id="xwClearWord">Effacer</button>
+      </div>
+    </div>
+
+    <div class="hint" style="margin-top:10px;">
+      Grille générée automatiquement depuis ta liste. • Accents tolérés (É = E) • Espaces ignorés.
     </div>
   `;
 
-  $("#xwBack").onclick = ()=> renderModeMenu();
-  $("#xwNew").onclick = ()=> startCrossword();
+  // --- interactions
+  $("#xwBack").onclick = ()=> { state.session=null; saveState(); renderCrosswordHome(); };
+  $("#xwMenu").onclick = ()=> renderModeMenu();
+  $("#xwRandom").onclick = ()=> startCrossword({seed: Date.now()});
+  $("#xwPrev").onclick = ()=> { play.wi = (play.wi - 1 + words.length) % words.length; play.cursor = 0; saveState(); renderCrosswordGame(); };
+  $("#xwNext").onclick = ()=> { play.wi = (play.wi + 1) % words.length; play.cursor = 0; saveState(); renderCrosswordGame(); };
 
-  const gridEl = $("#xwGrid");
-  const inputs = [];
-  let selected = { x: -1, y: -1, dir: "A" };
+  // click tile to move cursor
+  document.querySelectorAll("#xwTiles [data-i]").forEach(el=>{
+    el.onclick = ()=>{
+      play.cursor = Number(el.getAttribute("data-i"))||0;
+      saveState(); renderCrosswordGame();
+    };
+  });
 
-  function setSelected(x,y){
-    selected.x = x; selected.y = y;
-    refreshSelected();
-  }
-  function refreshSelected(){
-    gridEl.querySelectorAll(".xw-cell").forEach(c=>c.classList.remove("selected"));
-    const idx = selected.y*size + selected.x;
-    const cell = gridEl.children[idx];
-    if(cell && cell.classList.contains("xw-cell") && !cell.classList.contains("block")){
-      cell.classList.add("selected");
-    }
-  }
-
-  function nextCell(x,y,dir){ return dir==="A" ? {x:x+1, y} : {x, y:y+1}; }
-  function prevCell(x,y,dir){ return dir==="A" ? {x:x-1, y} : {x, y:y-1}; }
-  function isIn(x,y){ return x>=0 && y>=0 && x<size && y<size; }
-  function isBlock(x,y){ return !isIn(x,y) || blocks[y][x]; }
-
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      const isBlk = blocks[y][x];
-      const cell = document.createElement("div");
-      cell.className = "xw-cell" + (isBlk ? " block" : "");
-      if(!isBlk){
-        const n = numGrid[y][x];
-        if(n){
-          const num = document.createElement("div");
-          num.className="num";
-          num.textContent = String(n);
-          cell.appendChild(num);
+  // click cell: pick word containing it (prefer same number if possible)
+  document.querySelectorAll("#xwGrid .xw-cell-app").forEach(el=>{
+    if(el.classList.contains("block")) return;
+    el.onclick = ()=>{
+      const x = Number(el.getAttribute("data-x"));
+      const y = Number(el.getAttribute("data-y"));
+      // find first word that contains cell, prefer across then down for same number
+      let foundWi = -1;
+      let foundCursor = 0;
+      for(let wi=0; wi<words.length; wi++){
+        const w = words[wi];
+        const cs = cellsOf(w);
+        const idx = cs.findIndex(c=>c.x===x && c.y===y);
+        if(idx>=0){
+          foundWi = wi; foundCursor = idx; break;
         }
-        const inp = document.createElement("input");
-        inp.setAttribute("inputmode","text");
-        inp.setAttribute("autocomplete","off");
-        inp.setAttribute("autocapitalize","characters");
-        inp.maxLength = 1;
-        inp.dataset.x = String(x);
-        inp.dataset.y = String(y);
-        inp.value = "";
-
-        inp.addEventListener("focus", ()=> setSelected(x,y));
-
-        inp.addEventListener("click", ()=>{
-          if(selected.x===x && selected.y===y){
-            selected.dir = (selected.dir==="A") ? "D" : "A";
-          }else{
-            selected.dir = "A";
-          }
-          setSelected(x,y);
-        });
-
-        inp.addEventListener("keydown", (e)=>{
-          const key = e.key;
-          if(key === "Backspace"){
-            e.preventDefault();
-            if(inp.value){
-              inp.value = "";
-            }else{
-              const p = prevCell(x,y,selected.dir);
-              if(!isBlock(p.x,p.y)){
-                const prev = inputs.find(z=>z.x===p.x && z.y===p.y)?.inp;
-                if(prev){ prev.focus(); prev.value=""; }
-              }
-            }
-            return;
-          }
-          if(key === "ArrowRight"){ e.preventDefault(); selected.dir="A"; const p=nextCell(x,y,"A"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
-          if(key === "ArrowLeft"){ e.preventDefault(); selected.dir="A"; const p=prevCell(x,y,"A"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
-          if(key === "ArrowDown"){ e.preventDefault(); selected.dir="D"; const p=nextCell(x,y,"D"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
-          if(key === "ArrowUp"){ e.preventDefault(); selected.dir="D"; const p=prevCell(x,y,"D"); if(!isBlock(p.x,p.y)) inputs.find(z=>z.x===p.x&&z.y===p.y)?.inp?.focus(); return; }
-        });
-
-        inp.addEventListener("input", ()=>{
-          const v = normalizeLettersOnly(inp.value).slice(0,1);
-          inp.value = v;
-          const p = nextCell(x,y,selected.dir);
-          if(!isBlock(p.x,p.y)){
-            inputs.find(z=>z.x===p.x && z.y===p.y)?.inp?.focus();
-          }
-        });
-
-        cell.appendChild(inp);
-        inputs.push({x,y,inp});
       }
-      gridEl.appendChild(cell);
-    }
+      if(foundWi>=0){
+        play.wi = foundWi;
+        play.cursor = foundCursor;
+        saveState(); renderCrosswordGame();
+      }
+    };
+  });
+
+  function setLetterAtCursor(letter){
+    const ch = normalizeLettersOnly(letter).slice(0,1);
+    if(!ch) return;
+    const cell = curCells[play.cursor];
+    user[cell.y][cell.x] = ch;
+    // advance
+    let next = play.cursor + 1;
+    if(next > cur.len-1) next = cur.len-1;
+    play.cursor = next;
+    saveState();
+    renderCrosswordGame();
   }
 
-  const first = inputs[0]?.inp;
-  if(first){ first.focus(); setSelected(Number(first.dataset.x), Number(first.dataset.y)); }
+  document.querySelectorAll(".xw-key[data-k]").forEach(b=>{
+    b.onclick = ()=> setLetterAtCursor(b.getAttribute("data-k"));
+  });
 
-  $("#xwCheck").onclick = ()=>{
-    gridEl.querySelectorAll(".xw-cell").forEach(c=>{
-      c.classList.remove("bad","good");
-    });
+  $("#xwBksp").onclick = ()=>{
+    const cell = curCells[play.cursor];
+    if(user[cell.y][cell.x]){
+      user[cell.y][cell.x] = "";
+    }else{
+      // go back one and clear
+      play.cursor = Math.max(0, play.cursor-1);
+      const cell2 = curCells[play.cursor];
+      user[cell2.y][cell2.x] = "";
+    }
+    saveState(); renderCrosswordGame();
+  };
 
-    let totalLetters = 0;
-    let goodLetters = 0;
+  $("#xwClearWord").onclick = ()=>{
+    curCells.forEach(c=> user[c.y][c.x] = "");
+    play.cursor = 0;
+    saveState(); renderCrosswordGame();
+  };
 
-    for(const it of inputs){
-      const x = it.x, y = it.y;
-      const sol = solution[y][x] || "";
-      if(!sol) continue;
-      totalLetters++;
-      const typed = normalizeLettersOnly(it.inp.value || "");
-      if(typed === sol){
-        goodLetters++;
-        const idx = y*size + x;
-        gridEl.children[idx].classList.add("good");
-      }else{
-        const idx = y*size + x;
-        gridEl.children[idx].classList.add("bad");
+  // Indice: va au prochain mot non rempli / non correct (2 pièces)
+  $("#xwHint").onclick = ()=>{
+    const COST = 2;
+    if(state.coins < COST){
+      ui.footer.innerHTML = "⚠️ Pas assez de pièces pour l’indice.";
+      return;
+    }
+    // find first word not fully correct
+    function wordIsCorrect(w){
+      const cs = cellsOf(w);
+      for(let i=0;i<cs.length;i++){
+        const {x,y} = cs[i];
+        const u = (user[y][x]||"").toUpperCase();
+        const s = (solution[y][x]||"").toUpperCase();
+        if(u !== s) return false;
+      }
+      return true;
+    }
+    const idx = words.findIndex(w=>!wordIsCorrect(w));
+    if(idx<0){
+      ui.footer.innerHTML = "✅ Tout semble correct. Tu peux vérifier.";
+      return;
+    }
+    state.coins -= COST;
+    play.wi = idx;
+    play.cursor = 0;
+    saveState();
+    updateTopBar();
+    renderCrosswordGame();
+  };
+
+  // Vérifier tout
+  $("#xwCheckAll").onclick = ()=>{
+    let total=0, good=0, filled=0;
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(!blocks[y][x]) continue;
+        total++;
+        const u = (user[y][x]||"").toUpperCase();
+        if(u) filled++;
+        if(u === (solution[y][x]||"").toUpperCase()) good++;
       }
     }
-
-    const percent = totalLetters ? Math.round((goodLetters/totalLetters)*100) : 0;
-    const complete = (totalLetters > 0 && goodLetters === totalLetters);
+    const pct = total ? Math.round((good/total)*100) : 0;
 
     ui.resultBox.style.display = "block";
-    ui.resultBox.className = "result " + (complete ? "good" : "bad");
+    ui.resultBox.className = "result " + (pct===100 ? "good":"bad");
     ui.resultBox.innerHTML = `
-      <div class="title">${complete ? "🎉 Grille correcte !" : "🧠 Continue !"}</div>
-      <div class="small">Lettres correctes : <strong>${goodLetters}</strong> / ${totalLetters} (${percent}%)</div>
-      ${complete ? `<div class="small">Récompense : <strong>+10 🪙</strong></div>` : `<div class="small">Astuce : les accents sont tolérés (É = E).</div>`}
+      <div class="title">${pct===100 ? "🎉 Grille correcte !" : "🔎 Vérification"}</div>
+      <div class="small">
+        Remplies : <strong>${filled}</strong> / ${total}<br>
+        Correctes : <strong>${good}</strong> / ${total} (${pct}%)
+      </div>
     `;
 
-    if(complete){
-      if(!last.meta || !last.meta.won){
-        state.coins += 10;
-        state.crossword.wins = (Number(state.crossword.wins)||0) + 1;
-        last.meta = last.meta || {};
-        last.meta.won = true;
-        state.crossword.last = last;
-        saveState();
-        updateTopBar();
-      }
+    if(pct === 100 && !last.meta.won){
+      state.coins += 10;
+      state.crossword.wins = (state.crossword.wins||0) + 1;
+      last.meta.won = true;
+      saveState();
+      updateTopBar();
     }
   };
 }
+
 
 /* Génération mots croisés (placement automatique) */
 function generateCrossword(items, size, maxTries=120){
@@ -2317,7 +2646,8 @@ function buildCrosswordNumbering(solution, blocks){
   const down = [];
   let n = 0;
 
-  function isBlock(x,y){ return blocks[y][x]; }
+  // Here, "blocks" is actually a usable-cells matrix: true = letter cell, false = black block.
+  function isBlock(x,y){ return !blocks[y][x]; }
   function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
 
   for(let y=0;y<size;y++){
