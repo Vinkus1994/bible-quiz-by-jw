@@ -1,6 +1,3 @@
-
-
-
 <!doctype html>
 <html lang="fr">
 <head>
@@ -23,6 +20,8 @@
     }
     *{box-sizing:border-box}
     body{
+  overflow-x:hidden;
+
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background:
@@ -616,6 +615,25 @@
   .xw-key.wide{ min-width:56px; }
 }
 
+
+/* ===== MOTS MÊLÉS ===== */
+.wm-legend{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.wm-wordlist{
+  margin-top:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.xw-cell-app.found{
+  background: rgba(26,165,106,.18);
+  box-shadow: inset 0 0 0 3px rgba(26,165,106,.55);
+}
+
 /* ===== Mots croisés (layout type app + clavier AZERTY) ===== */
 .xw-appbar{
   display:flex; align-items:center; justify-content:space-between;
@@ -732,6 +750,18 @@
   flex-wrap:wrap;
   gap:8px;
 }
+
+.xw-tiles-row{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.xw-tiles-row .xw-answer-tiles{
+  margin-top:0;
+}
 .xw-tile{
   width:44px; height:44px;
   border-radius:12px;
@@ -759,6 +789,77 @@
 }
 
 /* (clavier mots croisés défini plus haut) */
+
+
+/* ===== FIX DEFINITIF SCROLL HORIZONTAL MOTS MÊLÉS ===== */
+.wm-stage,
+.xw-stage-app{
+  width:100%;
+  max-width:100vw;
+  overflow:hidden;
+}
+
+#wmGrid{
+  width:100%;
+  max-width:100%;
+  display:grid;
+  grid-template-columns: repeat(var(--wm-cols), 1fr);
+  gap:4px;
+  box-sizing:border-box;
+}
+
+.wm-cell{
+  width:100%;
+  aspect-ratio:1/1;
+  font-size:clamp(11px, 2.6vw, 18px);
+}
+
+
+/* ===== MOTS MÊLÉS – FIX GRILLE STABLE (TOUTES LES CASES VISIBLES) ===== */
+#wmGrid{
+  display:grid;
+  width:100%;
+  max-width:100%;
+  gap:4px;
+  justify-content:center;
+  box-sizing:border-box;
+}
+/* Taille des cases basée sur la largeur écran (safe pour 14x14) */
+.wm-cell{
+  width:clamp(22px, calc(100vw / 16), 34px);
+  height:clamp(22px, calc(100vw / 16), 34px);
+  aspect-ratio:auto; /* on évite les bugs */
+  font-size:clamp(11px, 2.8vw, 17px);
+  box-sizing:border-box;
+}
+/* Sécurité anti-scroll horizontal */
+body{ overflow-x:hidden; }
+.xw-stage-app{ overflow:hidden; }
+
+
+/* ===== AJUSTEMENT MOTS MÊLÉS 14x14 UNIQUEMENT (14 LETTRES VISIBLES) =====
+   Objectif: le 14x14 tient EN ENTIER dans l’écran (sans scroll) et reste lisible.
+   On ne touche pas au 10x10.
+*/
+#wmGrid[data-size="14"]{
+  --wm-gap14: 3px;
+  /* largeur dispo ~ écran - marges (barre/arrondis). Ajuste si besoin. */
+  --wm-cell14: clamp(17px, calc((100vw - 76px - (13 * var(--wm-gap14))) / 14), 27px);
+  gap: var(--wm-gap14);
+  grid-template-columns: repeat(14, var(--wm-cell14)) !important;
+  width: calc(14 * var(--wm-cell14) + 13 * var(--wm-gap14));
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+#wmGrid[data-size="14"] .wm-cell{
+  width: var(--wm-cell14) !important;
+  height: var(--wm-cell14) !important;
+}
+
+#wmGrid[data-size="14"] .wm-cell .ch{
+  font-size: clamp(10px, calc(var(--wm-cell14) * 0.42), 16px) !important;
+}
 
 </style>
 </head>
@@ -813,123 +914,36 @@
     </div>
   </div>
 
+<script src="questions.js"></script>
+<script src="crosswords.js"></script>
+<script src="wordmix.js"></script>
+
 <script>
-/* ========= Base (tes modes existants) ========= */
-const THEMES = [
-  { key:"Mixte", label:"Mixte", icon:"🔀", hint:"Toutes les questions (même déjà réussies)" },
-  { key:"Croyance", label:"Croyance", icon:"📖", hint:"Doctrine / foi / vérités bibliques" },
-  { key:"Qualités chrétiennes", label:"Qualités chrétiennes", icon:"💛", hint:"Amour, foi, patience..." },
-  { key:"Jéhovah", label:"Jéhovah", icon:"✨", hint:"Nom, qualités, actions" },
-  { key:"Jésus", label:"Jésus", icon:"👑", hint:"Vie, enseignements" },
-  { key:"Bible", label:"Bible", icon:"📚", hint:"Livres, versets, structure" },
-];
+/* ========= Base (tes modes existants) =========
+   ✅ Données déplacées dans des fichiers séparés :
+   - questions.js  -> window.THEMES + window.QUESTIONS  (Classique + Aventure)
+   - crosswords.js -> window.CROSSWORD_BANKS           (Mots croisés)
+   Assure-toi que ces 2 fichiers sont dans le même dossier que index.html
+*/
+const THEMES = (window.THEMES && Array.isArray(window.THEMES)) ? window.THEMES : [];
+const QUESTIONS = (window.QUESTIONS && Array.isArray(window.QUESTIONS)) ? window.QUESTIONS : [];
 
-const QUESTIONS = [
-  { id:"jw001", question:"Quelle est la qualité dominante de Jéhovah ?", answer:"Amour",
-    options:["Amour","Joie","Patience","Bonté"], reference:"1 Jean 4:8", difficulty:2, type:"TROU", theme:"Jéhovah" },
-  { id:"jw002", question:"Car Dieu a tellement aimé le monde qu’il a donné son Fils unique, afin que tous ceux qui exercent la ________ en lui ne soient pas détruits mais aient la vie éternelle.",
-    answer:"Foi", options:["Foi","Patience","Miséricorde","Bonté"], reference:"Jean 3:16", difficulty:1, type:"QCM", theme:"Croyance" },
-  { id:"jw003", question:"Marc a coupé l’oreille d’un serviteur du grand prêtre ?",
-    answer:"Faux", options:["Vrai","Faux"], reference:"C’est Pierre qui coupa l’oreille du serviteur. – Jean 18:10",
-    difficulty:1, type:"VF", theme:"Croyance" },
-  { id:"jw004", question:"Mets les livres de la Bible dans l’ordre.",
-    answer:"Juges | 1 Rois | 1 Chroniques | Néhémie | Lamentations | Daniel | Osée | Joël | Nahum | Sophonie",
-    options:null, reference:"", difficulty:3, type:"ORDRE", theme:"Bible" },
-  { id:"jw005", question:"Quel est le nom de Dieu ?",
-    answer:"Jéhovah", options:["Jéhovah","Jean-Pierre","Allah","Jésus"], reference:"Psaume 83:18", difficulty:1, type:"QCM", theme:"Croyance" },
-  { id:"jw006", question:"Qui est le fils unique de Dieu ?",
-    answer:"Jésus", options:["Jésus","Adam","Gabriel","Marc"], reference:"Luc 22:29 ; Jean 3:16", difficulty:1, type:"QCM", theme:"Croyance" },
-  { id:"jw007", question:"Quel est le premier livre de la Bible ?",
-    answer:"Genèse", options:["Genèse","Révélation","Psaumes","Blanche neige"], reference:"", difficulty:1, type:"QCM", theme:"Bible" },
-  { id:"jw008", question:"Combien de noms avait l'apôtre Pierre ?",
-    answer:"5", options:["5","2","1","7"],
-    reference:"Ses noms étaient Syméôn (hébreu), Simon (grec), Pierre, Céphas, Simon Pierre - Actes 15:14 ; Matthieu 10:2; 16:16 ; Jean 1:42",
-    difficulty:2, type:"QCM", theme:"Bible" },
-  { id:"jw009", question:"Combien y a-t-il d’Oints ?",
-    answer:"144000", options:["144000","144001","144400","1"], reference:"Révélation 7:4 ; 14:1", difficulty:1, type:"QCM", theme:"Bible" },
-  { id:"jw010", question:"Quel livre se trouve entre Michée et Habacuc ?",
-    answer:"Nahum", options:["Nahum","Matthieu","Jonas","Zacharie"], reference:"", difficulty:3, type:"QCM", theme:"Bible" },
-  { id:"jw011", question:"Dans quel domaine devons-nous être parfaits ?",
-    answer:"En amour", options:["En amour","En toute chose","En richesse","Possible uniquement dans le paradis"],
-    reference:"Matthieu 5:43-48", difficulty:4, type:"QCM", theme:"Croyance" },
-  { id:"jw012", question:"Peux-tu mettre le fruit de l’esprit dans l’ordre ?",
-    answer:"Amour | joie | paix | patience | bienveillance | bonté | foi | douceur | maîtrise de soi",
-    options:null, reference:"Galates 5:22,23", difficulty:4, type:"ORDRE", theme:"Bible" },
-  { id:"jw013", question:"Comment s’appelle le 8e roi de Juda ?",
-    answer:"Joas", options:["Joas","Joram","Amazia","David"], reference:"2 Rois 12:1", difficulty:5, type:"QCM", theme:"Bible" },
-  { id:"jw014", question:"L’omer est une unité de mesure. À combien équivaut un omer ?",
-    answer:"2,2 litres", options:["2,2 litres","2 litres","1 litres","37 saisons et 797 épisodes"],
-    reference:"Exode 16:16, note", difficulty:5, type:"QCM", theme:"Bible" },
-  { id:"jw015", question:"Pourquoi Jésus est-il venu sur terre ?",
-    answer:"Pour sanctifier son Père et nous sauver",
-    options:[
-      "Pour sanctifier son Père et nous sauver",
-      "Parce qu'il s'ennuyait au ciel",
-      "Pour nous sauver",
-      "Parce qu'il voulait goûter la carbonnade flamande"
-    ],
-    reference:"Jean 3:16 ; Jean 17:16",
-    difficulty:1,
-    type:"QCM",
-    theme:"Jésus"
-  },
-  { id:"jw016", question:"Quelle qualité est manifestée en Actes 20:35 ?",
-    answer:"La générosité",
-    options:["La générosité","La joie","La patience","La bonté"],
-    reference:"Actes 20:35",
-    difficulty:3,
-    type:"QCM",
-    theme:"Qualités chrétiennes"
-  },
-];
+// Petit garde-fou (évite un jeu vide si un fichier manque)
+if(!THEMES.length || !QUESTIONS.length){
+  console.warn("questions.js manquant ou invalide : THEMES/QUESTIONS vides.");
+}
+const CROSSWORD_BANKS = (window.CROSSWORD_BANKS && Array.isArray(window.CROSSWORD_BANKS)) ? window.CROSSWORD_BANKS : [];
+if(!CROSSWORD_BANKS.length){
+  console.warn("crosswords.js manquant ou invalide : CROSSWORD_BANKS vide.");
+}
 
-/* ======== NOUVEAU : banques "Mots croisés" (2 grilles) ======== */
-const CROSSWORD_BANKS = [
-  {
-    key: "grille1",
-    title: "Grille 1",
-    subtitle: "Liste 1 (mixte)",
-    items: [
-      { id:"cw01", clue:"Si nous profitons de la délivrance qui nous est offerte par Jésus, nous ne le serons plus [en trois mots] (Romains 6:6).", answer:"ESCLAVES DU PÉCHÉ" },
-      { id:"cw02", clue:"Personne qui a fait des études et qui exerçait bien souvent la fonction de notaire public (Juges 5:14).", answer:"SCRIBE" },
-      { id:"cw03", clue:"Petit-fils d’Aaron (Exode 6:25).", answer:"PHINÉHAS" },
-      { id:"cw04", clue:"A exprimé sa gaieté (Genèse 18:15).", answer:"RI" },
-      { id:"cw05", clue:"Dans une expression signifiant: sans en avoir conscience (Hébreux 13:2).", answer:"INSU" },
-      { id:"cw06", clue:"Colorées (Exode 25:5).", answer:"TEINTES" },
-      { id:"cw07", clue:"Femme de haute naissance (1 Rois 15:13).", answer:"DAME" },
-      { id:"cw08", clue:"Cinquième fils de Gad (Genèse 46:16).", answer:"ÉRI" },
-      { id:"cw09", clue:"Cuir (Lévitique 4:11).", answer:"PEAU" },
-      { id:"cw10", clue:"Sec (Jérémie 50:12).", answer:"ARIDE" },
-      { id:"cw11", clue:"Comble (Proverbes 29:21).", answer:"GÂTE" },
-      { id:"cw12", clue:"Jésus l’était souvent [en trois mots] (Marc 1:41).", answer:"ÉMU DE PITIÉ" },
-      { id:"cw13", clue:"Révolte (Actes 19:40).", answer:"SÉDITION" },
-      { id:"cw14", clue:"Premier-né de Juda (Genèse 38:2, 3).", answer:"ER" },
-      { id:"cw15", clue:"Groupes d’insectes (Exode 8:24).", answer:"ESSAIMS" },
-    ],
-  },
-  {
-    key: "grille2",
-    title: "Grille 2",
-    subtitle: "Liste 2 (verticalement)",
-    items: [
-      { id:"cw2_01", clue:"Paul priait pour que ses frères le reçoivent [en trois mots] (Éphésiens 1:17).", answer:"ESPRIT DE SAGESSE" },
-      { id:"cw2_02", clue:"Ancien nom de la Babylonie (Genèse 10:10).", answer:"SCHINÉAR" },
-      { id:"cw2_03", clue:"Il peut être joyeux (Psaume 105:43).", answer:"CRI" },
-      { id:"cw2_04", clue:"Symbolise parfois la justice (Révélation 19:8).", answer:"LIN" },
-      { id:"cw2_05", clue:"Premier sur la liste des témoins (Hébreux 11:4).", answer:"ABEL" },
-      { id:"cw2_06", clue:"Ardeur (Actes 23:9).", answer:"VÉHÉMENCE" },
-      { id:"cw2_07", clue:"Distrait (Juges 16:25).", answer:"AMUSE" },
-      { id:"cw2_08", clue:"Qui ne saurait décevoir (Néhémie 7:2).", answer:"SÛR" },
-      { id:"cw2_09", clue:"Dette (1 Corinthiens 7:3).", answer:"DÛ" },
-      { id:"cw2_10", clue:"Se servant (Exode 38:8).", answer:"UTILISANT" },
-      { id:"cw2_11", clue:"Mesure de poids (1 Samuel 13:21).", answer:"PIM" },
-      { id:"cw2_12", clue:"Un homme vaillant de David (2 Samuel 23:24, 25).", answer:"ÉLICA" },
-      { id:"cw2_13", clue:"Démonstratif (Actes 1:18).", answer:"CET" },
-      { id:"cw2_14", clue:"Elle fut bâtie par Nimrod (Genèse 10:10, Darby).", answer:"ÉREC" },
-      { id:"cw2_15", clue:"Accablerez (Job 19:2).", answer:"ÉCRASEREZ" },
-    ],
-  },
-];
+const WORDMIX_BANKS = (window.WORDMIX_BANKS && Array.isArray(window.WORDMIX_BANKS)) ? window.WORDMIX_BANKS : [];
+if(!WORDMIX_BANKS.length){
+  console.warn("wordmix.js manquant ou invalide : WORDMIX_BANKS vide.");
+}
+
+
+/* Banque "Mots croisés" déplacée dans crosswords.js (window.CROSSWORD_BANKS) */
 
 /* Règles */
 const COINS_START = 0;
@@ -1048,6 +1062,7 @@ const defaultState = () => ({
     last: null,
     wins: 0,
     selectedBank: "grille1",
+    completedBanks: {},
   }
 });
 let state = loadState();
@@ -1069,6 +1084,8 @@ function loadState(){
 
     if(typeof st.crossword.wins !== "number") st.crossword.wins = 0;
     if(!st.crossword.selectedBank) st.crossword.selectedBank = "grille1";
+
+    if(!st.crossword.completedBanks || typeof st.crossword.completedBanks !== "object") st.crossword.completedBanks = {};
 
     return st;
   }catch(e){
@@ -1138,6 +1155,7 @@ function importSaveFile(file){
         state.crossword.wins = Number(data.crossword.wins) || 0;
         state.crossword.last = data.crossword.last || null;
         state.crossword.selectedBank = data.crossword.selectedBank || state.crossword.selectedBank || "grille1";
+        state.crossword.completedBanks = (data.crossword.completedBanks && typeof data.crossword.completedBanks === "object") ? data.crossword.completedBanks : (state.crossword.completedBanks || {});
       }
 
       state.session = null;
@@ -1271,6 +1289,18 @@ function renderModeMenu(){
         </div>
         <button class="btn" id="goCrossword">🧩 MOTS CROISÉS</button>
       </div>
+
+
+      <div class="mode-card">
+        <div class="mode-top">
+          <div class="mode-title">🔤 Mode Mots mêlés</div>
+        </div>
+        <div class="mode-desc">
+          Trouve les mots cachés dans une grille (horizontal, vertical et diagonales). Gagne <strong>+10 🪙</strong> si 100% trouvé.
+        </div>
+        <button class="btn" id="goWordMix">🔤 MOTS MÊLÉS</button>
+      </div>
+
     </div>
 
     <div class="row">
@@ -1287,6 +1317,7 @@ function renderModeMenu(){
   $("#goClassic").onclick = ()=> renderClassicHome();
   $("#goAdventure").onclick = ()=> renderAdventureMap();
   $("#goCrossword").onclick = ()=> renderCrosswordHome();
+  $("#goWordMix").onclick = ()=> renderWordMixHome();
 
   $("#btnWins").onclick  = ()=> renderSuccesses();
   $("#btnSave").onclick  = ()=> exportSave();
@@ -2072,13 +2103,15 @@ function renderCrosswordHome(){
   const selectedKey = state.crossword.selectedBank || "grille1";
   const banksHtml = CROSSWORD_BANKS.map(b=>{
     const sel = b.key === selectedKey;
+    const done = !!(state.crossword?.completedBanks && state.crossword.completedBanks[b.key]);
+    const sub = done ? "✔️ terminée" : (b.subtitle ? esc(b.subtitle) : "");
     return `
       <div class="theme-card ${sel ? "selected" : ""}" data-bank="${esc(b.key)}">
         <div class="t-top">
           <div class="t-name"><span class="t-ico">🧩</span> ${esc(b.title)}</div>
           <div>${sel ? "✅" : ""}</div>
         </div>
-        <div class="t-sub">${esc(b.subtitle)} • ${b.items.length} mots</div>
+        <div class="t-sub">${sub}</div>
       </div>
     `;
   }).join("");
@@ -2297,6 +2330,51 @@ function renderCrosswordGame(){
     }
     return arr;
   }
+  
+  // Progression (sauvegardée) – par grille/seed
+  if(!state.crossword.progress || state.crossword.progress.seed !== last.seed){
+    state.crossword.progress = { seed: last.seed, validated: {}, errors: 0, coinsFromWords: 0, won: false };
+    saveState();
+  }
+  const prog = state.crossword.progress;
+
+  function wordKey(w){ return `${w.x},${w.y},${w.dir}`; }
+
+  function wordIsCorrect(w){
+    const cs = cellsOf(w);
+    for(const c of cs){
+      const u = (user[c.y][c.x]||"").toUpperCase();
+      const s = (solution[c.y][c.x]||"").toUpperCase();
+      if(u !== s) return false;
+    }
+    return true;
+  }
+
+  function wordIsFilled(w){
+    const cs = cellsOf(w);
+    for(const c of cs){
+      const u = (user[c.y][c.x]||"").toUpperCase();
+      if(!u) return false;
+    }
+    return true;
+  }
+
+  function computeStars(){
+    const e = Number(prog.errors)||0;
+    if(e === 0) return 3;
+    if(e <= 2) return 2;
+    if(e <= 5) return 1;
+    return 0;
+  }
+
+  function updateCrosswordHUD(){
+    const totalWords = words.length;
+    const done = Object.keys(prog.validated||{}).length;
+    const st = computeStars();
+    ui.counter.textContent = `✅ ${done}/${totalWords} • ${"⭐".repeat(st)||"—"}`;
+  }
+updateCrosswordHUD();
+
   const curCells = cellsOf(cur);
   play.cursor = Math.max(0, Math.min(cur.len-1, play.cursor|0));
   const curCell = curCells[play.cursor];
@@ -2309,9 +2387,8 @@ function renderCrosswordGame(){
         <button class="xw-iconbtn" id="xwMenu" title="Menu">☰</button>
       </div>
       <div class="right">
-        <button class="xw-iconbtn" id="xwRandom" title="Grille aléatoire">🎲</button>
-        <button class="xw-iconbtn gold" id="xwHint" title="Indice (2 pièces)">Indice</button>
-        <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier">✅</button>
+        <button class="xw-iconbtn" id="xwRandom" title="Grille aléatoire">🎲Mélanger</button>
+                <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier la grille">✅ Grille</button>
       </div>
     </div>
 
@@ -2338,12 +2415,15 @@ function renderCrosswordGame(){
       <div class="arrow" id="xwNext">›</div>
     </div>
 
-    <div class="xw-answer-tiles" id="xwTiles">
-      ${curCells.map(({x,y,i})=>{
+    <div class="xw-tiles-row">
+      <div class="xw-answer-tiles" id="xwTiles">
+        ${curCells.map(({x,y,i})=>{
         const v = (user[y][x]||"").toUpperCase();
         const cls = ["xw-tile", v ? "" : "empty", (i===play.cursor) ? "cursor" : ""].filter(Boolean).join(" ");
         return `<div class="${cls}" data-i="${i}">${esc(v||"")}</div>`;
       }).join("")}
+      </div>
+      <button class="xw-iconbtn gold" id="xwCheckWord" title="Valider ce mot">✅ Mot</button>
     </div>
 
     <div class="xw-kb" aria-label="Clavier AZERTY">
@@ -2441,38 +2521,44 @@ function renderCrosswordGame(){
     saveState(); renderCrosswordGame();
   };
 
-  // Indice: va au prochain mot non rempli / non correct (2 pièces)
-  $("#xwHint").onclick = ()=>{
-    const COST = 2;
-    if(state.coins < COST){
-      ui.footer.innerHTML = "⚠️ Pas assez de pièces pour l’indice.";
+  
+  // ✅ Valider le mot courant (sans indice)
+  $("#xwCheckWord").onclick = ()=>{
+    const wk = wordKey(cur);
+    if(prog.validated[wk]){
+      ui.footer.innerHTML = "✅ Ce mot est déjà validé.";
       return;
     }
-    // find first word not fully correct
-    function wordIsCorrect(w){
-      const cs = cellsOf(w);
-      for(let i=0;i<cs.length;i++){
-        const {x,y} = cs[i];
-        const u = (user[y][x]||"").toUpperCase();
-        const s = (solution[y][x]||"").toUpperCase();
-        if(u !== s) return false;
-      }
-      return true;
-    }
-    const idx = words.findIndex(w=>!wordIsCorrect(w));
-    if(idx<0){
-      ui.footer.innerHTML = "✅ Tout semble correct. Tu peux vérifier.";
+    if(!wordIsFilled(cur)){
+      ui.footer.innerHTML = "⚠️ Remplis d’abord toutes les lettres du mot.";
       return;
     }
-    state.coins -= COST;
-    play.wi = idx;
-    play.cursor = 0;
-    saveState();
-    updateTopBar();
-    renderCrosswordGame();
+    if(wordIsCorrect(cur)){
+      prog.validated[wk] = true;
+
+      // Récompense : +1 🪙 par mot validé (une seule fois)
+      state.coins = Number(state.coins)||0;
+      state.coins += 1;
+      prog.coinsFromWords = Number(prog.coinsFromWords)||0;
+      prog.coinsFromWords += 1;
+
+      // Auto: passer au prochain mot non validé (si possible)
+      const next = words.findIndex(w=>!prog.validated[wordKey(w)]);
+      if(next >= 0) play.wi = next;
+
+      saveState();
+      updateTopBar();
+      renderCrosswordGame();
+      ui.footer.innerHTML = "✅ Mot validé ! (+1 🪙)";
+    }else{
+      prog.errors = (Number(prog.errors)||0) + 1;
+      saveState();
+      updateCrosswordHUD();
+      ui.footer.innerHTML = "❌ Pas encore… vérifie l’orthographe.";
+    }
   };
 
-  // Vérifier tout
+// Vérifier tout
   $("#xwCheckAll").onclick = ()=>{
     let total=0, good=0, filled=0;
     for(let y=0;y<size;y++){
@@ -2497,11 +2583,21 @@ function renderCrosswordGame(){
     `;
 
     if(pct === 100 && !last.meta.won){
-      state.coins += 10;
+      const st = computeStars();
+      const bonus = 10 + (st * 5);
+      state.coins += bonus;
       state.crossword.wins = (state.crossword.wins||0) + 1;
       last.meta.won = true;
+      prog.won = true;
+      // Marquer cette grille comme terminée (pour afficher "✔️ terminée" dans le menu)
+      const bk = last?.meta?.bankKey;
+      if(bk){
+        state.crossword.completedBanks ||= {};
+        state.crossword.completedBanks[bk] = true;
+      }
       saveState();
       updateTopBar();
+      ui.footer.innerHTML = `🎉 Grille terminée ! +${bonus} 🪙 (${st}⭐)`;
     }
   };
 }
@@ -2667,6 +2763,414 @@ function buildCrosswordNumbering(solution, blocks){
 
   return { numGrid, clues: { across, down } };
 }
+
+
+/* =======================
+   MODE MOTS MÊLÉS
+   (horizontal, vertical, diagonales)
+   Données dans wordmix.js : window.WORDMIX_BANKS
+   Sauvegarde locale séparée (n'affecte pas le reste du jeu)
+   ======================= */
+const WORDMIX_STORE_KEY = "jwquiz_wordmix_progress_v1";
+
+function loadWordMixStore(){
+  try{ return JSON.parse(localStorage.getItem(WORDMIX_STORE_KEY) || "{}"); }
+  catch(e){ return {}; }
+}
+function saveWordMixStore(obj){
+  localStorage.setItem(WORDMIX_STORE_KEY, JSON.stringify(obj));
+}
+
+function wmSeededRand(seed){
+  const rng = mulberry32(seed);
+  return ()=>rng();
+}
+function wmPick(rnd, arr){ return arr[Math.floor(rnd()*arr.length)]; }
+
+function wmNormalizeWord(w){
+  return String(w||"")
+    .toUpperCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^A-Z]/g,"");
+}
+
+// Directions: H / V / diagonales (8)
+const WM_DIRS = [
+  {dr:0, dc:1},   // →
+  {dr:0, dc:-1},  // ←
+  {dr:1, dc:0},   // ↓
+  {dr:-1, dc:0},  // ↑
+  {dr:1, dc:1},   // ↘
+  {dr:-1, dc:-1}, // ↖
+  {dr:1, dc:-1},  // ↙
+  {dr:-1, dc:1},  // ↗
+];
+
+function wmMakeGrid(n){
+  return Array.from({length:n}, ()=>Array.from({length:n}, ()=>""));
+}
+function wmInBounds(n, r, c){ return r>=0 && c>=0 && r<n && c<n; }
+
+function wmCanPlace(grid, word, r, c, dir){
+  const n = grid.length;
+  for(let i=0;i<word.length;i++){
+    const rr = r + dir.dr*i;
+    const cc = c + dir.dc*i;
+    if(!wmInBounds(n, rr, cc)) return false;
+    const cell = grid[rr][cc];
+    if(cell && cell !== word[i]) return false;
+  }
+  return true;
+}
+function wmPlace(grid, word, r, c, dir){
+  const coords = [];
+  for(let i=0;i<word.length;i++){
+    const rr = r + dir.dr*i;
+    const cc = c + dir.dc*i;
+    grid[rr][cc] = word[i];
+    coords.push([rr,cc]);
+  }
+  return coords;
+}
+
+function wmBuildPuzzle(bank, seed){
+  const size = Math.max(10, Math.min(22, Number(bank.size)||14));
+  const grid = wmMakeGrid(size);
+  const rnd = wmSeededRand(seed);
+
+  const raw = (bank.words||[]).map(wmNormalizeWord).filter(w=>w.length>=2);
+  const words = [...new Set(raw)].sort((a,b)=>b.length-a.length);
+
+  const placed = {};
+  for(const w of words){
+    let ok = false;
+    // On limite les essais pour rester rapide
+    for(let t=0; t<500 && !ok; t++){
+      const dir = wmPick(rnd, WM_DIRS);
+      const r = Math.floor(rnd()*size);
+      const c = Math.floor(rnd()*size);
+      if(wmCanPlace(grid, w, r, c, dir)){
+        placed[w] = wmPlace(grid, w, r, c, dir);
+        ok = true;
+      }
+    }
+  }
+
+  // Remplir les vides
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if(!grid[r][c]){
+        grid[r][c] = letters[Math.floor(rnd()*letters.length)];
+      }
+    }
+  }
+
+  return { size, grid, words: Object.keys(placed), placed };
+}
+
+function renderWordMixHome(){
+  updateTopBar();
+  ui.qType.textContent = "MOTS MÊLÉS";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🔤";
+  ui.qtext.textContent = "Mode Mots mêlés";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const store = loadWordMixStore();
+
+  const banksHtml = (WORDMIX_BANKS||[]).map(b=>{
+    const done = !!store[b.key]?.done;
+    const sub = done ? "✔️ terminée" : (b.subtitle ? esc(b.subtitle) : "");
+    return `
+      <div class="theme-card" data-wm="${esc(b.key)}">
+        <div class="t-top">
+          <div class="t-name"><span class="t-ico">🔤</span> ${esc(b.title||b.key)}</div>
+          <div>${done ? "✔️" : ""}</div>
+        </div>
+        <div class="t-sub">${sub}</div>
+      </div>
+    `;
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      Trouve les mots cachés dans la grille (horizontal, vertical et diagonales).<br/>
+      Astuce : tu peux <strong>glisser</strong> ton doigt/souris sur les lettres.
+    </div>
+
+    <div class="themes" id="wmBanks">${banksHtml || `<div class="hint">⚠️ Aucune grille dans wordmix.js</div>`}</div>
+
+    <div class="row">
+      <button class="btn secondary" id="wmBackModes">⬅️ Retour modes</button>
+    </div>
+  `;
+
+  $("#wmBackModes").onclick = ()=> renderModeMenu();
+  [...document.querySelectorAll("#wmBanks [data-wm]")].forEach(card=>{
+    card.onclick = ()=>{
+      const k = card.getAttribute("data-wm");
+      startWordMix(k);
+    };
+  });
+}
+
+let wmSession = null;
+
+function startWordMix(bankKey){
+  const bank = (WORDMIX_BANKS||[]).find(b=>b.key===bankKey);
+  if(!bank){ ui.footer.innerHTML = "⚠️ Grille introuvable."; return; }
+
+  const store = loadWordMixStore();
+  const existing = store[bankKey] || null;
+  const seed = existing?.seed || Date.now();
+
+  const puzzle = wmBuildPuzzle(bank, seed);
+  const found = new Set((existing?.found || []).filter(w=>puzzle.words.includes(w)));
+
+  wmSession = { bankKey, bank, seed, puzzle, found, drag:{active:false, start:null, path:[]} };
+  renderWordMixGame();
+}
+
+function renderWordMixGame(){
+  const s = wmSession;
+  if(!s){ renderWordMixHome(); return; }
+
+  updateTopBar();
+  ui.qType.textContent = "MOTS MÊLÉS";
+  ui.diffStars.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🔤";
+  ui.qtext.textContent = esc(s.bank.title||"Grille");
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  setHeartsVisible(false);
+
+  const total = s.puzzle.words.length;
+  const done = s.found.size;
+  ui.counter.textContent = `✔️ ${done}/${total}`;
+
+  // Word list
+  const wordList = s.puzzle.words
+    .slice()
+    .sort((a,b)=>a.localeCompare(b))
+    .map(w=>{
+      const ok = s.found.has(w);
+      return `<div class="pill" style="opacity:${ok?1:.65}">${ok?"✔️ ":""}${esc(w)}</div>`;
+    }).join("");
+
+  // Build grid HTML
+  const n = s.puzzle.size;
+  const gridHtml = s.puzzle.grid.map((row,r)=>{
+    return row.map((ch,c)=>{
+      const cls = ["xw-cell-app", "wm-cell"].join(" ");
+      return `<div class="${cls}" data-r="${r}" data-c="${c}"><div class="ch">${esc(ch)}</div></div>`;
+    }).join("");
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="xw-appbar">
+      <div class="left">
+        <button class="xw-iconbtn" id="wmBack" title="Retour">⬅️</button>
+        <button class="xw-iconbtn" id="wmMenu" title="Menu">☰</button>
+      </div>
+      <div class="right">
+        <button class="xw-iconbtn" id="wmRestart" title="Nouvelle grille">🎲Mélanger</button>
+        <button class="xw-iconbtn gold" id="wmCheckAll" title="Finir">✅ Grille</button>
+      </div>
+    </div>
+
+    <div class="wm-legend hint">
+      <span>Mot trouvé = ✔️ (+1 🪙)</span>
+      <span>Grille finie = +10 🪙</span>
+    </div>
+
+    <div class="xw-stage-app">
+      <div class="xw-grid-app" id="wmGrid" data-size="${n}" style="grid-template-columns: repeat(${n}, auto);">
+        ${gridHtml}
+      </div>
+    </div>
+
+    <div class="wm-wordlist">${wordList || ""}</div>
+  `;
+
+  $("#wmBack").onclick = ()=> { wmSession=null; renderWordMixHome(); };
+  $("#wmMenu").onclick = ()=> { wmSession=null; renderModeMenu(); };
+
+  $("#wmRestart").onclick = ()=>{
+    const store = loadWordMixStore();
+    store[s.bankKey] = { seed: Date.now(), found: [], done:false };
+    saveWordMixStore(store);
+    startWordMix(s.bankKey);
+  };
+
+  // Save progress helper
+  function persist(doneFlag=false){
+    const store = loadWordMixStore();
+    store[s.bankKey] = {
+      seed: s.seed,
+      found: [...s.found],
+      done: !!doneFlag
+    };
+    saveWordMixStore(store);
+  }
+
+  // Highlight helpers
+  const clearActive = ()=> {
+    ui.gameArea.querySelectorAll(".wm-cell.active").forEach(el=>el.classList.remove("active"));
+  };
+  const markPathActive = (path)=>{
+    clearActive();
+    path.forEach(p=>{
+      const el = ui.gameArea.querySelector(`.wm-cell[data-r="${p.r}"][data-c="${p.c}"]`);
+      if(el) el.classList.add("active");
+    });
+  };
+
+  // Mark found word cells (optional visual)
+  function markFoundCellsForWord(word){
+    // Mark its placement cells as found (if we know placement)
+    const coords = s.puzzle.placed[word];
+    if(!coords) return;
+    coords.forEach(([r,c])=>{
+      const el = ui.gameArea.querySelector(`.wm-cell[data-r="${r}"][data-c="${c}"]`);
+      if(el) el.classList.add("found");
+    });
+  }
+  // apply on render
+  s.found.forEach(markFoundCellsForWord);
+
+  // Build straight line path between start and end (must be H/V/Diag)
+  function linePath(a,b){
+    const dr = b.r - a.r;
+    const dc = b.c - a.c;
+    const adr = Math.abs(dr), adc = Math.abs(dc);
+    if(dr===0 && dc===0) return [a];
+
+    const stepR = dr===0 ? 0 : dr/adr;
+    const stepC = dc===0 ? 0 : dc/adc;
+
+    // valid if horizontal, vertical, or perfect diagonal
+    if(!( (stepR===0 && stepC!==0) || (stepC===0 && stepR!==0) || (adr===adc && stepR!==0 && stepC!==0) )) return null;
+
+    const len = Math.max(adr, adc);
+    const path = [];
+    for(let i=0;i<=len;i++){
+      path.push({ r: a.r + stepR*i, c: a.c + stepC*i });
+    }
+    return path;
+  }
+
+  function lettersFromPath(path){
+    return path.map(p=>s.puzzle.grid[p.r][p.c]).join("");
+  }
+
+  function tryValidate(path){
+    if(!path || path.length < 2) return;
+    const str = lettersFromPath(path);
+    const rev = str.split("").reverse().join("");
+    const w = s.puzzle.words.find(x=>x===str || x===rev);
+    if(!w) return;
+
+    if(s.found.has(w)){
+      ui.footer.innerHTML = "✔️ Déjà trouvé.";
+      return;
+    }
+
+    s.found.add(w);
+    // reward: +1 coin per word
+    state.coins = Number(state.coins)||0;
+    state.coins += 1;
+    saveState();
+    updateTopBar();
+
+    markFoundCellsForWord(w);
+
+    const finished = (s.found.size === s.puzzle.words.length && s.puzzle.words.length>0);
+    persist(finished);
+
+    ui.footer.innerHTML = `✅ Mot trouvé : ${esc(w)} (+1 🪙)`;
+
+    // re-render to update list + counter
+    renderWordMixGame();
+  }
+
+  const gridEl = $("#wmGrid");
+
+  const getCellFromEvent = (evt)=>{
+    const el = evt.target.closest(".wm-cell");
+    if(!el) return null;
+    return { r: Number(el.getAttribute("data-r")), c: Number(el.getAttribute("data-c")) };
+  };
+
+  const onDown = (evt)=>{
+    const cell = getCellFromEvent(evt);
+    if(!cell) return;
+    evt.preventDefault();
+    s.drag.active = true;
+    s.drag.start = cell;
+    s.drag.path = [cell];
+    markPathActive(s.drag.path);
+  };
+  const onMove = (evt)=>{
+    if(!s.drag.active || !s.drag.start) return;
+    const cell = getCellFromEvent(evt);
+    if(!cell) return;
+    const path = linePath(s.drag.start, cell);
+    if(!path) return;
+    s.drag.path = path;
+    markPathActive(path);
+  };
+  const onUp = ()=>{
+    if(!s.drag.active) return;
+    s.drag.active = false;
+    const path = s.drag.path;
+    clearActive();
+    tryValidate(path);
+    s.drag.start = null;
+    s.drag.path = [];
+  };
+
+  gridEl.addEventListener("pointerdown", onDown);
+  gridEl.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+
+  // ✅ Grille: donne bonus si tout trouvé
+  $("#wmCheckAll").onclick = ()=>{
+    const totalWords = s.puzzle.words.length;
+    const found = s.found.size;
+    const pct = totalWords ? Math.round((found/totalWords)*100) : 0;
+
+    ui.resultBox.style.display = "block";
+    ui.resultBox.className = "result " + (pct===100 ? "good":"bad");
+    ui.resultBox.innerHTML = `
+      <div class="title">${pct===100 ? "🎉 Grille terminée !" : "📌 Progression"}</div>
+      <div class="small">Trouvés : <strong>${found}</strong> / ${totalWords} (${pct}%)</div>
+    `;
+
+    if(pct===100){
+      // Bonus fin
+      state.coins = Number(state.coins)||0;
+      state.coins += 10;
+      saveState();
+      updateTopBar();
+
+      persist(true);
+      ui.footer.innerHTML = "🎉 Grille terminée ! +10 🪙";
+      renderWordMixGame();
+    }else{
+      ui.footer.innerHTML = `⚠️ Il reste ${Math.max(0, totalWords-found)} mot(s).`;
+    }
+  };
+}
+
 
 /* Boot */
 function boot(){
