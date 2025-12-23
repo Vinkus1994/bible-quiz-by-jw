@@ -9,7 +9,7 @@
       title: "Grille 1",
             items: [
         { id:"cw01", clue:"Si nous profitons de la délivrance qui nous est offerte par Jésus, nous ne le serons plus [en trois mots] (Romains 6:6).", answer:"ESCLAVES DU PÉCHÉ" },
-        { id:"cw02", clue:"Personne qui a fait des études et qui exerçait bien souvent la fonction de notaire public (Juges 5:14).", answer:"SCRIBE" },
+        { id:"cw02", clue:"Personne qui a fait des études et qui exerçait bien souvent la fonction de notaire public (Juges 5:14) - note.", answer:"SCRIBE" },
         { id:"cw03", clue:"Petit-fils d’Aaron (Exode 6:25).", answer:"PHINÉHAS" },
         { id:"cw04", clue:"A exprimé sa gaieté (Genèse 18:15).", answer:"RI" },
         { id:"cw05", clue:"Dans une expression signifiant: sans en avoir conscience (Hébreux 13:2).", answer:"INSU" },
@@ -48,3 +48,4 @@
     }
   ];
 })();
+
