@@ -1083,6 +1083,75 @@ input, button{
   max-width:100%;
 }
 
+
+
+/* ===== ACCUEIL (MODES) : 3 COLONNES MOBILE ===== */
+
+/* Grille des modes (accueil) */
+#modesGrid{}
+.themes.modes-3{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:10px;
+}
+@media (max-width: 520px){
+  .themes.modes-3{
+    grid-template-columns: repeat(3, 1fr);
+    gap:8px;
+  }
+  .themes.modes-3 .theme-card{
+    padding:10px;
+    border-radius:14px;
+    min-height:74px;
+    display:grid;
+    align-content:center;
+  }
+  .themes.modes-3 .t-top{ gap:8px; }
+  .themes.modes-3 .t-name{
+    font-size:12px;
+    line-height:1.15;
+  }
+  .themes.modes-3 .t-ico{ font-size:16px; }
+  .themes.modes-3 .t-sub{ display:none; } /* on retire la desc sur mobile pour faire clean */
+}
+
+/* Actions (Mes réussites / Sauvegarder / Importer) en 3 colonnes, 1 ligne */
+.actions-3{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+@media (max-width: 520px){
+  .actions-3{ gap:8px; }
+}
+.action-tile{
+  width:100%;
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, #ffffff, #f3fbff);
+  border-radius: 16px;
+  padding:12px 10px;
+  box-shadow: var(--shadowSoft);
+  cursor:pointer;
+  user-select:none;
+  font-weight:950;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:54px;
+}
+@media (max-width: 520px){
+  .action-tile{
+    padding:10px 8px;
+    font-size:12px;
+    border-radius:14px;
+    min-height:52px;
+  }
+}
+.action-tile:active{ transform: scale(.99); }
+
 </style>
 </head>
 
@@ -1477,7 +1546,7 @@ function renderModeMenu(){
 
 <div class="hint" style="margin-top:12px;">Choisis ton mode :</div>
 
-<div class="themes" id="modesGrid">
+<div class="themes modes-3" id="modesGrid">
   <div class="theme-card" data-mode="classic">
     <div class="t-top">
       <div class="t-name"><span class="t-ico">📘</span> Mode Classique</div>
@@ -1515,13 +1584,10 @@ function renderModeMenu(){
   </div>
 </div>
 
-<div class="row">
-  <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
-  <button class="btn secondary" id="btnSave">💾 Sauvegarder</button>
-</div>
-
-<div class="row">
-  <button class="btn secondary" id="btnImport">📥 Importer</button>
+<div class="actions-3">
+  <button class="action-tile" id="btnWins" type="button">📖 <span>Réussites</span></button>
+  <button class="action-tile" id="btnSave" type="button">💾 <span>Sauvegarde</span></button>
+  <button class="action-tile" id="btnImport" type="button">📥 <span>Importer</span></button>
   <input type="file" id="fileImport" accept="application/json" style="display:none;">
 </div>
 `;
