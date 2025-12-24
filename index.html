@@ -834,8 +834,13 @@
 }
 /* Sécurité anti-scroll horizontal */
 body{ overflow-x:hidden; }
-.xw-stage-app{ overflow:hidden; }
 
+/* ===== FIX: SCROLL/PAN DU CADRE MOTS CROISÉS ===== */
+.xw-stage-app{
+  overflow: auto;                 /* permet de glisser pour voir toute la grille */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;      /* autorise le pan sur mobile */
+}
 
 /* ===== AJUSTEMENT MOTS MÊLÉS 14x14 UNIQUEMENT (14 LETTRES VISIBLES) =====
    Objectif: le 14x14 tient EN ENTIER dans l’écran (sans scroll) et reste lisible.
@@ -2399,7 +2404,7 @@ updateCrosswordHUD();
       </div>
       <div class="right">
         <button class="xw-iconbtn" id="xwRandom" title="Grille aléatoire">🎲Mélanger</button>
-                <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier">✅Grille</button>
+                <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier la grille">✅ Grille</button>
       </div>
     </div>
 
@@ -2774,6 +2779,7 @@ function buildCrosswordNumbering(solution, blocks){
 
   return { numGrid, clues: { across, down } };
 }
+
 
 /* =======================
    MODE MOTS MÊLÉS
