@@ -5,11 +5,11 @@
 (() => {
   window.THEMES = [
     { key:"Mixte", label:"Mixte", icon:"🔀", hint:"Toutes les questions (même déjà réussies)" },
-    { key:"Croyance", label:"Croyance", icon:"📖", hint:"Doctrine / foi / vérités bibliques" },
-    { key:"Qualités chrétiennes", label:"Qualités chrétiennes", icon:"💛", hint:"Amour, foi, patience..." },
-    { key:"Jéhovah", label:"Jéhovah", icon:"✨", hint:"Nom, qualités, actions" },
-    { key:"Jésus", label:"Jésus", icon:"👑", hint:"Vie, enseignements" },
-    { key:"Bible", label:"Bible", icon:"📚", hint:"Livres, versets, structure" },
+    { key:"Croyance", label:"Croyance", icon:"📖", hint:"" },
+    { key:"Qualités chrétiennes", label:"Qualités chrétiennes", icon:"💛", hint:"" },
+    { key:"Jéhovah", label:"Jéhovah", icon:"✨", hint:"" },
+    { key:"Jésus", label:"Jésus", icon:"👑", hint:"" },
+    { key:"Bible", label:"Bible", icon:"📚", hint:"" },
   ];
 
   window.QUESTIONS = [
@@ -86,3 +86,4 @@
     },
   ];
 })();
+
