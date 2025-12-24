@@ -450,7 +450,7 @@
     .xw-grid{
       border:1px solid var(--line);
       border-radius: 16px;
-      overflow:auto;                  /* ✅ scroll si trop large */
+      overflow:auto;                  /*  scroll si trop large */
       box-shadow: var(--shadowSoft);
       background:#fff;
       display:grid;
@@ -463,7 +463,7 @@
       position:relative;
       background:#f6fbff;
       border:1px solid rgba(191,230,255,.65);
-      width:46px;                     /* ✅ taille PC */
+      width:46px;                     /*  taille PC */
       height:46px;
       display:grid;
       place-items:center;
@@ -473,7 +473,7 @@
 
     @media (max-width: 480px){
       .xw-cell{
-        width:36px;                   /* ✅ mobile */
+        width:36px;                   /*  mobile */
         height:36px;
       }
     }
@@ -1166,6 +1166,98 @@ input, button{
   }
 }
 
+
+
+/* ===== NIVEAUX TERMINÉS : STYLE VERT CLAIR ===== */
+/* Cache l'icône de validation */
+.theme-card .done,
+.theme-card .check,
+.theme-card .t-check,
+.theme-card .ok,
+.theme-card .badge-ok {
+  display:none !important;
+}
+
+/* Style carte terminée */
+.theme-card.completed,
+.theme-card.is-done,
+.theme-card[data-done="1"] {
+  background: linear-gradient(180deg, #e9f9ef, #f4fffa);
+  border-color: #8ad6a8;
+  box-shadow: 0 10px 22px rgba(120, 200, 150, .35);
+}
+
+
+
+/* ===== TERMINÉ : VERT TRANSPARENT (SANS ICÔNES) ===== */
+/* Supprimer tout symbole de validation (, , etc.) */
+.theme-card * {
+  text-decoration: none;
+}
+.theme-card::after {
+  content: none !important;
+}
+
+/* État terminé : vert évident mais transparent */
+.theme-card.completed,
+.theme-card.is-done,
+.theme-card[data-done="1"] {
+  background: rgba(120, 200, 150, 0.25) !important;
+  border-color: rgba(60, 160, 110, 0.6) !important;
+  box-shadow: inset 0 0 0 2px rgba(60, 160, 110, 0.35),
+              0 6px 14px rgba(60, 160, 110, 0.25);
+}
+
+
+
+/* ===== MENU SEULEMENT : PAS D'ICÔNES DE VALIDATION ===== */
+/* Cache les symboles UNIQUEMENT dans les cartes de menu */
+.theme-card .check,
+.theme-card .done,
+.theme-card .t-check,
+.theme-card .badge-ok,
+.theme-card .ok,
+.theme-card .emoji {
+  display:none !important;
+}
+
+/* IMPORTANT : on ne touche PAS aux validations dans le jeu */
+.xw-stage-app .check,
+.xw-stage-app .done,
+.xw-stage-app .t-check,
+.xw-stage-app .badge-ok,
+.xw-stage-app .ok {
+  display:inline-flex !important;
+}
+
+
+
+/* ===== MOTS MÊLÉS : COULEURS MULTIPLES POUR MOTS TROUVÉS ===== */
+.wm-cell.found{ 
+  color:#0f1f2e;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.55);
+}
+.wm-cell.found.wm-c0{ background: rgba(90, 200, 120, .35); border-color: rgba(60,160,110,.75); }
+.wm-cell.found.wm-c1{ background: rgba(80, 170, 255, .35); border-color: rgba(60,120,210,.75); }
+.wm-cell.found.wm-c2{ background: rgba(255, 170, 80, .35); border-color: rgba(210,130,60,.75); }
+.wm-cell.found.wm-c3{ background: rgba(200, 120, 255, .30); border-color: rgba(150,90,210,.75); }
+.wm-cell.found.wm-c4{ background: rgba(255, 110, 160, .28); border-color: rgba(210,80,130,.75); }
+.wm-cell.found.wm-c5{ background: rgba(255, 220, 90, .32); border-color: rgba(210,170,60,.75); }
+.wm-cell.found.wm-c6{ background: rgba(120, 230, 220, .30); border-color: rgba(70,170,160,.75); }
+.wm-cell.found.wm-c7{ background: rgba(180, 180, 190, .26); border-color: rgba(130,130,150,.75); }
+
+
+
+/* ===== MOTS MÊLÉS : MOT TROUVÉ BARRÉ ===== */
+.wm-word{ font-weight:900; }
+.wm-word--found{
+  opacity: .55;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(15,31,46,.55);
+  filter: grayscale(.15);
+}
+
 </style>
 </head>
 
@@ -1225,7 +1317,7 @@ input, button{
 
 <script>
 /* ========= Base (tes modes existants) =========
-   ✅ Données déplacées dans des fichiers séparés :
+    Données déplacées dans des fichiers séparés :
    - questions.js  -> window.THEMES + window.QUESTIONS  (Classique + Aventure)
    - crosswords.js -> window.CROSSWORD_BANKS           (Mots croisés)
    Assure-toi que ces 2 fichiers sont dans le même dossier que index.html
@@ -1314,7 +1406,7 @@ function pickMedia(q){
   const t=(q.type||"QCM").toUpperCase();
   if(t==="ORDRE") return "🧩";
   if(t==="TROU") return "🕳️";
-  if(t==="VF") return "✅";
+  if(t==="VF") return "";
   const d=Number(q.difficulty)||1;
   return d<=1?"📘":d===2?"📗":d===3?"📙":d===4?"📕":"👑";
 }
@@ -1495,7 +1587,7 @@ function renderProfileGate(){
         <div class="label">Pseudo *</div>
         <input class="input" id="inpName" maxlength="18" placeholder="Ex: Vincenzo" />
       </div>
-      <button class="btn" id="btnCreate">✅ Créer mon compte</button>
+      <button class="btn" id="btnCreate"> Créer mon compte</button>
     </div>
   `;
 
@@ -1679,7 +1771,7 @@ function renderClassicHome(){
     card.innerHTML = `
       <div class="t-top">
         <div class="t-name"><span class="t-ico">${t.icon}</span> ${esc(t.label)}</div>
-        <div>${isSel ? "✅" : ""}</div>
+        <div>${isSel ? "" : ""}</div>
       </div>
       <div class="t-sub">${esc(info)}</div>
     `;
@@ -1702,7 +1794,7 @@ function getClassicPool(){
 function startClassicSession(){
   const pool = getClassicPool();
   if(!pool.length){
-    ui.footer.innerHTML = "✅ Tu as déjà tout réussi dans cette catégorie ! (Mixte reste toujours disponible)";
+    ui.footer.innerHTML = " Tu as déjà tout réussi dans cette catégorie ! (Mixte reste toujours disponible)";
     return;
   }
   const ids = shuffle(pool.map(q=>q.id));
@@ -2072,7 +2164,7 @@ function renderTrou(q){
         <div class="label">Ta réponse</div>
         <input class="input" id="fillInput" placeholder="Écris ici..." />
       </div>
-      <button class="btn secondary" id="btnValidateFill">✅ Valider ce que j’ai écrit</button>
+      <button class="btn secondary" id="btnValidateFill"> Valider ce que j’ai écrit</button>
     </div>
     <div class="answers" id="answers" style="margin-top:12px;"></div>
   `;
@@ -2111,7 +2203,7 @@ function renderOrder(q){
         <div class="order-title">Ton ordre (clique pour retirer)</div>
         <div class="chips" id="builtChips"></div>
       </div>
-      <button class="btn" id="btnValidateOrder">✅ Valider</button>
+      <button class="btn" id="btnValidateOrder"> Valider</button>
     </div>
   `;
   const poolEl=$("#poolChips"), builtEl=$("#builtChips");
@@ -2219,7 +2311,7 @@ function validateAnswer(userAnswer, isSkip=false){
     ? `<div class="small">❤️ Cœurs : <strong>${state.adventure.hearts}</strong></div>`
     : "";
 
-  const goodTitle = `✅ Bonne réponse ! (+${COINS_PER_GOOD} 🪙)`;
+  const goodTitle = ` Bonne réponse ! (+${COINS_PER_GOOD} 🪙)`;
   const badTitle = isSkip ? "⏭️ Passé." : "❌ Incorrect.";
 
   ui.resultBox.innerHTML = `
@@ -2294,7 +2386,7 @@ function renderAdventureEnd(level, percent, earnedStars, bonus, cfg){
 
   const starTxt = earnedStars ? "⭐".repeat(earnedStars) : "—";
   const unlockMsg = (earnedStars>=1)
-    ? (level < ADVENTURE_LEVELS.length ? "✅ Niveau suivant débloqué !" : "🏆 Aventure terminée !")
+    ? (level < ADVENTURE_LEVELS.length ? " Niveau suivant débloqué !" : "🏆 Aventure terminée !")
     : "❗ Niveau non validé (il faut au moins 50%).";
 
   ui.gameArea.innerHTML = `
@@ -2371,7 +2463,7 @@ function renderSuccesses(){
       const it=document.createElement("div");
       it.className="result good";
       it.style.marginTop="8px";
-      it.innerHTML = `<div class="title">✅ ${esc(q.question)}</div>
+      it.innerHTML = `<div class="title"> ${esc(q.question)}</div>
                       <div class="small"><b>Réponse :</b> ${esc(q.answer)} • <b>Réf :</b> ${esc(q.reference||"—")}</div>`;
       box.appendChild(it);
     });
@@ -2401,12 +2493,12 @@ function renderCrosswordHome(){
   const banksHtml = CROSSWORD_BANKS.map(b=>{
     const sel = b.key === selectedKey;
     const done = !!(state.crossword?.completedBanks && state.crossword.completedBanks[b.key]);
-    const sub = done ? "✔️ terminée" : (b.subtitle ? esc(b.subtitle) : "");
+    const sub = (b.subtitle ? esc(b.subtitle) : "");
     return `
-      <div class="theme-card ${sel ? "selected" : ""}" data-bank="${esc(b.key)}">
+      <div class="theme-card ${sel ? "selected" : ""}${done ? " completed" : ""}" data-bank="${esc(b.key)}">
         <div class="t-top">
           <div class="t-name"><span class="t-ico">🧩</span> ${esc(b.title)}</div>
-          <div>${sel ? "✅" : ""}</div>
+          <div>${sel ? "" : ""}</div>
         </div>
         <div class="t-sub">${sub}</div>
       </div>
@@ -2459,6 +2551,7 @@ function startCrossword(opts = {}){
   const bank = CROSSWORD_BANKS.find(b=>b.key===selectedKey) || CROSSWORD_BANKS[0];
   if(!bank || !bank.items || !bank.items.length){
     ui.footer.innerHTML = "⚠️ Grille vide.";
+      play.flashGridUntil = Date.now()+900;
     return;
   }
 
@@ -2668,7 +2761,7 @@ function renderCrosswordGame(){
     const totalWords = words.length;
     const done = Object.keys(prog.validated||{}).length;
     const st = computeStars();
-    ui.counter.textContent = `✅ ${done}/${totalWords} • ${"⭐".repeat(st)||"—"}`;
+    ui.counter.textContent = ` ${done}/${totalWords} • ${"⭐".repeat(st)||"—"}`;
   }
 updateCrosswordHUD();
 
@@ -2685,7 +2778,7 @@ updateCrosswordHUD();
       </div>
       <div class="right">
         <button class="xw-iconbtn" id="xwRandom" title="Grille aléatoire">🎲Mélanger</button>
-                <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier la grille">✅ Grille</button>
+                <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier la grille"> Grille${(play.flashGridUntil && Date.now()<play.flashGridUntil)?" ✅":""}</button>
       </div>
     </div>
 
@@ -2720,7 +2813,7 @@ updateCrosswordHUD();
         return `<div class="${cls}" data-i="${i}">${esc(v||"")}</div>`;
       }).join("")}
       </div>
-      <button class="xw-iconbtn gold" id="xwCheckWord" title="Valider ce mot">✅ Mot</button>
+      <button class="xw-iconbtn gold" id="xwCheckWord" title="Valider ce mot"> Mot${(play.flashWordUntil && Date.now()<play.flashWordUntil)?" ✅":""}</button>
     </div>
 
     <div class="xw-kb" aria-label="Clavier AZERTY">
@@ -2819,11 +2912,11 @@ updateCrosswordHUD();
   };
 
   
-  // ✅ Valider le mot courant (sans indice)
+  //  Valider le mot courant (sans indice)
   $("#xwCheckWord").onclick = ()=>{
     const wk = wordKey(cur);
     if(prog.validated[wk]){
-      ui.footer.innerHTML = "✅ Ce mot est déjà validé.";
+      ui.footer.innerHTML = " Ce mot est déjà validé.";
       return;
     }
     if(!wordIsFilled(cur)){
@@ -2832,6 +2925,7 @@ updateCrosswordHUD();
     }
     if(wordIsCorrect(cur)){
       prog.validated[wk] = true;
+      play.flashWordUntil = Date.now()+900;
 
       // Récompense : +1 🪙 par mot validé (une seule fois)
       state.coins = Number(state.coins)||0;
@@ -2846,7 +2940,7 @@ updateCrosswordHUD();
       saveState();
       updateTopBar();
       renderCrosswordGame();
-      ui.footer.innerHTML = "✅ Mot validé ! (+1 🪙)";
+      ui.footer.innerHTML = " Mot validé ! (+1 🪙)";
     }else{
       prog.errors = (Number(prog.errors)||0) + 1;
       saveState();
@@ -2886,7 +2980,7 @@ updateCrosswordHUD();
       state.crossword.wins = (state.crossword.wins||0) + 1;
       last.meta.won = true;
       prog.won = true;
-      // Marquer cette grille comme terminée (pour afficher "✔️ terminée" dans le menu)
+      // Marquer cette grille comme terminée (pour afficher " terminée" dans le menu)
       const bk = last?.meta?.bankKey;
       if(bk){
         state.crossword.completedBanks ||= {};
@@ -3184,12 +3278,12 @@ function renderWordMixHome(){
 
   const banksHtml = (WORDMIX_BANKS||[]).map(b=>{
     const done = !!store[b.key]?.done;
-    const sub = done ? "✔️ terminée" : (b.subtitle ? esc(b.subtitle) : "");
+    const sub = (b.subtitle ? esc(b.subtitle) : "");
     return `
-      <div class="theme-card" data-wm="${esc(b.key)}">
+      <div class="theme-card ${done ? " completed" : ""}" data-wm="${esc(b.key)}">
         <div class="t-top">
           <div class="t-name"><span class="t-ico">🔤</span> ${esc(b.title||b.key)}</div>
-          <div>${done ? "✔️" : ""}</div>
+          <div>${done ? "" : ""}</div>
         </div>
         <div class="t-sub">${sub}</div>
       </div>
@@ -3230,7 +3324,12 @@ function startWordMix(bankKey){
   const puzzle = wmBuildPuzzle(bank, seed);
   const found = new Set((existing?.found || []).filter(w=>puzzle.words.includes(w)));
 
-  wmSession = { bankKey, bank, seed, puzzle, found, drag:{active:false, start:null, path:[]} };
+    const colorsRaw = existing?.colors || {};
+  const colors = {};
+  Object.keys(colorsRaw).forEach(k=>{ if(puzzle.words.includes(k)) colors[k]=colorsRaw[k]; });
+  const nextColor = Number.isFinite(existing?.nextColor) ? existing.nextColor : Object.keys(colors).length;
+
+  wmSession = { bankKey, bank, seed, puzzle, found, colors, nextColor, drag:{active:false, start:null, path:[]} };
   renderWordMixGame();
 }
 
@@ -3251,7 +3350,7 @@ function renderWordMixGame(){
 
   const total = s.puzzle.words.length;
   const done = s.found.size;
-  ui.counter.textContent = `✔️ ${done}/${total}`;
+  ui.counter.textContent = ` ${done}/${total}`;
 
   // Word list
   const wordList = s.puzzle.words
@@ -3259,7 +3358,7 @@ function renderWordMixGame(){
     .sort((a,b)=>a.localeCompare(b))
     .map(w=>{
       const ok = s.found.has(w);
-      return `<div class="pill" style="opacity:${ok?1:.65}">${ok?"✔️ ":""}${esc(w)}</div>`;
+      return `<div class="pill wm-word ${ok? "wm-word--found":""}">${esc(w)}</div>`;
     }).join("");
 
   // Build grid HTML
@@ -3279,12 +3378,12 @@ function renderWordMixGame(){
       </div>
       <div class="right">
         <button class="xw-iconbtn" id="wmRestart" title="Nouvelle grille">🎲Mélanger</button>
-        <button class="xw-iconbtn gold" id="wmCheckAll" title="Finir">✅ Grille</button>
+        <button class="xw-iconbtn gold" id="wmCheckAll" title="Finir"> Grille</button>
       </div>
     </div>
 
     <div class="wm-legend hint">
-      <span>Mot trouvé = ✔️ (+1 🪙)</span>
+      <span>Mot trouvé =  (+1 🪙)</span>
       <span>Grille finie = +10 🪙</span>
     </div>
 
@@ -3313,6 +3412,8 @@ function renderWordMixGame(){
     store[s.bankKey] = {
       seed: s.seed,
       found: [...s.found],
+      colors: s.colors || {},
+      nextColor: Number.isFinite(s.nextColor) ? s.nextColor : 0,
       done: !!doneFlag
     };
     saveWordMixStore(store);
@@ -3337,7 +3438,11 @@ function renderWordMixGame(){
     if(!coords) return;
     coords.forEach(([r,c])=>{
       const el = ui.gameArea.querySelector(`.wm-cell[data-r="${r}"][data-c="${c}"]`);
-      if(el) el.classList.add("found");
+      if(el){
+        el.classList.add("found");
+        const ci = (s.colors && (word in s.colors)) ? s.colors[word] : 0;
+        el.classList.add(`wm-c${ci}`);
+      }
     });
   }
   // apply on render
@@ -3376,11 +3481,19 @@ function renderWordMixGame(){
     if(!w) return;
 
     if(s.found.has(w)){
-      ui.footer.innerHTML = "✔️ Déjà trouvé.";
+      ui.footer.innerHTML = " Déjà trouvé.";
       return;
     }
 
     s.found.add(w);
+
+    // assign a color for this word
+    s.colors = s.colors || {};
+    if(!(w in s.colors)){
+      const idx = Number.isFinite(s.nextColor) ? s.nextColor : Object.keys(s.colors).length;
+      s.colors[w] = idx % 8;
+      s.nextColor = idx + 1;
+    }
     // reward: +1 coin per word
     state.coins = Number(state.coins)||0;
     state.coins += 1;
@@ -3392,7 +3505,7 @@ function renderWordMixGame(){
     const finished = (s.found.size === s.puzzle.words.length && s.puzzle.words.length>0);
     persist(finished);
 
-    ui.footer.innerHTML = `✅ Mot trouvé : ${esc(w)} (+1 🪙)`;
+    ui.footer.innerHTML = ` Mot trouvé : ${esc(w)} (+1 🪙)`;
 
     // re-render to update list + counter
     renderWordMixGame();
@@ -3489,7 +3602,7 @@ function renderWordMixGame(){
   gridEl.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
 
-  // ✅ Grille: donne bonus si tout trouvé
+  //  Grille: donne bonus si tout trouvé
   $("#wmCheckAll").onclick = ()=>{
     const totalWords = s.puzzle.words.length;
     const found = s.found.size;
