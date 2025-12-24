@@ -877,6 +877,212 @@ body{ overflow-x:hidden; }
   overscroll-behavior: contain;    /* évite le scroll/bounce du parent */
 }
 
+
+/* ===== MENU MOTS CROISÉS / MOTS MÊLÉS : 3 COLONNES (compact) ===== */
+.xw-themes,
+.wm-themes{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+.xw-themes .theme-card,
+.wm-themes .theme-card{
+  padding:10px;
+  border-radius:14px;
+}
+.xw-themes .t-name,
+.wm-themes .t-name{ font-size:14px; }
+.xw-themes .t-sub,
+.wm-themes .t-sub{ font-size:11px; }
+.xw-themes .t-ico,
+.wm-themes .t-ico{ font-size:16px; }
+
+@media (max-width:480px){
+  .xw-themes,
+  .wm-themes{
+    grid-template-columns: repeat(3, 1fr);
+    gap:8px;
+  }
+  .xw-themes .theme-card,
+  .wm-themes .theme-card{ padding:8px; }
+  .xw-themes .t-name,
+  .wm-themes .t-name{ font-size:13px; }
+}
+
+
+
+/* ===== AMÉLIORATION VISUELLE GLOBALE (CLEAN UI) ===== */
+
+/* Lisibilité générale */
+body{
+  letter-spacing: .1px;
+}
+
+/* Titres plus clairs */
+.qtext{
+  font-size:17px;
+  line-height:1.25;
+}
+
+/* Boutons : hiérarchie plus nette */
+.btn{
+  border-radius:16px;
+}
+.btn.secondary{
+  opacity:.92;
+}
+.btn.gold{
+  box-shadow: 0 14px 30px rgba(255,206,92,.35);
+}
+
+/* Cartes : cohérence visuelle */
+.card,
+.theme-card,
+.lvl,
+.result{
+  border-radius:18px;
+}
+
+/* Espacements cohérents */
+.hint{
+  margin-bottom:6px;
+}
+
+/* Désactivé plus compréhensible */
+.btn[disabled],
+.ansbtn[disabled]{
+  opacity:.45;
+  filter:grayscale(.2);
+}
+
+/* Feedback réussite */
+.result.good{
+  animation: pop .25s ease-out;
+}
+
+@keyframes pop{
+  from{ transform:scale(.97); opacity:.7; }
+  to{ transform:scale(1); opacity:1; }
+}
+
+/* HUD plus lisible */
+.hud-pill{
+  font-size:13px;
+}
+
+/* Mobile : zones cliquables confort */
+@media (max-width:480px){
+  .btn,
+  .ctrl,
+  .ansbtn{
+    padding:16px 12px;
+  }
+}
+
+
+
+/* ===== OPTIMISATION MOBILE 📱 ===== */
+
+/* Safe-area iPhone + paddings plus confort */
+:root{
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+body{
+  padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: contain;
+}
+
+/* Evite les zooms/scrolls bizarres iOS */
+input, button{
+  touch-action: manipulation;
+}
+
+/* Conteneur : plein écran mobile */
+.wrap{
+  width: min(520px, 100%);
+}
+
+/* Sur petit écran : layout question plus compact et lisible */
+@media (max-width: 420px){
+  body{ padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right)) calc(10px + var(--safe-bottom)) calc(10px + var(--safe-left)); }
+
+  .hud{
+    gap:8px;
+    padding:10px 10px;
+  }
+  .hud-center{ font-size:15px; }
+  .hud-pill{ font-size:12px; padding:6px 9px; }
+
+  .track{ margin:10px 0 12px; height:44px; }
+  .avatar{ width:34px; height:34px; font-size:17px; }
+  .track-dot{ width:16px; height:16px; }
+
+  .card-top{ padding:10px 12px; }
+  .tag{ font-size:11px; padding:6px 9px; }
+  .counter{ font-size:11px; }
+
+  /* Question: passe en colonne (meilleur sur mobile) */
+  .qarea{
+    grid-template-columns: 1fr;
+    gap:10px;
+    padding:12px;
+  }
+  .qmedia{
+    width:64px; height:64px;
+    border-radius:14px;
+    font-size:28px;
+    justify-self:start;
+  }
+  .qtext{
+    font-size:16px;
+    line-height:1.25;
+  }
+
+  /* Boutons plus “thumb-friendly” */
+  .btn, .ansbtn, .ctrl{
+    min-height:52px;
+    border-radius:16px;
+  }
+
+  /* Les 2 boutons en “row” se mettent bien en pile */
+  .row{ gap:10px; }
+  .row .btn{ min-width: 100%; }
+
+  /* Theme cards plus confort en touch */
+  .theme-card{ padding:10px; }
+  .theme-card .t-name{ font-size:15px; }
+
+  /* Clavier mots croisés: un peu plus compact sans wrap */
+  .xw-key{ min-width:28px; height:34px; line-height:34px; }
+  .xw-key.wide{ min-width:54px; }
+}
+
+/* Confort lecture sur mobile moyen */
+@media (max-width: 520px){
+  .card{ box-shadow: 0 12px 24px rgba(0,0,0,.12); }
+  .result{ padding:12px; }
+  .hint{ line-height:1.4; }
+}
+
+/* Appbar (mots croisés/mêlés) : reste visible en scroll */
+.xw-appbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding-top: var(--safe-top);
+}
+
+/* Empêche le défilement horizontal accidentel */
+.wrap, .card, .xw-stage-app, .wm-stage{
+  max-width:100%;
+}
+
 </style>
 </head>
 
@@ -1266,76 +1472,71 @@ function renderModeMenu(){
   setHeartsVisible(false);
 
   ui.gameArea.innerHTML = `
-    <div class="hint">
-      👋 ${esc(state.profile.name)}
-      • Pièces : <strong>${state.coins}</strong>
-      • Réussies : <strong>${counts.doneAll}</strong>/${counts.totalAll}
-      • Cœurs aventure : <strong>❤️ ${state.adventure.hearts}</strong>
-      • Mots croisés gagnés : <strong>${state.crossword.wins}</strong>
+<div class="hint">
+</div>
+
+<div class="hint" style="margin-top:12px;">Choisis ton mode :</div>
+
+<div class="themes" id="modesGrid">
+  <div class="theme-card" data-mode="classic">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">📘</span> Mode Classique</div>
+      <div></div>
     </div>
-
-    <div class="mode-grid">
-      <div class="mode-card">
-        <div class="mode-top">
-          <div class="mode-title">📘 Mode Classique</div>
-        </div>
-        <div class="mode-desc">
-          Choisis un thème et réponds aux questions (les bonnes réponses sont exclues des catégories, sauf Mixte).
-        </div>
-        <button class="btn" id="goClassic">▶️ CLASSIQUE</button>
-      </div>
-
-      <div class="mode-card">
-        <div class="mode-top">
-          <div class="mode-title">🗺️ Mode Aventure</div>
-        </div>
-        <div class="mode-desc">
-          Progresse niveau par niveau, gagne des étoiles ⭐ et des cœurs ❤️.
-          Niveau actuel : <strong>${adv.currentLevel}</strong>.
-        </div>
-        <button class="btn gold" id="goAdventure">🗺️ AVENTURE</button>
-      </div>
-
-      <div class="mode-card">
-        <div class="mode-top">
-          <div class="mode-title">🧩 Mode Mots croisés</div>
-        </div>
-        <div class="mode-desc">
-          Grilles générées automatiquement. Accents tolérés. Gagne <strong>+10 🪙</strong> si 100% correct.
-        </div>
-        <button class="btn" id="goCrossword">🧩 MOTS CROISÉS</button>
-      </div>
-
-
-      <div class="mode-card">
-        <div class="mode-top">
-          <div class="mode-title">🔤 Mode Mots mêlés</div>
-        </div>
-        <div class="mode-desc">
-          Trouve les mots cachés dans une grille (horizontal, vertical et diagonales). Gagne <strong>+10 🪙</strong> si 100% trouvé.
-        </div>
-        <button class="btn" id="goWordMix">🔤 MOTS MÊLÉS</button>
-      </div>
-
+    <div class="t-sub">      
     </div>
+  </div>
 
-    <div class="row">
-      <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
-      <button class="btn secondary" id="btnSave">💾 Sauvegarder</button>
+  <div class="theme-card" data-mode="adventure">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">🗺️</span> Mode Aventure</div>
+      <div></div>
     </div>
-
-    <div class="row">
-      <button class="btn secondary" id="btnImport">📥 Importer</button>
-      <input type="file" id="fileImport" accept="application/json" style="display:none;">
+    <div class="t-sub">
     </div>
-  `;
+  </div>
 
-  $("#goClassic").onclick = ()=> renderClassicHome();
-  $("#goAdventure").onclick = ()=> renderAdventureMap();
-  $("#goCrossword").onclick = ()=> renderCrosswordHome();
-  $("#goWordMix").onclick = ()=> renderWordMixHome();
+  <div class="theme-card" data-mode="crossword">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">🧩</span> Mots croisés</div>
+      <div></div>
+    </div>
+    <div class="t-sub">
+    </div>
+  </div>
 
-  $("#btnWins").onclick  = ()=> renderSuccesses();
+  <div class="theme-card" data-mode="wordmix">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">🔤</span> Mots mêlés</div>
+      <div></div>
+    </div>
+    <div class="t-sub">
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <button class="btn secondary" id="btnWins">📖 Mes réussites</button>
+  <button class="btn secondary" id="btnSave">💾 Sauvegarder</button>
+</div>
+
+<div class="row">
+  <button class="btn secondary" id="btnImport">📥 Importer</button>
+  <input type="file" id="fileImport" accept="application/json" style="display:none;">
+</div>
+`;
+
+  
+document.querySelectorAll("#modesGrid [data-mode]").forEach(card=>{
+  card.onclick = ()=>{
+    const m = card.getAttribute("data-mode");
+    if(m === "classic") return renderClassicHome();
+    if(m === "adventure") return renderAdventureMap();
+    if(m === "crossword") return renderCrosswordHome();
+    if(m === "wordmix") return renderWordMixHome();
+  };
+});
+$("#btnWins").onclick  = ()=> renderSuccesses();
   $("#btnSave").onclick  = ()=> exportSave();
   $("#btnImport").onclick = ()=> $("#fileImport").click();
   $("#fileImport").onchange = (e)=>{
@@ -2138,14 +2339,14 @@ function renderCrosswordHome(){
     </div>
 
     <div class="hint" style="margin-top:10px;">
-      Grille générée automatiquement depuis ta liste. • Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
+     Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
     </div>
 
     <div class="hint" style="margin-top:10px;">
       Choisis ta grille :
     </div>
 
-    <div class="themes" id="xwBanks">
+    <div class="themes xw-themes" id="xwBanks">
       ${banksHtml}
     </div>
 
@@ -2457,7 +2658,7 @@ updateCrosswordHUD();
     </div>
 
     <div class="hint" style="margin-top:10px;">
-      Grille générée automatiquement depuis ta liste. • Accents tolérés (É = E) • Espaces ignorés.
+     Accents tolérés (É = E) • Espaces ignorés.
     </div>
   `;
 
@@ -2918,10 +3119,9 @@ function renderWordMixHome(){
   ui.gameArea.innerHTML = `
     <div class="hint">
       Trouve les mots cachés dans la grille (horizontal, vertical et diagonales).<br/>
-      Astuce : tu peux <strong>glisser</strong> ton doigt/souris sur les lettres.
     </div>
 
-    <div class="themes" id="wmBanks">${banksHtml || `<div class="hint">⚠️ Aucune grille dans wordmix.js</div>`}</div>
+    <div class="themes wm-themes" id="wmBanks">${banksHtml || `<div class="hint">⚠️ Aucune grille dans wordmix.js</div>`}</div>
 
     <div class="row">
       <button class="btn secondary" id="wmBackModes">⬅️ Retour modes</button>
