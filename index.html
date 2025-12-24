@@ -861,6 +861,12 @@ body{ overflow-x:hidden; }
   font-size: clamp(10px, calc(var(--wm-cell14) * 0.42), 16px) !important;
 }
 
+
+/* ===== MOTS MÊLÉS – DRAG MOBILE (EMPÊCHE LE SCROLL SUR LA GRILLE) ===== */
+#wmGrid{
+  touch-action: none;            /* autorise le drag sans faire scroller la page */
+}
+
 </style>
 </head>
 
@@ -3111,8 +3117,10 @@ function renderWordMixGame(){
   };
 
   const onDown = (evt)=>{
+    if(evt.cancelable) evt.preventDefault();
     const cell = getCellFromEvent(evt);
     if(!cell) return;
+    try{ gridEl.setPointerCapture(evt.pointerId); }catch(e){}
     evt.preventDefault();
     s.drag.active = true;
     s.drag.start = cell;
@@ -3120,6 +3128,7 @@ function renderWordMixGame(){
     markPathActive(s.drag.path);
   };
   const onMove = (evt)=>{
+    if(evt.cancelable) evt.preventDefault();
     if(!s.drag.active || !s.drag.start) return;
     const cell = getCellFromEvent(evt);
     if(!cell) return;
