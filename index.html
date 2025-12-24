@@ -826,8 +826,8 @@
 }
 /* Taille des cases basée sur la largeur écran (safe pour 14x14) */
 .wm-cell{
-  width:clamp(22px, calc(100vw / 16), 40px);
-  height:clamp(22px, calc(100vw / 16), 40px);
+  width:clamp(22px, calc(100vw / 16), 34px);
+  height:clamp(22px, calc(100vw / 16), 34px);
   aspect-ratio:auto; /* on évite les bugs */
   font-size:clamp(11px, 2.8vw, 17px);
   box-sizing:border-box;
@@ -863,7 +863,7 @@ body{ overflow-x:hidden; }
 }
 
 #wmGrid[data-size="14"] .wm-cell .ch{
-  font-size: clamp(14px, calc(var(--wm-cell14) * 0.42), 16px) !important;
+  font-size: clamp(10px, calc(var(--wm-cell14) * 0.42), 16px) !important;
 }
 
 
@@ -1256,6 +1256,97 @@ input, button{
   text-decoration-thickness: 2px;
   text-decoration-color: rgba(15,31,46,.55);
   filter: grayscale(.15);
+}
+
+
+/* =========================================================
+   MOTS MÊLÉS — THÈME ÉPURÉ (sans fond bleu + sans "bulles")
+   Objectif : grille claire, traits fins, look minimal.
+   (On ne touche pas à la logique JS : drag, validation, sauvegarde)
+   ========================================================= */
+
+.wm-stage{
+  margin-top:10px;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: var(--shadowSoft);
+  padding:12px;
+  overflow:hidden;
+}
+
+.wm-grid{
+  display:grid;
+  gap:6px;
+  justify-content:center;
+  width: max-content;
+  margin: 0 auto;
+}
+
+/* Case épurée */
+.wm-cell{
+  width:clamp(30px, calc(100vw / 16), 50px);
+  height:clamp(30px, calc(100vw / 16), 50px);
+  border-radius: 7px;
+  background: #cee2f2;
+  border: 1px solid rgba(18,48,74,.14);
+  box-shadow: none;
+  display:grid;
+  place-items:center;
+  user-select:none;
+}
+
+.wm-cell .ch{
+  font-size: clamp(12px, 2.7vw, 18px);
+  font-weight: 900;
+  color: rgba(18,48,74,.92);
+}
+
+/* Surlignage pendant le drag */
+.wm-cell.active{
+  background: rgba(58,166,255,.10);
+  border-color: rgba(58,166,255,.45);
+  box-shadow: inset 0 0 0 2px rgba(58,166,255,.35);
+}
+
+/* Mots trouvés : plus discret */
+.wm-cell.found{
+  color:#0f1f2e;
+  border-color: rgba(26,165,106,.35);
+  box-shadow: inset 0 0 0 2px rgba(26,165,106,.20);
+}
+
+/* 8 couleurs, mais plus douces */
+.wm-cell.found.wm-c0{ background: rgba(90, 200, 120, .18); }
+.wm-cell.found.wm-c1{ background: rgba(80, 170, 255, .16); }
+.wm-cell.found.wm-c2{ background: rgba(255, 170, 80, .16); }
+.wm-cell.found.wm-c3{ background: rgba(200, 120, 255, .14); }
+.wm-cell.found.wm-c4{ background: rgba(255, 110, 160, .14); }
+.wm-cell.found.wm-c5{ background: rgba(255, 220, 90, .16); }
+.wm-cell.found.wm-c6{ background: rgba(120, 230, 220, .14); }
+.wm-cell.found.wm-c7{ background: rgba(180, 180, 190, .12); }
+
+/* Liste des mots : tags clean */
+.wm-wordlist{
+  margin-top:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.wm-word{
+  border:1px solid rgba(18,48,74,.12);
+  background: #ffffff;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:900;
+  color: rgba(18,48,74,.85);
+}
+
+.wm-word--found{
+  opacity:.55;
+  text-decoration: line-through;
 }
 
 </style>
@@ -3365,7 +3456,7 @@ function renderWordMixGame(){
   const n = s.puzzle.size;
   const gridHtml = s.puzzle.grid.map((row,r)=>{
     return row.map((ch,c)=>{
-      const cls = ["xw-cell-app", "wm-cell"].join(" ");
+      const cls = ["wm-cell"].join(" ");
       return `<div class="${cls}" data-r="${r}" data-c="${c}"><div class="ch">${esc(ch)}</div></div>`;
     }).join("");
   }).join("");
@@ -3387,8 +3478,8 @@ function renderWordMixGame(){
       <span>Grille finie = +10 🪙</span>
     </div>
 
-    <div class="xw-stage-app">
-      <div class="xw-grid-app" id="wmGrid" data-size="${n}" style="grid-template-columns: repeat(${n}, auto);">
+    <div class="wm-stage">
+      <div class="wm-grid" id="wmGrid" data-size="${n}" style="grid-template-columns: repeat(${n}, max-content);">
         ${gridHtml}
       </div>
     </div>
