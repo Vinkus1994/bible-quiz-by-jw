@@ -1349,6 +1349,56 @@ input, button{
   text-decoration: line-through;
 }
 
+
+/* ===== RÉUSSITES – ACCORDÉON (ouvrir/fermer par catégorie) ===== */
+.success-cat{
+  margin-top:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  box-shadow: var(--shadowSoft);
+  overflow:hidden;
+}
+.success-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 14px;
+  cursor:pointer;
+  user-select:none;
+  font-weight:950;
+}
+.success-head:hover{
+  background: rgba(58,166,255,.06);
+}
+.success-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.success-title span:last-child{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.success-arrow{
+  font-size:16px;
+  transition: transform .2s ease;
+}
+.success-cat[data-open="1"] .success-arrow{
+  transform: rotate(90deg);
+}
+.success-body{
+  padding:10px 14px 14px;
+  display:none;
+}
+.success-cat[data-open="1"] .success-body{
+  display:block;
+}
+
+
 </style>
 </head>
 
@@ -1828,7 +1878,7 @@ function renderClassicHome(){
 
   ui.gameArea.innerHTML = `
     <div class="hint">
-      Total : <strong>${counts.totalAll}</strong>
+      Total des questions : <strong>${counts.totalAll}</strong>
       • Réussies : <strong>${counts.doneAll}</strong>
       • Restantes (global) : <strong>${counts.remainingAll}</strong>
       • Pièces : <strong>${state.coins}</strong>
@@ -2544,23 +2594,52 @@ function renderSuccesses(){
   `;
   $("#backModes").onclick=()=>renderModeMenu();
 
-  const acc=$("#acc");
+  const acc = $("#acc");
+
   Object.keys(groups).forEach(th=>{
-    const list = groups[th].slice().sort((a,b)=>a.question.localeCompare(b.question));
-    const box=document.createElement("div");
-    box.style.marginTop="10px";
-    box.innerHTML = `<div class="hint"><strong>${esc(th)}</strong> — ${list.length}</div>`;
+    const list = groups[th]
+      .slice()
+      .sort((a,b)=>String(a.question||"").localeCompare(String(b.question||"")));
+
+    const cat = document.createElement("div");
+    cat.className = "success-cat";
+    cat.dataset.open = "0"; // fermé par défaut
+
+    cat.innerHTML = `
+      <div class="success-head">
+        <div class="success-title">
+          <span class="success-arrow">▶</span>
+          <span>${esc(th)} (${list.length})</span>
+        </div>
+      </div>
+      <div class="success-body"></div>
+    `;
+
+    const body = cat.querySelector(".success-body");
+
     list.forEach(q=>{
-      const it=document.createElement("div");
-      it.className="result good";
-      it.style.marginTop="8px";
-      it.innerHTML = `<div class="title"> ${esc(q.question)}</div>
-                      <div class="small"><b>Réponse :</b> ${esc(q.answer)} • <b>Réf :</b> ${esc(q.reference||"—")}</div>`;
-      box.appendChild(it);
+      const it = document.createElement("div");
+      it.className = "result good";
+      it.style.marginTop = "8px";
+      it.innerHTML = `
+        <div class="title">${esc(q.question)}</div>
+        <div class="small">
+          <b>Réponse :</b> ${esc(q.answer)}<br>
+          <b>Réf :</b> ${esc(q.reference || "—")}
+        </div>
+      `;
+      body.appendChild(it);
     });
-    acc.appendChild(box);
+
+    const head = cat.querySelector(".success-head");
+    head.onclick = ()=>{
+      cat.dataset.open = (cat.dataset.open === "1") ? "0" : "1";
+    };
+
+    acc.appendChild(cat);
   });
 }
+
 
 /* =======================
    MODE MOTS CROISÉS
