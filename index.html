@@ -862,9 +862,14 @@ body{ overflow-x:hidden; }
 }
 
 
-/* ===== MOTS MÊLÉS – DRAG MOBILE (EMPÊCHE LE SCROLL SUR LA GRILLE) ===== */
+/* ===== MOTS MÊLÉS – ANDROID DRAG FIX ===== */
 #wmGrid{
-  touch-action: none;            /* autorise le drag sans faire scroller la page */
+  touch-action: none;              /* empêche le scroll pendant l'interaction */
+  -webkit-user-select: none;
+  user-select: none;
+}
+.xw-stage-app{
+  overscroll-behavior: contain;    /* évite le scroll/bounce du parent */
 }
 
 </style>
@@ -3117,10 +3122,8 @@ function renderWordMixGame(){
   };
 
   const onDown = (evt)=>{
-    if(evt.cancelable) evt.preventDefault();
     const cell = getCellFromEvent(evt);
     if(!cell) return;
-    try{ gridEl.setPointerCapture(evt.pointerId); }catch(e){}
     evt.preventDefault();
     s.drag.active = true;
     s.drag.start = cell;
@@ -3128,7 +3131,6 @@ function renderWordMixGame(){
     markPathActive(s.drag.path);
   };
   const onMove = (evt)=>{
-    if(evt.cancelable) evt.preventDefault();
     if(!s.drag.active || !s.drag.start) return;
     const cell = getCellFromEvent(evt);
     if(!cell) return;
@@ -3148,6 +3150,57 @@ function renderWordMixGame(){
   };
 
   gridEl.addEventListener("pointerdown", onDown);
+
+  /* ===== ANDROID TOUCH FALLBACK (si pointer events buggent) ===== */
+  let wmTouchActive = false;
+
+  function wmCellFromPoint(x, y){
+    const el = document.elementFromPoint(x, y);
+    if(!el) return null;
+    const cellEl = el.closest(".wm-cell");
+    if(!cellEl) return null;
+    return { r: Number(cellEl.getAttribute("data-r")), c: Number(cellEl.getAttribute("data-c")) };
+  }
+
+  gridEl.addEventListener("touchstart", (e)=>{
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    const cell = wmCellFromPoint(t.clientX, t.clientY);
+    if(!cell) return;
+    wmTouchActive = true;
+    if(e.cancelable) e.preventDefault();
+    // Simule un onDown
+    s.drag.active = true;
+    s.drag.start = cell;
+    s.drag.path = [cell];
+    markPathActive(s.drag.path);
+  }, { passive:false });
+
+  gridEl.addEventListener("touchmove", (e)=>{
+    if(!wmTouchActive || !s.drag.active || !s.drag.start) return;
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    if(e.cancelable) e.preventDefault();
+    const cell = wmCellFromPoint(t.clientX, t.clientY);
+    if(!cell) return;
+    const path = linePath(s.drag.start, cell);
+    if(!path) return;
+    s.drag.path = path;
+    markPathActive(path);
+  }, { passive:false });
+
+  gridEl.addEventListener("touchend", (e)=>{
+    if(!wmTouchActive) return;
+    wmTouchActive = false;
+    // Simule un onUp
+    s.drag.active = false;
+    const path = s.drag.path;
+    clearActive();
+    tryValidate(path);
+    s.drag.start = null;
+    s.drag.path = [];
+  }, { passive:false });
+
   gridEl.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
 
