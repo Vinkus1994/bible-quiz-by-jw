@@ -15,7 +15,3652 @@
       --ink:#12304a;
       --muted:#4f6b86;
       --shadow: 0 14px 30px rgba(0,0,0,.14);
+      --shadowSoft: 0 10px 18px rgba(0,0,0,.10);<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JW Quiz</title>
+  <style>
+    :root{
+      --sky1:#4cc3ff;
+      --sky2:#2a8dff;
+      --bg:#eaf6ff;
+      --panel:#ffffff;
+      --panel2:#f5fbff;
+      --line:#bfe6ff;
+      --ink:#12304a;
+      --muted:#4f6b86;
+      --shadow: 0 14px 30px rgba(0,0,0,.14);
       --shadowSoft: 0 10px 18px rgba(0,0,0,.10);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+  overflow-x:hidden;
+
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(900px 650px at 20% 0%, rgba(255,255,255,.65), transparent 55%),
+        radial-gradient(900px 650px at 90% 10%, rgba(255,255,255,.45), transparent 55%),
+        linear-gradient(180deg, var(--sky1), var(--sky2) 35%, var(--bg) 35%, var(--bg));
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:14px;
+      color:var(--ink);
+    }
+    .wrap{width:min(460px, 100%);}
+
+    .hud{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.22);
+      border:1px solid rgba(255,255,255,.40);
+      box-shadow: var(--shadow);
+      color:#fff;
+      backdrop-filter: blur(8px);
+    }
+    .hud-center{
+      font-weight:950;
+      letter-spacing:.2px;
+      text-shadow: 0 2px 10px rgba(0,0,0,.15);
+      user-select:none;
+      cursor:pointer;
+    }
+    .hud-right{display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap}
+    .hud-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.16);
+      border:1px solid rgba(255,255,255,.35);
+      font-weight:900;
+      font-size:12px;
+      white-space:nowrap;
+      user-select:none;
+    }
+    .hud-pill strong{ font-variant-numeric: tabular-nums; }
+
+    .track{ position:relative; margin:12px 0 14px; height:48px; }
+    .track-line{
+      position:absolute; left:18px; right:18px; top:50%;
+      height:10px; transform:translateY(-50%);
+      background: rgba(255,255,255,.65);
+      border:1px solid rgba(255,255,255,.95);
+      border-radius:999px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,.10);
+    }
+    .track-dot{
+      position:absolute; top:50%;
+      width:18px;height:18px; transform:translate(-50%,-50%);
+      border-radius:999px;
+      background:#ffe27a;
+      border:2px solid rgba(255,255,255,.98);
+      box-shadow: 0 6px 14px rgba(0,0,0,.16);
+      transition:left .2s ease;
+    }
+    .avatar{
+      position:absolute; top:50%;
+      width:36px; height:36px; transform:translateY(-50%);
+      border-radius:999px;
+      background: rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      display:grid; place-items:center;
+      box-shadow: 0 10px 18px rgba(0,0,0,.14);
+      font-size:18px; user-select:none;
+    }
+    .avatar.left{left:0}
+    .avatar.right{right:0}
+
+    .card{
+      position:relative;
+      background: var(--panel);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transform: translateZ(0);
+    }
+    .card-top{
+      padding:12px 14px;
+      background: linear-gradient(180deg, rgba(58,166,255,.14), rgba(58,166,255,.04));
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(58,166,255,.08);
+      color: var(--muted);
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .tag strong{color:var(--ink)}
+    .counter{ font-size:12px; color:var(--muted); font-weight:900; white-space:nowrap; }
+
+    .qarea{
+      padding:14px;
+      display:grid;
+      grid-template-columns: 82px 1fr;
+      gap:12px;
+      align-items:center;
+      background: linear-gradient(180deg, #ffffff, var(--panel2));
+    }
+    .qmedia{
+      width:82px; height:82px;
+      border-radius: 14px;
+      background: #f2fbff;
+      border: 1px dashed #a9dcff;
+      display:grid;
+      place-items:center;
+      font-size:32px;
+      user-select:none;
+    }
+    .qtext{ font-size:16px; font-weight:950; line-height:1.2; }
+
+    .ref{
+      padding:0 14px 12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+      display:none;
+    }
+
+    .btn{
+      width:100%;
+      margin-top:12px;
+      padding:14px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, #ffffff, #eaf7ff);
+      font-size:16px;
+      font-weight:950;
+      color:var(--ink);
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .btn:hover{ box-shadow: 0 14px 26px rgba(0,0,0,.12); border-color: rgba(58,166,255,.35); }
+    .btn:active{ transform: scale(.99); }
+    .btn[disabled]{opacity:.55; cursor:not-allowed;}
+    .btn.secondary{ background: linear-gradient(180deg, #ffffff, #f3fbff); }
+    .btn.gold{ background: linear-gradient(180deg, #fff8d9, #ffeaa9); }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    .row .btn{flex:1; min-width:140px; margin-top:0;}
+
+    .answers{margin-top:12px; display:grid; gap:10px;}
+    .ansbtn{
+      width:100%;
+      text-align:center;
+      padding:14px 12px;
+      font-size:16px;
+      font-weight:950;
+      color:var(--ink);
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #eaf7ff);
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .ansbtn:hover{border-color: rgba(58,166,255,.35); box-shadow: 0 14px 26px rgba(0,0,0,.12);}
+    .ansbtn:active{transform: scale(.99)}
+    .ansbtn[disabled]{opacity:.55; cursor:not-allowed}
+    .ansbtn.correct{border-color: rgba(26,165,106,.45); background: rgba(26,165,106,.08);}
+    .ansbtn.wrong{border-color: rgba(229,72,93,.45); background: rgba(229,72,93,.07);}
+
+    .order-wrap{margin-top:12px; display:grid; gap:10px;}
+    .order-zone{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:14px;
+      padding:10px;
+      box-shadow: var(--shadowSoft);
+    }
+    .order-title{
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      margin:0 0 8px 0;
+    }
+    .chips{display:flex; flex-wrap:wrap; gap:8px;}
+    .chipbtn{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f2fbff);
+      border-radius:999px;
+      padding:8px 10px;
+      font-weight:900;
+      color:var(--ink);
+      cursor:pointer;
+      box-shadow: 0 10px 16px rgba(0,0,0,.08);
+      user-select:none;
+    }
+    .chipbtn[disabled]{opacity:.45; cursor:not-allowed}
+
+    .result{
+      margin-top:12px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    .result.good{border-color: rgba(26,165,106,.35); background: rgba(26,165,106,.06)}
+    .result.bad{border-color: rgba(229,72,93,.35); background: rgba(229,72,93,.05)}
+    .result .title{font-weight:950}
+    .result .small{margin-top:6px; font-size:12px; color:var(--muted); line-height:1.35}
+
+    .controls{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;}
+    .ctrl{
+      flex:1; min-width:140px;
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:950;
+      color:var(--ink);
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+    }
+    .ctrl.danger{
+      border-color: rgba(229,72,93,.25);
+      background: rgba(229,72,93,.06);
+    }
+    .ctrl.gold{
+      border-color: rgba(255,206,92,.55);
+      background: rgba(255,206,92,.18);
+    }
+
+    .form{ display:grid; gap:10px; margin-top:12px; }
+    .field{ display:grid; gap:6px; }
+    .label{ font-size:12px; font-weight:900; color:var(--muted); }
+    .input{
+      width:100%;
+      padding:14px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, #ffffff, #f3fbff);
+      font-weight:950;
+      color:var(--ink);
+      outline:none;
+      box-shadow: var(--shadowSoft);
+      transition: box-shadow .18s ease, border-color .18s ease;
+    }
+    .input:focus{
+      border-color: rgba(58,166,255,.45);
+      box-shadow: 0 14px 26px rgba(0,0,0,.12);
+    }
+    .hint{ font-size:12px; color:var(--muted); line-height:1.35; }
+
+    .themes{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .theme-card{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #f3fbff);
+      border-radius: 16px;
+      padding:12px;
+      box-shadow: var(--shadowSoft);
+      cursor:pointer;
+      user-select:none;
+      text-align:left;
+      transition: transform .06s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .theme-card:hover{
+      border-color: rgba(58,166,255,.35);
+      box-shadow: 0 14px 26px rgba(0,0,0,.12);
+    }
+    .theme-card:active{ transform: scale(.99); }
+    .theme-card.selected{
+      border-color: rgba(26,165,106,.35);
+      background: linear-gradient(180deg, rgba(26,165,106,.08), #ffffff);
+    }
+    .theme-card .t-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .theme-card .t-ico{ font-size:18px; }
+    .theme-card .t-name{ font-weight:950; }
+    .theme-card .t-sub{ margin-top:6px; font-size:12px; color:var(--muted); line-height:1.25; }
+
+    /* Aventure */
+    .adv-banner{
+      margin-top:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,204,77,.20), rgba(255,204,77,.06));
+      box-shadow: var(--shadowSoft);
+    }
+    .adv-banner .big{font-weight:950}
+    .adv-banner .small{margin-top:6px; font-size:12px; color:var(--muted); line-height:1.35}
+
+    .map{ margin-top:12px; display:grid; gap:10px; }
+    .lvl{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: var(--shadowSoft);
+      overflow:hidden;
+    }
+    .lvl-head{
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: linear-gradient(180deg, rgba(58,166,255,.10), rgba(58,166,255,.03));
+      cursor:pointer;
+      user-select:none;
+    }
+    .lvl-left{display:flex; align-items:center; gap:10px; min-width:0;}
+    .badge{
+      width:34px;height:34px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      border:1px solid rgba(0,0,0,.08);
+      background: linear-gradient(180deg,#fff,#f2fbff);
+      box-shadow: 0 10px 16px rgba(0,0,0,.08);
+      font-weight:950;
+    }
+    .lvl-title{
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .lvl-right{display:flex; align-items:center; gap:10px; flex:0 0 auto;}
+    .stars{font-weight:950; color:#946200; white-space:nowrap;}
+    .lock{font-weight:950; color:var(--muted)}
+    .lvl-body{
+      padding:10px 12px 12px;
+      display:grid;
+      gap:8px;
+      background: linear-gradient(180deg, #fff, #f7fcff);
+    }
+    .lvl-body[hidden]{display:none}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(191,230,255,.95);
+      background: rgba(58,166,255,.06);
+      font-size:12px;
+      font-weight:900;
+      color:var(--muted);
+      width:max-content;
+    }
+    .pill strong{color:var(--ink)}
+
+    /* Menu Modes */
+    .mode-grid{ margin-top:12px; display:grid; gap:10px; }
+    .mode-card{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: var(--shadowSoft);
+      padding:12px;
+      display:grid;
+      gap:10px;
+    }
+    .mode-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .mode-title{
+      font-weight:950;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:16px;
+    }
+    .mode-desc{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    /* ===== Mots croisés ===== */
+    .xw-wrap{
+      margin-top:12px;
+      display:grid;
+      gap:12px;
+    }
+    .xw-toprow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .xw-stats{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .xw-grid{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      overflow:auto;                  /*  scroll si trop large */
+      box-shadow: var(--shadowSoft);
+      background:#fff;
+      display:grid;
+      gap:6px;
+      padding:10px;
+      max-width:100%;
+    }
+
+    .xw-cell{
+      position:relative;
+      background:#f6fbff;
+      border:1px solid rgba(191,230,255,.65);
+      width:46px;                     /*  taille PC */
+      height:46px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      border-radius:10px;
+    }
+
+    @media (max-width: 480px){
+      .xw-cell{
+        width:36px;                   /*  mobile */
+        height:36px;
+      }
+    }
+
+    .xw-cell.block{
+      background: #1b3d5a;
+      border-color: rgba(0,0,0,.10);
+    }
+    .xw-cell input{
+      width:100%;
+      height:100%;
+      border:0;
+      outline:none;
+      background:transparent;
+      text-align:center;
+      font-weight:950;
+      font-size:16px;
+      color:var(--ink);
+      text-transform: uppercase;
+      caret-color: transparent;
+    }
+    .xw-cell input::selection{ background: rgba(58,166,255,.25); }
+    .xw-cell .num{
+      position:absolute;
+      top:2px; left:3px;
+      font-size:10px;
+      font-weight:950;
+      color: rgba(18,48,74,.72);
+      user-select:none;
+      pointer-events:none;
+    }
+    .xw-cell.selected{
+      box-shadow: inset 0 0 0 2px rgba(58,166,255,.80);
+      background: rgba(58,166,255,.08);
+    }
+    .xw-cell.bad{
+      background: rgba(229,72,93,.12);
+      box-shadow: inset 0 0 0 2px rgba(229,72,93,.35);
+    }
+    .xw-cell.good{
+      background: rgba(26,165,106,.10);
+    }
+    .xw-clues{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    .xw-panel{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      background:#fff;
+      box-shadow: var(--shadowSoft);
+      padding:10px;
+      overflow:hidden;
+    }
+    .xw-panel h3{
+      margin:0 0 8px 0;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:950;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .xw-cluelist{
+      display:grid;
+      gap:8px;
+      font-size:12px;
+      color:var(--ink);
+      line-height:1.3;
+      max-height: 240px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .xw-clue{
+      padding:8px;
+      border:1px solid rgba(191,230,255,.75);
+      border-radius:12px;
+      background: rgba(58,166,255,.05);
+    }
+    .xw-clue .n{
+      font-weight:950;
+      color:var(--ink);
+    }
+    .xw-footnote{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+  
+
+/* ===== CLAVIER MOTS CROISÉS – VERSION LISIBLE & RESPONSIVE ===== */
+.xw-kb{
+  margin-top:12px;
+  display:grid;
+  gap:6px;
+}
+/* Chaque ligne du clavier */
+.xw-kb-row{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:nowrap;          /* empêche le retour à la ligne */
+  overflow-x:auto;           /* scroll si nécessaire */
+  padding:2px 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width:none;
+}
+.xw-kb-row::-webkit-scrollbar{ display:none; }
+/* Touches */
+.xw-key{
+  min-width:32px;            /* plus compact */
+  height:36px;
+  padding:0 8px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:900;
+  line-height:36px;
+  border:1px solid rgba(0,0,0,.10);
+  background: linear-gradient(180deg, #ffffff, #eaf7ff);
+  box-shadow: var(--shadowSoft);
+  color:var(--ink);
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+}
+.xw-key:active{ transform:scale(.97); }
+/* Touches larges (Effacer / Entrée) */
+.xw-key.wide{ min-width:64px; }
+/* Mobile très étroit */
+@media (max-width: 420px){
+  .xw-key{
+    min-width:28px;
+    height:32px;
+    font-size:13px;
+    line-height:32px;
+    border-radius:9px;
+  }
+  .xw-key.wide{ min-width:56px; }
+}
+
+
+/* ===== MOTS MÊLÉS ===== */
+.wm-legend{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.wm-wordlist{
+  margin-top:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.xw-cell-app.found{
+  background: rgba(26,165,106,.18);
+  box-shadow: inset 0 0 0 3px rgba(26,165,106,.55);
+}
+
+/* ===== Mots croisés (layout type app + clavier AZERTY) ===== */
+.xw-appbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin-top:12px;
+}
+.xw-appbar .left, .xw-appbar .right{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.xw-iconbtn{
+  border:1px solid rgba(191,230,255,.9);
+  background: rgba(255,255,255,.85);
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:950;
+  color:var(--ink);
+  box-shadow: var(--shadowSoft);
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+}
+.xw-iconbtn:active{transform:scale(.99);}
+.xw-iconbtn.gold{
+  border-color: rgba(255,206,92,.75);
+  background: linear-gradient(180deg, #fff8d9, #ffeaa9);
+}
+
+.xw-stage-app{
+  margin-top:10px;
+  border:1px solid rgba(0,0,0,.10);
+  border-radius: 16px;
+  background: rgba(18,48,74,.92);
+  box-shadow: var(--shadowSoft);
+  padding:12px;
+  overflow:auto;
+}
+.xw-grid-app{
+  display:grid;
+  gap:6px;
+  width:max-content;
+  margin:0 auto;
+}
+.xw-cell-app{
+  width:44px; height:44px;
+  border-radius:10px;
+  background:#f7fbff;
+  border:1px solid rgba(191,230,255,.65);
+  display:grid; place-items:center;
+  position:relative;
+  user-select:none;
+  cursor:pointer;
+}
+.xw-cell-app.block{
+  background: rgba(0,0,0,.55);
+  border-color: rgba(0,0,0,.35);
+  cursor:default;
+}
+.xw-cell-app .num{
+  position:absolute;
+  top:2px; left:4px;
+  font-size:10px; font-weight:950;
+  color: rgba(18,48,74,.70);
+  pointer-events:none;
+}
+.xw-cell-app .ch{
+  font-size:18px;
+  font-weight:950;
+  color:var(--ink);
+}
+.xw-cell-app.active{
+  background: rgba(58,166,255,.22);
+  box-shadow: inset 0 0 0 3px rgba(58,166,255,.85);
+}
+.xw-cell-app.cursor{
+  background: rgba(255,206,92,.22);
+  box-shadow: inset 0 0 0 3px rgba(255,206,92,.92);
+}
+@media (max-width: 480px){
+  .xw-cell-app{width:36px;height:36px;}
+  .xw-cell-app .ch{font-size:16px;}
+}
+
+.xw-cluebar-app{
+  margin-top:10px;
+  border:1px solid rgba(0,0,0,.10);
+  background: #ffffff;
+  border-radius: 16px;
+  padding:10px;
+  box-shadow: var(--shadowSoft);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.xw-cluebar-app .arrow{
+  width:44px; height:44px;
+  border-radius:14px;
+  border:1px solid rgba(191,230,255,.85);
+  background: rgba(58,166,255,.08);
+  display:grid;
+  place-items:center;
+  font-size:20px;
+  font-weight:950;
+  cursor:pointer;
+  user-select:none;
+  flex:0 0 auto;
+}
+.xw-cluebar-app .arrow:active{transform:scale(.99);}
+.xw-cluebar-app .text{flex:1; text-align:center; line-height:1.2;}
+.xw-cluebar-app .sub{display:block; font-size:12px; font-weight:900; color:var(--muted); margin-bottom:4px;}
+.xw-cluebar-app .main{font-weight:950; color:var(--ink);}
+
+.xw-answer-tiles{
+  margin-top:10px;
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.xw-tiles-row{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.xw-tiles-row .xw-answer-tiles{
+  margin-top:0;
+}
+.xw-tile{
+  width:44px; height:44px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.10);
+  background: rgba(58,166,255,.92);
+  box-shadow: 0 10px 18px rgba(0,0,0,.16);
+  display:grid; place-items:center;
+  color:#fff;
+  font-weight:950;
+  font-size:18px;
+  user-select:none;
+  cursor:pointer;
+}
+.xw-tile.empty{
+  background: rgba(18,48,74,.10);
+  color: rgba(18,48,74,.55);
+  box-shadow:none;
+}
+.xw-tile.cursor{
+  outline: 3px solid rgba(255,206,92,.92);
+  outline-offset: 0px;
+}
+@media (max-width: 480px){
+  .xw-tile{width:38px;height:38px;border-radius:10px;font-size:16px;}
+}
+
+/* (clavier mots croisés défini plus haut) */
+
+
+/* ===== FIX DEFINITIF SCROLL HORIZONTAL MOTS MÊLÉS ===== */
+.wm-stage,
+.xw-stage-app{
+  width:100%;
+  max-width:100vw;
+  overflow:hidden;
+}
+
+#wmGrid{
+  width:100%;
+  max-width:100%;
+  display:grid;
+  grid-template-columns: repeat(var(--wm-cols), 1fr);
+  gap:4px;
+  box-sizing:border-box;
+}
+
+.wm-cell{
+  width:100%;
+  aspect-ratio:1/1;
+  font-size:clamp(11px, 2.6vw, 18px);
+}
+
+
+/* ===== MOTS MÊLÉS – FIX GRILLE STABLE (TOUTES LES CASES VISIBLES) ===== */
+#wmGrid{
+  display:grid;
+  width:100%;
+  max-width:100%;
+  gap:4px;
+  justify-content:center;
+  box-sizing:border-box;
+}
+/* Taille des cases basée sur la largeur écran (safe pour 14x14) */
+.wm-cell{
+  width:clamp(22px, calc(100vw / 16), 34px);
+  height:clamp(22px, calc(100vw / 16), 34px);
+  aspect-ratio:auto; /* on évite les bugs */
+  font-size:clamp(11px, 2.8vw, 17px);
+  box-sizing:border-box;
+}
+/* Sécurité anti-scroll horizontal */
+body{ overflow-x:hidden; }
+
+/* ===== FIX: SCROLL/PAN DU CADRE MOTS CROISÉS ===== */
+.xw-stage-app{
+  overflow: auto;                 /* permet de glisser pour voir toute la grille */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;      /* autorise le pan sur mobile */
+}
+
+/* ===== AJUSTEMENT MOTS MÊLÉS 14x14 UNIQUEMENT (14 LETTRES VISIBLES) =====
+   Objectif: le 14x14 tient EN ENTIER dans l’écran (sans scroll) et reste lisible.
+   On ne touche pas au 10x10.
+*/
+#wmGrid[data-size="14"]{
+  --wm-gap14: 3px;
+  /* largeur dispo ~ écran - marges (barre/arrondis). Ajuste si besoin. */
+  --wm-cell14: clamp(17px, calc((100vw - 76px - (13 * var(--wm-gap14))) / 14), 27px);
+  gap: var(--wm-gap14);
+  grid-template-columns: repeat(14, var(--wm-cell14)) !important;
+  width: calc(14 * var(--wm-cell14) + 13 * var(--wm-gap14));
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+#wmGrid[data-size="14"] .wm-cell{
+  width: var(--wm-cell14) !important;
+  height: var(--wm-cell14) !important;
+}
+
+#wmGrid[data-size="14"] .wm-cell .ch{
+  font-size: clamp(14px, calc(var(--wm-cell14) * 0.42), 16px) !important;
+}
+
+
+/* ===== MOTS MÊLÉS – ANDROID DRAG FIX ===== */
+#wmGrid{
+  touch-action: none;              /* empêche le scroll pendant l'interaction */
+  -webkit-user-select: none;
+  user-select: none;
+}
+.xw-stage-app{
+  overscroll-behavior: contain;    /* évite le scroll/bounce du parent */
+}
+
+
+/* ===== MENU MOTS CROISÉS / MOTS MÊLÉS : 3 COLONNES (compact) ===== */
+.xw-themes,
+.wm-themes{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+.xw-themes .theme-card,
+.wm-themes .theme-card{
+  padding:10px;
+  border-radius:14px;
+}
+.xw-themes .t-name,
+.wm-themes .t-name{ font-size:14px; }
+.xw-themes .t-sub,
+.wm-themes .t-sub{ font-size:11px; }
+.xw-themes .t-ico,
+.wm-themes .t-ico{ font-size:16px; }
+
+@media (max-width:480px){
+  .xw-themes,
+  .wm-themes{
+    grid-template-columns: repeat(3, 1fr);
+    gap:8px;
+  }
+  .xw-themes .theme-card,
+  .wm-themes .theme-card{ padding:8px; }
+  .xw-themes .t-name,
+  .wm-themes .t-name{ font-size:13px; }
+}
+
+
+
+/* ===== AMÉLIORATION VISUELLE GLOBALE (CLEAN UI) ===== */
+
+/* Lisibilité générale */
+body{
+  letter-spacing: .1px;
+}
+
+/* Titres plus clairs */
+.qtext{
+  font-size:17px;
+  line-height:1.25;
+}
+
+/* Boutons : hiérarchie plus nette */
+.btn{
+  border-radius:16px;
+}
+.btn.secondary{
+  opacity:.92;
+}
+.btn.gold{
+  box-shadow: 0 14px 30px rgba(255,206,92,.35);
+}
+
+/* Cartes : cohérence visuelle */
+.card,
+.theme-card,
+.lvl,
+.result{
+  border-radius:18px;
+}
+
+/* Espacements cohérents */
+.hint{
+  margin-bottom:6px;
+}
+
+/* Désactivé plus compréhensible */
+.btn[disabled],
+.ansbtn[disabled]{
+  opacity:.45;
+  filter:grayscale(.2);
+}
+
+/* Feedback réussite */
+.result.good{
+  animation: pop .25s ease-out;
+}
+
+@keyframes pop{
+  from{ transform:scale(.97); opacity:.7; }
+  to{ transform:scale(1); opacity:1; }
+}
+
+/* HUD plus lisible */
+.hud-pill{
+  font-size:13px;
+}
+
+/* Mobile : zones cliquables confort */
+@media (max-width:480px){
+  .btn,
+  .ctrl,
+  .ansbtn{
+    padding:16px 12px;
+  }
+}
+
+
+
+/* ===== OPTIMISATION MOBILE 📱 ===== */
+
+/* Safe-area iPhone + paddings plus confort */
+:root{
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+body{
+  padding: calc(12px + var(--safe-top)) calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: contain;
+}
+
+/* Evite les zooms/scrolls bizarres iOS */
+input, button{
+  touch-action: manipulation;
+}
+
+/* Conteneur : plein écran mobile */
+.wrap{
+  width: min(520px, 100%);
+}
+
+/* Sur petit écran : layout question plus compact et lisible */
+@media (max-width: 420px){
+  body{ padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right)) calc(10px + var(--safe-bottom)) calc(10px + var(--safe-left)); }
+
+  .hud{
+    gap:8px;
+    padding:10px 10px;
+  }
+  .hud-center{ font-size:15px; }
+  .hud-pill{ font-size:12px; padding:6px 9px; }
+
+  .track{ margin:10px 0 12px; height:44px; }
+  .avatar{ width:34px; height:34px; font-size:17px; }
+  .track-dot{ width:16px; height:16px; }
+
+  .card-top{ padding:10px 12px; }
+  .tag{ font-size:11px; padding:6px 9px; }
+  .counter{ font-size:11px; }
+
+  /* Question: passe en colonne (meilleur sur mobile) */
+  .qarea{
+    grid-template-columns: 1fr;
+    gap:10px;
+    padding:12px;
+  }
+  .qmedia{
+    width:64px; height:64px;
+    border-radius:14px;
+    font-size:28px;
+    justify-self:start;
+  }
+  .qtext{
+    font-size:16px;
+    line-height:1.25;
+  }
+
+  /* Boutons plus “thumb-friendly” */
+  .btn, .ansbtn, .ctrl{
+    min-height:52px;
+    border-radius:16px;
+  }
+
+  /* Les 2 boutons en “row” se mettent bien en pile */
+  .row{ gap:10px; }
+  .row .btn{ min-width: 100%; }
+
+  /* Theme cards plus confort en touch */
+  .theme-card{ padding:10px; }
+  .theme-card .t-name{ font-size:15px; }
+
+  /* Clavier mots croisés: un peu plus compact sans wrap */
+  .xw-key{ min-width:28px; height:34px; line-height:34px; }
+  .xw-key.wide{ min-width:54px; }
+}
+
+/* Confort lecture sur mobile moyen */
+@media (max-width: 520px){
+  .card{ box-shadow: 0 12px 24px rgba(0,0,0,.12); }
+  .result{ padding:12px; }
+  .hint{ line-height:1.4; }
+}
+
+/* Appbar (mots croisés/mêlés) : reste visible en scroll */
+.xw-appbar{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding-top: var(--safe-top);
+}
+
+/* Empêche le défilement horizontal accidentel */
+.wrap, .card, .xw-stage-app, .wm-stage{
+  max-width:100%;
+}
+
+
+
+/* ===== ACCUEIL (MODES) : 3 COLONNES MOBILE ===== */
+
+/* Grille des modes (accueil) */
+#modesGrid{}
+.themes.modes-3{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:10px;
+}
+@media (max-width: 520px){
+  .themes.modes-3{
+    grid-template-columns: repeat(2, 1fr);
+    gap:10px;
+  }
+  .themes.modes-3 .theme-card{
+    padding:10px;
+    border-radius:14px;
+    min-height:74px;
+    display:grid;
+    align-content:center;
+  }
+  .themes.modes-3 .t-top{ gap:8px; }
+  .themes.modes-3 .t-name{
+    font-size:12px;
+    line-height:1.15;
+  }
+  .themes.modes-3 .t-ico{ font-size:16px; }
+  .themes.modes-3 .t-sub{ display:none; } /* on retire la desc sur mobile pour faire clean */
+}
+
+/* Actions (Mes réussites / Sauvegarder / Importer) en 3 colonnes, 1 ligne */
+.actions-3{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px;
+}
+@media (max-width: 520px){
+  .actions-3{ gap:8px; }
+}
+.action-tile{
+  width:100%;
+  border:1px solid var(--line);
+  background: linear-gradient(180deg, #ffffff, #f3fbff);
+  border-radius: 16px;
+  padding:12px 10px;
+  box-shadow: var(--shadowSoft);
+  cursor:pointer;
+  user-select:none;
+  font-weight:950;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:54px;
+}
+@media (max-width: 520px){
+  .action-tile{
+    padding:10px 8px;
+    font-size:12px;
+    border-radius:14px;
+    min-height:52px;
+  }
+}
+.action-tile:active{ transform: scale(.99); }
+
+
+
+/* ===== FIX MOBILE: "Grille 10" sur une ligne ===== */
+.xw-themes .t-name,
+.wm-themes .t-name{
+  white-space: nowrap;
+}
+@media (max-width:480px){
+  .xw-themes .t-name,
+  .wm-themes .t-name{
+    font-size: 13px;
+  }
+}
+
+
+
+/* ===== NIVEAUX TERMINÉS : STYLE VERT CLAIR ===== */
+/* Cache l'icône de validation */
+.theme-card .done,
+.theme-card .check,
+.theme-card .t-check,
+.theme-card .ok,
+.theme-card .badge-ok {
+  display:none !important;
+}
+
+/* Style carte terminée */
+.theme-card.completed,
+.theme-card.is-done,
+.theme-card[data-done="1"] {
+  background: linear-gradient(180deg, #e9f9ef, #f4fffa);
+  border-color: #8ad6a8;
+  box-shadow: 0 10px 22px rgba(120, 200, 150, .35);
+}
+
+
+
+/* ===== TERMINÉ : VERT TRANSPARENT (SANS ICÔNES) ===== */
+/* Supprimer tout symbole de validation (, , etc.) */
+.theme-card * {
+  text-decoration: none;
+}
+.theme-card::after {
+  content: none !important;
+}
+
+/* État terminé : vert évident mais transparent */
+.theme-card.completed,
+.theme-card.is-done,
+.theme-card[data-done="1"] {
+  background: rgba(120, 200, 150, 0.25) !important;
+  border-color: rgba(60, 160, 110, 0.6) !important;
+  box-shadow: inset 0 0 0 2px rgba(60, 160, 110, 0.35),
+              0 6px 14px rgba(60, 160, 110, 0.25);
+}
+
+
+
+/* ===== MENU SEULEMENT : PAS D'ICÔNES DE VALIDATION ===== */
+/* Cache les symboles UNIQUEMENT dans les cartes de menu */
+.theme-card .check,
+.theme-card .done,
+.theme-card .t-check,
+.theme-card .badge-ok,
+.theme-card .ok,
+.theme-card .emoji {
+  display:none !important;
+}
+
+/* IMPORTANT : on ne touche PAS aux validations dans le jeu */
+.xw-stage-app .check,
+.xw-stage-app .done,
+.xw-stage-app .t-check,
+.xw-stage-app .badge-ok,
+.xw-stage-app .ok {
+  display:inline-flex !important;
+}
+
+
+
+/* ===== MOTS MÊLÉS : COULEURS MULTIPLES POUR MOTS TROUVÉS ===== */
+.wm-cell.found{ 
+  color:#0f1f2e;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.55);
+}
+.wm-cell.found.wm-c0{ background: rgba(90, 200, 120, .35); border-color: rgba(60,160,110,.75); }
+.wm-cell.found.wm-c1{ background: rgba(80, 170, 255, .35); border-color: rgba(60,120,210,.75); }
+.wm-cell.found.wm-c2{ background: rgba(255, 170, 80, .35); border-color: rgba(210,130,60,.75); }
+.wm-cell.found.wm-c3{ background: rgba(200, 120, 255, .30); border-color: rgba(150,90,210,.75); }
+.wm-cell.found.wm-c4{ background: rgba(255, 110, 160, .28); border-color: rgba(210,80,130,.75); }
+.wm-cell.found.wm-c5{ background: rgba(255, 220, 90, .32); border-color: rgba(210,170,60,.75); }
+.wm-cell.found.wm-c6{ background: rgba(120, 230, 220, .30); border-color: rgba(70,170,160,.75); }
+.wm-cell.found.wm-c7{ background: rgba(180, 180, 190, .26); border-color: rgba(130,130,150,.75); }
+
+
+
+/* ===== MOTS MÊLÉS : MOT TROUVÉ BARRÉ ===== */
+.wm-word{ font-weight:900; }
+.wm-word--found{
+  opacity: .55;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(15,31,46,.55);
+  filter: grayscale(.15);
+}
+
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hud">
+      <div class="hud-center" id="hudTitle">JW Quiz</div>
+      <div class="hud-right">
+        <span class="hud-pill" title="Profil">👤 <strong id="profileName">—</strong></span>
+        <span class="hud-pill">🪙 <strong id="coins">0</strong></span>
+        <span class="hud-pill" id="heartsPill" style="display:none;">❤️ <strong id="hearts">0</strong></span>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-line"></div>
+      <div class="track-dot" id="trackDot" style="left:50%"></div>
+      <div class="avatar left" title="Joueur">🙂</div>
+      <div class="avatar right" title="Adversaire">😄</div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="tag">
+          <span id="qType">MENU</span>
+          • Thème : <strong id="themeLabel">Mixte</strong>
+          • Difficulté : <strong id="diffStars">—</strong>
+        </div>
+        <div class="counter" id="counter">—</div>
+      </div>
+
+      <div class="qarea">
+        <div class="qmedia" id="qmedia">📘</div>
+        <div class="qtext" id="qtext">Bienvenue</div>
+      </div>
+
+      <div class="ref" id="ref"></div>
+
+      <div style="padding: 0 14px 14px;">
+        <div id="gameArea"></div>
+        <div class="result" id="resultBox" style="display:none;"></div>
+
+        <div class="controls" id="controls" style="display:none;">
+          <button class="ctrl gold" id="btnJoker">🃏 Joker (2 🪙)</button>
+          <button class="ctrl" id="btnSkip">⏭️ Passer</button>
+          <button class="ctrl danger" id="btnEnd">⛔ Finir</button>
+        </div>
+
+        <div class="footer" id="footer"></div>
+      </div>
+    </div>
+  </div>
+
+<script src="questions.js"></script>
+<script src="crosswords.js"></script>
+<script src="wordmix.js"></script>
+
+<script>
+/* ========= Base (tes modes existants) =========
+    Données déplacées dans des fichiers séparés :
+   - questions.js  -> window.THEMES + window.QUESTIONS  (Classique + Aventure)
+   - crosswords.js -> window.CROSSWORD_BANKS           (Mots croisés)
+   Assure-toi que ces 2 fichiers sont dans le même dossier que index.html
+*/
+const THEMES = (window.THEMES && Array.isArray(window.THEMES)) ? window.THEMES : [];
+const QUESTIONS = (window.QUESTIONS && Array.isArray(window.QUESTIONS)) ? window.QUESTIONS : [];
+
+// Petit garde-fou (évite un jeu vide si un fichier manque)
+if(!THEMES.length || !QUESTIONS.length){
+  console.warn("questions.js manquant ou invalide : THEMES/QUESTIONS vides.");
+}
+const CROSSWORD_BANKS = (window.CROSSWORD_BANKS && Array.isArray(window.CROSSWORD_BANKS)) ? window.CROSSWORD_BANKS : [];
+if(!CROSSWORD_BANKS.length){
+  console.warn("crosswords.js manquant ou invalide : CROSSWORD_BANKS vide.");
+}
+
+const WORDMIX_BANKS = (window.WORDMIX_BANKS && Array.isArray(window.WORDMIX_BANKS)) ? window.WORDMIX_BANKS : [];
+if(!WORDMIX_BANKS.length){
+  console.warn("wordmix.js manquant ou invalide : WORDMIX_BANKS vide.");
+}
+
+
+/* Banque "Mots croisés" déplacée dans crosswords.js (window.CROSSWORD_BANKS) */
+
+/* Règles */
+const COINS_START = 0;
+const COINS_PER_GOOD = 2;
+const JOKER_COST = 2;
+const ADVENTURE_HEARTS_START = 3;
+
+/* Aventure */
+const ADVENTURE_LEVELS = [
+  { n:1,  name:"Tutoriel",   qCount:5,  minD:1, maxD:1,  minTypes:["QCM"],                  boss:false, bonusStars:[3,6,10] },
+  { n:2,  name:"Départ",     qCount:7,  minD:1, maxD:2,  minTypes:["QCM","VF"],            boss:false, bonusStars:[3,6,10] },
+  { n:3,  name:"Chemin",     qCount:8,  minD:2, maxD:3,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[4,7,12] },
+  { n:4,  name:"Forêt",      qCount:9,  minD:2, maxD:3,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[4,7,12] },
+  { n:5,  name:"Mini Boss",  qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:true,  bonusStars:[6,10,16] },
+  { n:6,  name:"Montée",     qCount:10, minD:3, maxD:4,  minTypes:["QCM","VF","TROU"],     boss:false, bonusStars:[5,9,14] },
+  { n:7,  name:"Plateau",    qCount:10, minD:3, maxD:4,  minTypes:["QCM","ORDRE"],         boss:false, bonusStars:[5,9,14] },
+  { n:8,  name:"Épreuve",    qCount:10, minD:4, maxD:4,  minTypes:["QCM","TROU"],          boss:false, bonusStars:[6,10,16] },
+  { n:9,  name:"Avant-boss", qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","ORDRE"],    boss:false, bonusStars:[7,12,18] },
+  { n:10, name:"Boss",       qCount:10, minD:4, maxD:5,  minTypes:["QCM","VF","TROU","ORDRE"], boss:true, bonusStars:[10,16,24] },
+];
+
+/* Stockage */
+const STORAGE_KEY = "jwquiz_full_v2025_12_19_crossword_banks";
+
+/* Helpers */
+const $ = (s)=>document.querySelector(s);
+function normalize(s){
+  return String(s ?? "").trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+}
+function normalizeLettersOnly(s){
+  const t = String(s ?? "")
+    .toUpperCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^A-Z]/g,"");
+  return t;
+}
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t ^= t + Math.imul(t ^ t >>> 7, 61 | t);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function esc(s){
+  return String(s ?? "").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function stars(n){
+  n=Math.max(1,Math.min(5,Number(n)||1));
+  return "⭐".repeat(n);
+}
+function pickMedia(q){
+  const t=(q.type||"QCM").toUpperCase();
+  if(t==="ORDRE") return "🧩";
+  if(t==="TROU") return "🕳️";
+  if(t==="VF") return "";
+  const d=Number(q.difficulty)||1;
+  return d<=1?"📘":d===2?"📗":d===3?"📙":d===4?"📕":"👑";
+}
+function splitOrderAnswer(ans){
+  const raw=String(ans??"").trim();
+  if(!raw) return [];
+  if(raw.includes("|")) return raw.split("|").map(x=>x.trim()).filter(Boolean);
+  if(raw.includes(",")) return raw.split(",").map(x=>x.trim()).filter(Boolean);
+  return raw.split(/\s+/).map(x=>x.trim()).filter(Boolean);
+}
+
+/* UI */
+const ui = {
+  coins: $("#coins"),
+  profileName: $("#profileName"),
+  hudTitle: $("#hudTitle"),
+  trackDot: $("#trackDot"),
+  qType: $("#qType"),
+  themeLabel: $("#themeLabel"),
+  diffStars: $("#diffStars"),
+  counter: $("#counter"),
+  qmedia: $("#qmedia"),
+  qtext: $("#qtext"),
+  ref: $("#ref"),
+  gameArea: $("#gameArea"),
+  resultBox: $("#resultBox"),
+  controls: $("#controls"),
+  btnJoker: $("#btnJoker"),
+  btnSkip: $("#btnSkip"),
+  btnEnd: $("#btnEnd"),
+  footer: $("#footer"),
+  heartsPill: $("#heartsPill"),
+  hearts: $("#hearts"),
+};
+
+/* State */
+const defaultState = () => ({
+  version: 1,
+  profile: null,
+  coins: COINS_START,
+  selectedTheme: "Mixte",
+  correctIds: {},
+  session: null,
+  adventure: {
+    currentLevel: 1,
+    levelStars: {},
+    hearts: ADVENTURE_HEARTS_START,
+  },
+  crossword: {
+    last: null,
+    wins: 0,
+    selectedBank: "grille1",
+    completedBanks: {},
+  }
+});
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const st = raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState();
+
+    if(typeof st.coins !== "number") st.coins = COINS_START;
+    if(!st.selectedTheme) st.selectedTheme = "Mixte";
+    if(!st.correctIds || typeof st.correctIds !== "object") st.correctIds = {};
+    if(!st.adventure || typeof st.adventure !== "object") st.adventure = defaultState().adventure;
+    if(!st.crossword || typeof st.crossword !== "object") st.crossword = defaultState().crossword;
+
+    if(!st.adventure.currentLevel) st.adventure.currentLevel = 1;
+    if(!st.adventure.levelStars || typeof st.adventure.levelStars !== "object") st.adventure.levelStars = {};
+    if(typeof st.adventure.hearts !== "number") st.adventure.hearts = ADVENTURE_HEARTS_START;
+
+    if(typeof st.crossword.wins !== "number") st.crossword.wins = 0;
+    if(!st.crossword.selectedBank) st.crossword.selectedBank = "grille1";
+
+    if(!st.crossword.completedBanks || typeof st.crossword.completedBanks !== "object") st.crossword.completedBanks = {};
+
+    return st;
+  }catch(e){
+    return defaultState();
+  }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function setHeartsVisible(show){
+  ui.heartsPill.style.display = show ? "inline-flex" : "none";
+}
+function updateTopBar(){
+  ui.coins.textContent = String(state.coins);
+  ui.profileName.textContent = state.profile?.name ? state.profile.name : "—";
+  ui.themeLabel.textContent = state.selectedTheme || "Mixte";
+  ui.hearts.textContent = String(state.adventure?.hearts ?? 0);
+
+  const inAdventure = state.session?.mode === "adventure";
+  setHeartsVisible(inAdventure);
+}
+ui.hudTitle.onclick = ()=> renderModeMenu();
+
+/* Save/Import */
+function exportSave(){
+  const data = {
+    version: state.version,
+    profile: state.profile,
+    coins: state.coins,
+    selectedTheme: state.selectedTheme,
+    correctIds: state.correctIds,
+    adventure: state.adventure,
+    crossword: state.crossword,
+    exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `jwquiz_save_${(state.profile?.name||"player").replace(/\s+/g,"_")}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+function importSaveFile(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || typeof data !== "object") throw new Error("invalid");
+
+      state.profile = data.profile || state.profile;
+      state.coins = Number.isFinite(data.coins) ? data.coins : state.coins;
+      state.selectedTheme = data.selectedTheme || state.selectedTheme;
+      state.correctIds = (data.correctIds && typeof data.correctIds === "object") ? data.correctIds : state.correctIds;
+
+      if(data.adventure && typeof data.adventure === "object"){
+        state.adventure.currentLevel = Number(data.adventure.currentLevel) || state.adventure.currentLevel;
+        state.adventure.levelStars = (data.adventure.levelStars && typeof data.adventure.levelStars==="object")
+          ? data.adventure.levelStars : state.adventure.levelStars;
+
+        const h = Number(data.adventure.hearts);
+        state.adventure.hearts = Number.isFinite(h) ? h : state.adventure.hearts;
+      }
+
+      if(data.crossword && typeof data.crossword === "object"){
+        state.crossword.wins = Number(data.crossword.wins) || 0;
+        state.crossword.last = data.crossword.last || null;
+        state.crossword.selectedBank = data.crossword.selectedBank || state.crossword.selectedBank || "grille1";
+        state.crossword.completedBanks = (data.crossword.completedBanks && typeof data.crossword.completedBanks === "object") ? data.crossword.completedBanks : (state.crossword.completedBanks || {});
+      }
+
+      state.session = null;
+      saveState();
+      renderModeMenu();
+    }catch(e){
+      ui.footer.innerHTML = "⚠️ Fichier de sauvegarde invalide.";
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* Profile */
+function renderProfileGate(){
+  updateTopBar();
+  ui.qType.textContent = "COMPTE";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "👤";
+  ui.qtext.textContent = "Créer ton compte";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">Ton compte reste enregistré sur cet appareil.</div>
+    <div class="form">
+      <div class="field">
+        <div class="label">Pseudo *</div>
+        <input class="input" id="inpName" maxlength="18" placeholder="Ex: Vincenzo" />
+      </div>
+      <button class="btn" id="btnCreate"> Créer mon compte</button>
+    </div>
+  `;
+
+  $("#btnCreate").onclick = ()=>{
+    const name = ($("#inpName").value || "").trim();
+    if(!name){ ui.footer.innerHTML = "⚠️ Mets un pseudo."; return; }
+    state.profile = { id: "id_"+Date.now(), name };
+    saveState();
+    renderModeMenu();
+  };
+}
+
+/* Counts */
+function computeCounts(){
+  const correct = state.correctIds || {};
+  const totalAll = QUESTIONS.length;
+  const doneAll = Object.keys(correct).filter(id => QUESTIONS.some(q=>q.id===id)).length;
+
+  const byTheme = {};
+  THEMES.forEach(t=>{
+    if(t.key === "Mixte") return;
+    const list = QUESTIONS.filter(q => (q.theme||"Bible") === t.key);
+    const done = list.filter(q => !!correct[q.id]).length;
+    byTheme[t.key] = { total: list.length, remaining: Math.max(0, list.length - done), done };
+  });
+
+  return { totalAll, doneAll, remainingAll: Math.max(0, totalAll - doneAll), byTheme };
+}
+
+/* ----- MENU MODES ----- */
+function getAdventureInfo(){
+  const currentLevel = Math.max(1, Math.min(ADVENTURE_LEVELS.length, Number(state.adventure.currentLevel)||1));
+  const starsMap = state.adventure.levelStars || {};
+  const totalStars = Object.values(starsMap).reduce((a,b)=>a+(Number(b)||0),0);
+  const cfg = ADVENTURE_LEVELS[currentLevel-1];
+  const nextGoal = cfg.boss ? `Vaincre le boss (niveau ${cfg.n})` : `Valider le niveau ${cfg.n}`;
+  return { currentLevel, totalStars, nextGoal };
+}
+
+function renderModeMenu(){
+  updateTopBar();
+  if(!state.profile){ renderProfileGate(); return; }
+
+  const counts = computeCounts();
+  const adv = getAdventureInfo();
+
+  ui.qType.textContent = "ACCUEIL";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🎮";
+  ui.qtext.textContent = `Choisis ton mode`;
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
+
+  ui.gameArea.innerHTML = `
+<div class="hint">
+</div>
+
+<div class="hint" style="margin-top:12px;">Choisis ton mode :</div>
+
+<div class="themes modes-3" id="modesGrid">
+  <div class="theme-card" data-mode="classic">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">📘</span> Mode Classique</div>
+      <div></div>
+    </div>
+    <div class="t-sub">      
+    </div>
+  </div>
+
+  <div class="theme-card" data-mode="adventure">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">🗺️</span> Mode Aventure</div>
+      <div></div>
+    </div>
+    <div class="t-sub">
+    </div>
+  </div>
+
+  <div class="theme-card" data-mode="crossword">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">🧩</span> Mots croisés</div>
+      <div></div>
+    </div>
+    <div class="t-sub">
+    </div>
+  </div>
+
+  <div class="theme-card" data-mode="wordmix">
+    <div class="t-top">
+      <div class="t-name"><span class="t-ico">🔤</span> Mots mêlés</div>
+      <div></div>
+    </div>
+    <div class="t-sub">
+    </div>
+  </div>
+</div>
+
+<div class="actions-3">
+  <button class="action-tile" id="btnWins" type="button">📖 <span>Réussites</span></button>
+  <button class="action-tile" id="btnSave" type="button">💾 <span>Sauvegarde</span></button>
+  <button class="action-tile" id="btnImport" type="button">📥 <span>Importer</span></button>
+  <input type="file" id="fileImport" accept="application/json" style="display:none;">
+</div>
+`;
+
+  
+document.querySelectorAll("#modesGrid [data-mode]").forEach(card=>{
+  card.onclick = ()=>{
+    const m = card.getAttribute("data-mode");
+    if(m === "classic") return renderClassicHome();
+    if(m === "adventure") return renderAdventureMap();
+    if(m === "crossword") return renderCrosswordHome();
+    if(m === "wordmix") return renderWordMixHome();
+  };
+});
+$("#btnWins").onclick  = ()=> renderSuccesses();
+  $("#btnSave").onclick  = ()=> exportSave();
+  $("#btnImport").onclick = ()=> $("#fileImport").click();
+  $("#fileImport").onchange = (e)=>{
+    const f = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if(f) importSaveFile(f);
+  };
+}
+
+/* ====== CLASSIQUE (inchangé) ====== */
+function renderClassicHome(){
+  updateTopBar();
+  const counts = computeCounts();
+
+  ui.qType.textContent = "CLASSIQUE";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "📘";
+  ui.qtext.textContent = `Mode Classique`;
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      Total : <strong>${counts.totalAll}</strong>
+      • Réussies : <strong>${counts.doneAll}</strong>
+      • Restantes (global) : <strong>${counts.remainingAll}</strong>
+      • Pièces : <strong>${state.coins}</strong>
+    </div>
+
+    <div class="hint" style="margin-top:12px;">Choisis un thème :</div>
+    <div class="themes" id="themesGrid"></div>
+
+    <button class="btn" id="btnStart">▶️ COMMENCER</button>
+    <button class="btn secondary" id="backModes">⬅️ Retour modes</button>
+  `;
+
+  $("#backModes").onclick = ()=> renderModeMenu();
+
+  const grid = $("#themesGrid");
+  grid.innerHTML = "";
+
+  THEMES.forEach(t=>{
+    const isSel = (state.selectedTheme || "Mixte") === t.key;
+
+    let info = "";
+    if(t.key === "Mixte"){
+      info = `${t.hint} • ${counts.totalAll} questions`;
+    }else{
+      const c = counts.byTheme[t.key] || {total:0, remaining:0};
+      info = `${t.hint} • ${c.remaining}/${c.total} restantes`;
+    }
+
+    const card = document.createElement("div");
+    card.className = "theme-card" + (isSel ? " selected" : "");
+    card.innerHTML = `
+      <div class="t-top">
+        <div class="t-name"><span class="t-ico">${t.icon}</span> ${esc(t.label)}</div>
+        <div>${isSel ? "" : ""}</div>
+      </div>
+      <div class="t-sub">${esc(info)}</div>
+    `;
+    card.onclick = ()=>{
+      state.selectedTheme = t.key;
+      saveState();
+      renderClassicHome();
+    };
+    grid.appendChild(card);
+  });
+
+  $("#btnStart").onclick = ()=> startClassicSession();
+}
+
+function getClassicPool(){
+  const key = state.selectedTheme || "Mixte";
+  if(key === "Mixte") return QUESTIONS.slice();
+  return QUESTIONS.filter(q => (q.theme||"Bible") === key && !state.correctIds[q.id]);
+}
+function startClassicSession(){
+  const pool = getClassicPool();
+  if(!pool.length){
+    ui.footer.innerHTML = " Tu as déjà tout réussi dans cette catégorie ! (Mixte reste toujours disponible)";
+    return;
+  }
+  const ids = shuffle(pool.map(q=>q.id));
+  state.session = { ids, i:0, good:0, bad:0, orderState:null, mode:"classic", jokerUsed:false, answered:false };
+  saveState();
+  renderQuestion();
+}
+
+/* ====== AVENTURE (inchangé) ====== */
+function levelIsUnlocked(n){
+  const current = Number(state.adventure.currentLevel)||1;
+  return n <= current;
+}
+function getLevelStars(n){
+  return Number((state.adventure.levelStars||{})[n]) || 0;
+}
+function setLevelStars(n, s){
+  state.adventure.levelStars = state.adventure.levelStars || {};
+  state.adventure.levelStars[n] = s;
+}
+function advanceAdventureIfNeeded(completedLevel, earnedStars){
+  if(earnedStars >= 1){
+    const current = Number(state.adventure.currentLevel)||1;
+    if(completedLevel >= current && completedLevel < ADVENTURE_LEVELS.length){
+      state.adventure.currentLevel = completedLevel + 1;
+    }
+  }
+}
+
+function renderAdventureMap(){
+  updateTopBar();
+  ui.qType.textContent = "AVENTURE";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🗺️";
+  ui.qtext.textContent = "Carte d’aventure";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const adv = getAdventureInfo();
+
+  const mapHtml = ADVENTURE_LEVELS.map(cfg=>{
+    const unlocked = levelIsUnlocked(cfg.n);
+    const st = getLevelStars(cfg.n);
+    const stTxt = st ? "⭐".repeat(st) : "—";
+    const lockTxt = unlocked ? "" : "🔒";
+    const badge = cfg.boss ? "👑" : "🏁";
+
+    return `
+      <div class="lvl" data-lvl="${cfg.n}">
+        <div class="lvl-head">
+          <div class="lvl-left">
+            <div class="badge">${badge}</div>
+            <div class="lvl-title">Niveau ${cfg.n} — ${esc(cfg.name)}</div>
+          </div>
+          <div class="lvl-right">
+            <div class="stars">${stTxt}</div>
+            <div class="lock">${lockTxt}</div>
+          </div>
+        </div>
+        <div class="lvl-body" hidden>
+          <div class="pill">Questions : <strong>${cfg.qCount}</strong></div>
+          <div class="pill">Difficulté : <strong>${cfg.minD} → ${cfg.maxD}</strong></div>
+          <div class="pill">Types min : <strong>${cfg.minTypes.join(", ")}</strong></div>
+          <button class="btn gold" ${unlocked ? "" : "disabled"} data-start="${cfg.n}">
+            ▶️ Jouer ce niveau
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="adv-banner">
+      <div class="big">Ton aventure (Mixte)</div>
+      <div class="small">
+        Niveau actuel : <strong>${adv.currentLevel}</strong>
+        • Total étoiles : <strong>${adv.totalStars}</strong> ⭐
+        • Cœurs : <strong>❤️ ${state.adventure.hearts}</strong><br/>
+        ${esc(adv.nextGoal)}
+      </div>
+    </div>
+
+    <div class="map" id="map">${mapHtml}</div>
+    <button class="btn secondary" id="backModes">⬅️ Retour modes</button>
+  `;
+
+  $("#backModes").onclick = ()=> renderModeMenu();
+
+  [...document.querySelectorAll(".lvl")].forEach(box=>{
+    const head = box.querySelector(".lvl-head");
+    const body = box.querySelector(".lvl-body");
+    head.onclick = ()=>{ body.hidden = !body.hidden; };
+  });
+  [...document.querySelectorAll("[data-start]")].forEach(btn=>{
+    btn.onclick = ()=>{
+      const n = Number(btn.getAttribute("data-start"));
+      startAdventureLevel(n);
+    };
+  });
+}
+
+function buildAdventureSession(cfg){
+  const poolAll = QUESTIONS.slice();
+  let pool = poolAll.filter(q=>{
+    const d = Number(q.difficulty)||1;
+    return d >= cfg.minD && d <= cfg.maxD;
+  });
+  if(pool.length < cfg.qCount) pool = poolAll.slice();
+
+  const byType = {};
+  pool.forEach(q=>{
+    const t=(q.type||"QCM").toUpperCase();
+    (byType[t] ||= []).push(q);
+  });
+  Object.keys(byType).forEach(k=>shuffle(byType[k]));
+
+  const picked = [];
+  cfg.minTypes.forEach(t=>{
+    const T = t.toUpperCase();
+    if(byType[T] && byType[T].length){
+      const q = byType[T].pop();
+      if(q) picked.push(q);
+    }
+  });
+
+  const remainingPool = pool.slice().filter(q=>!picked.some(p=>p.id===q.id));
+  shuffle(remainingPool);
+  for(const q of remainingPool){
+    if(picked.length >= cfg.qCount) break;
+    picked.push(q);
+  }
+
+  if(picked.length < cfg.qCount){
+    const fallback = poolAll.slice().filter(q=>!picked.some(p=>p.id===q.id));
+    shuffle(fallback);
+    for(const q of fallback){
+      if(picked.length >= cfg.qCount) break;
+      picked.push(q);
+    }
+  }
+
+  return shuffle(picked.slice(0, cfg.qCount)).map(q=>q.id);
+}
+
+function startAdventureLevel(levelNumber){
+  const cfg = ADVENTURE_LEVELS.find(x=>x.n===levelNumber);
+  if(!cfg) return;
+  if(!levelIsUnlocked(cfg.n)) return;
+
+  const ids = buildAdventureSession(cfg);
+  if(!ids.length){
+    ui.footer.innerHTML = "⚠️ Pas assez de questions pour ce niveau (ajoute quelques questions et ça ira).";
+    return;
+  }
+
+  state.session = {
+    ids,
+    i:0,
+    good:0,
+    bad:0,
+    orderState:null,
+    mode:"adventure",
+    adv:{ level: cfg.n, levelCfg: cfg },
+    jokerUsed:false,
+    answered:false,
+  };
+  saveState();
+  renderQuestion();
+}
+
+/* ----- 🃏 JOKER (classique uniquement) ----- */
+function updateJokerButton(){
+  const s = state.session;
+  const inClassic = s && s.mode === "classic";
+  ui.btnJoker.style.display = inClassic ? "inline-block" : "none";
+  if(!inClassic) return;
+
+  const disabled = (state.coins < JOKER_COST) || !!s.jokerUsed || !!s.answered;
+  ui.btnJoker.disabled = disabled;
+  ui.btnJoker.textContent = `🃏 Joker (${JOKER_COST} 🪙)`;
+}
+
+function consumeJokerCoins(){
+  state.coins = Number(state.coins)||0;
+  state.coins = Math.max(0, state.coins - JOKER_COST);
+  saveState();
+  updateTopBar();
+}
+
+function applyJoker(){
+  const s = state.session;
+  if(!s || s.mode !== "classic") return;
+  if(s.jokerUsed || s.answered) return;
+  if(state.coins < JOKER_COST){
+    ui.footer.innerHTML = "⚠️ Pas assez de pièces pour le Joker.";
+    return;
+  }
+
+  const q = QUESTIONS.find(x=>x.id===s.ids[s.i]);
+  if(!q) return;
+
+  consumeJokerCoins();
+  s.jokerUsed = true;
+  saveState();
+  updateTopBar();
+  ui.footer.innerHTML = `🃏 Joker utilisé (-${JOKER_COST} 🪙)`;
+
+  const qt = (q.type||"QCM").toUpperCase();
+
+  if(qt === "QCM" || qt === "VF" || qt === "TROU"){
+    const btns = [...ui.gameArea.querySelectorAll(".ansbtn")];
+    if(btns.length){
+      const correctBtn = btns.find(b => normalize(b.textContent) === normalize(q.answer));
+      const wrongBtns = btns.filter(b => normalize(b.textContent) !== normalize(q.answer));
+      const keepWrong = wrongBtns.length ? wrongBtns[Math.floor(Math.random()*wrongBtns.length)] : null;
+
+      btns.forEach(b=>{
+        const isCorrect = correctBtn && b === correctBtn;
+        const isKeepWrong = keepWrong && b === keepWrong;
+        if(isCorrect || isKeepWrong){
+          b.disabled = false;
+          b.style.opacity = "1";
+        }else{
+          b.disabled = true;
+          b.style.opacity = ".35";
+        }
+      });
+    }
+
+    if(qt === "TROU"){
+      const inp = $("#fillInput");
+      if(inp){
+        const ans = String(q.answer || "");
+        const first = ans ? ans.trim().charAt(0) : "";
+        const len = ans.trim().length;
+        inp.placeholder = `Indice : commence par "${first}" • ${len} caractères`;
+      }
+    }
+
+    updateJokerButton();
+    return;
+  }
+
+  if(qt === "ORDRE"){
+    if(!s.orderState || !Array.isArray(s.orderState.correct) || !Array.isArray(s.orderState.pool) || !Array.isArray(s.orderState.built)){
+      updateJokerButton();
+      return;
+    }
+    const nextIndex = s.orderState.built.length;
+    const next = s.orderState.correct[nextIndex];
+    if(!next){
+      ui.footer.innerHTML = "🃏 Joker : l’ordre est déjà complet.";
+      updateJokerButton();
+      return;
+    }
+    const i = s.orderState.pool.findIndex(x => normalize(x) === normalize(next));
+    if(i >= 0){
+      s.orderState.built.push(s.orderState.pool[i]);
+      s.orderState.pool.splice(i,1);
+      saveState();
+      if(typeof s.orderState.render === "function") s.orderState.render();
+      ui.footer.innerHTML = `🃏 Joker : "${esc(next)}" placé au bon endroit !`;
+    }else{
+      ui.footer.innerHTML = "🃏 Joker : impossible de trouver l’élément suivant.";
+    }
+    updateJokerButton();
+    return;
+  }
+
+  updateJokerButton();
+}
+
+/* ----- Rendu questions (commun) ----- */
+function renderQuestion(){
+  const s = state.session;
+  if(!s){ renderModeMenu(); return; }
+
+  updateTopBar();
+  ui.controls.style.display="flex";
+  ui.resultBox.style.display="none";
+  ui.ref.style.display="none";
+  ui.footer.innerHTML = "";
+
+  s.jokerUsed = false;
+  s.answered = false;
+
+  const total = s.ids.length;
+  const idx = s.i;
+  const q = QUESTIONS.find(x=>x.id===s.ids[idx]);
+  if(!q){ endSession(); return; }
+
+  ui.trackDot.style.left = `${total<=1?50:Math.max(8,Math.min(92,(idx/(total-1))*100))}%`;
+  ui.counter.textContent = `${idx+1}/${total}`;
+  ui.qType.textContent = (s.mode==="adventure")
+    ? `AVENTURE • Niv ${s.adv?.level || "?"}`
+    : (q.type||"QCM").toUpperCase();
+  ui.diffStars.textContent = stars(q.difficulty);
+  ui.qmedia.textContent = (s.mode==="adventure") ? (s.adv?.levelCfg?.boss ? "👑" : "🗺️") : pickMedia(q);
+  ui.qtext.textContent = q.question;
+
+  const qt = (q.type||"QCM").toUpperCase();
+  if(qt==="ORDRE") renderOrder(q);
+  else if(qt==="VF") renderVF(q);
+  else if(qt==="TROU") renderTrou(q);
+  else renderQcm(q);
+
+  ui.btnJoker.onclick = ()=> applyJoker();
+  ui.btnSkip.onclick = ()=> validateAnswer(null, true);
+  ui.btnEnd.onclick  = ()=> endSession();
+
+  updateJokerButton();
+}
+
+/* Réponses */
+function buildChoices(q){
+  let opts = Array.isArray(q.options) ? q.options.slice() : [];
+  opts = opts.map(x=>String(x).trim()).filter(Boolean);
+  if(!opts.some(x=>normalize(x)===normalize(q.answer))) opts.unshift(String(q.answer).trim());
+  opts = shuffle([...new Set(opts)]);
+  while(opts.length < 4) opts.push("Je ne sais pas");
+  return opts.slice(0,4);
+}
+function renderQcm(q){
+  const choices = buildChoices(q);
+  ui.gameArea.innerHTML = `<div class="answers" id="answers"></div>`;
+  const answersEl = $("#answers");
+  answersEl.dataset.locked="0";
+  choices.forEach(txt=>{
+    const b=document.createElement("button");
+    b.className="ansbtn";
+    b.textContent=txt;
+    b.onclick=()=>{
+      if(answersEl.dataset.locked==="1") return;
+      answersEl.dataset.locked="1";
+      validateAnswer(txt,false);
+    };
+    answersEl.appendChild(b);
+  });
+}
+function renderVF(q){
+  ui.gameArea.innerHTML = `<div class="answers" id="answers"></div>`;
+  const answersEl = $("#answers");
+  answersEl.dataset.locked="0";
+  ["Vrai","Faux"].forEach(txt=>{
+    const b=document.createElement("button");
+    b.className="ansbtn";
+    b.textContent=txt;
+    b.onclick=()=>{
+      if(answersEl.dataset.locked==="1") return;
+      answersEl.dataset.locked="1";
+      validateAnswer(txt,false);
+    };
+    answersEl.appendChild(b);
+  });
+}
+function renderTrou(q){
+  const choices = buildChoices(q);
+  ui.gameArea.innerHTML = `
+    <div class="hint">Écris la réponse ou choisis une proposition :</div>
+    <div class="form" style="margin-top:10px;">
+      <div class="field">
+        <div class="label">Ta réponse</div>
+        <input class="input" id="fillInput" placeholder="Écris ici..." />
+      </div>
+      <button class="btn secondary" id="btnValidateFill"> Valider ce que j’ai écrit</button>
+    </div>
+    <div class="answers" id="answers" style="margin-top:12px;"></div>
+  `;
+  $("#btnValidateFill").onclick = ()=>{
+    const v = ($("#fillInput").value || "").trim();
+    if(!v){ ui.footer.innerHTML = "⚠️ Écris une réponse (ou clique sur une proposition)."; return; }
+    validateAnswer(v,false);
+  };
+  const answersEl = $("#answers");
+  answersEl.dataset.locked="0";
+  choices.forEach(txt=>{
+    const b=document.createElement("button");
+    b.className="ansbtn";
+    b.textContent=txt;
+    b.onclick=()=>{
+      if(answersEl.dataset.locked==="1") return;
+      answersEl.dataset.locked="1";
+      validateAnswer(txt,false);
+    };
+    answersEl.appendChild(b);
+  });
+}
+function renderOrder(q){
+  const s = state.session;
+  const correct = splitOrderAnswer(q.answer);
+  s.orderState = { correct, pool: shuffle(correct.slice()), built: [], render:null };
+  saveState();
+
+  ui.gameArea.innerHTML = `
+    <div class="order-wrap">
+      <div class="order-zone">
+        <div class="order-title">Éléments disponibles (clique pour ajouter)</div>
+        <div class="chips" id="poolChips"></div>
+      </div>
+      <div class="order-zone">
+        <div class="order-title">Ton ordre (clique pour retirer)</div>
+        <div class="chips" id="builtChips"></div>
+      </div>
+      <button class="btn" id="btnValidateOrder"> Valider</button>
+    </div>
+  `;
+  const poolEl=$("#poolChips"), builtEl=$("#builtChips");
+  function renderChips(){
+    poolEl.innerHTML=""; builtEl.innerHTML="";
+    s.orderState.pool.forEach((w,i)=>{
+      const b=document.createElement("button");
+      b.className="chipbtn"; b.textContent=w;
+      b.onclick=()=>{
+        s.orderState.built.push(w);
+        s.orderState.pool.splice(i,1);
+        saveState(); renderChips();
+      };
+      poolEl.appendChild(b);
+    });
+    s.orderState.built.forEach((w,i)=>{
+      const b=document.createElement("button");
+      b.className="chipbtn"; b.textContent=w;
+      b.onclick=()=>{
+        s.orderState.pool.push(w);
+        s.orderState.built.splice(i,1);
+        saveState(); renderChips();
+      };
+      builtEl.appendChild(b);
+    });
+  }
+  s.orderState.render = renderChips;
+  renderChips();
+  $("#btnValidateOrder").onclick=()=> validateAnswer(s.orderState.built.slice(), false);
+}
+
+/* Marquer réussite (global) */
+function markCorrect(q){
+  if(!q || !q.id) return;
+  state.correctIds[q.id] = true;
+  saveState();
+}
+
+/* ❤️ Appliquer gain/perte de cœurs (aventure seulement) */
+function applyAdventureHearts(delta){
+  state.adventure.hearts = Number(state.adventure.hearts) || 0;
+  state.adventure.hearts += delta;
+  if(state.adventure.hearts < 0) state.adventure.hearts = 0;
+  saveState();
+  updateTopBar();
+}
+
+/* Validation */
+function validateAnswer(userAnswer, isSkip=false){
+  const s = state.session;
+  if(!s) return;
+
+  const q = QUESTIONS.find(x=>x.id===s.ids[s.i]);
+  const qtype = (q.type||"QCM").toUpperCase();
+
+  let ok=false;
+  if(qtype==="ORDRE"){
+    const correct = splitOrderAnswer(q.answer);
+    const built = Array.isArray(userAnswer) ? userAnswer : [];
+    ok = normalize(built.join(" | ")) === normalize(correct.join(" | "));
+  }else{
+    ok = (!isSkip && userAnswer && normalize(userAnswer)===normalize(q.answer));
+  }
+
+  if(ok){
+    s.good++;
+    state.coins += COINS_PER_GOOD;
+    markCorrect(q);
+  }else{
+    s.bad++;
+  }
+
+  if(s.mode === "adventure"){
+    if(ok) applyAdventureHearts(+1);
+    else if(!isSkip) applyAdventureHearts(-1);
+  }
+
+  s.answered = true;
+  saveState();
+  updateTopBar();
+  updateJokerButton();
+
+  [...ui.gameArea.querySelectorAll(".ansbtn")].forEach(b=>b.disabled=true);
+  [...ui.gameArea.querySelectorAll(".chipbtn")].forEach(b=>b.disabled=true);
+  const fill = $("#fillInput");
+  if(fill) fill.disabled = true;
+  const fillBtn = $("#btnValidateFill");
+  if(fillBtn) fillBtn.disabled = true;
+
+  if(qtype!=="ORDRE"){
+    const btns=[...ui.gameArea.querySelectorAll(".ansbtn")];
+    btns.forEach(b=>{
+      if(normalize(b.textContent)===normalize(q.answer)) b.classList.add("correct");
+      else if(userAnswer && normalize(b.textContent)===normalize(userAnswer) && !ok) b.classList.add("wrong");
+    });
+  }
+
+  ui.ref.style.display="block";
+  ui.ref.innerHTML = `Référence : <strong>${esc(q.reference || "—")}</strong>`;
+
+  ui.resultBox.style.display="block";
+  ui.resultBox.className = "result " + (ok ? "good" : "bad");
+
+  const heartLine = (s.mode === "adventure" && !isSkip)
+    ? `<div class="small">❤️ Cœurs : <strong>${state.adventure.hearts}</strong></div>`
+    : "";
+
+  const goodTitle = ` Bonne réponse ! (+${COINS_PER_GOOD} 🪙)`;
+  const badTitle = isSkip ? "⏭️ Passé." : "❌ Incorrect.";
+
+  ui.resultBox.innerHTML = `
+    <div class="title">${ok ? goodTitle : badTitle}</div>
+    <div style="margin-top:6px"><strong>Bonne réponse :</strong> ${esc(q.answer)}</div>
+    <div class="small">📖 ${esc(q.reference || "—")}</div>
+    ${heartLine}
+    <button class="btn" id="nextBtn" style="margin-top:10px;">➡️ Question suivante</button>
+  `;
+
+  $("#nextBtn").onclick=()=>{
+    s.i++;
+    s.orderState=null;
+    saveState();
+    if(s.i >= s.ids.length) endSession();
+    else renderQuestion();
+  };
+}
+
+function computeStarsFromScore(percent){
+  if(percent >= 90) return 3;
+  if(percent >= 70) return 2;
+  if(percent >= 50) return 1;
+  return 0;
+}
+
+function endSession(){
+  const s = state.session;
+  if(!s){ renderModeMenu(); return; }
+
+  const total = s.ids.length || 1;
+  const good = s.good || 0;
+  const percent = Math.round((good/total)*100);
+
+  if(s.mode === "adventure"){
+    const lvl = s.adv?.level || 1;
+    const cfg = s.adv?.levelCfg || ADVENTURE_LEVELS[lvl-1];
+    const earnedStars = computeStarsFromScore(percent);
+
+    const bonus = earnedStars ? (cfg.bonusStars[earnedStars-1] || 0) : 0;
+    state.coins += bonus;
+
+    const prev = getLevelStars(lvl);
+    if(earnedStars > prev) setLevelStars(lvl, earnedStars);
+
+    advanceAdventureIfNeeded(lvl, earnedStars);
+
+    state.session = null;
+    saveState();
+    renderAdventureEnd(lvl, percent, earnedStars, bonus, cfg);
+    return;
+  }
+
+  state.session = null;
+  saveState();
+  renderClassicHome();
+}
+
+function renderAdventureEnd(level, percent, earnedStars, bonus, cfg){
+  updateTopBar();
+  ui.qType.textContent = `AVENTURE • FIN`;
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = cfg.boss ? "👑" : "🏁";
+  ui.qtext.textContent = `Niveau ${level} terminé !`;
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML = "";
+  setHeartsVisible(false);
+
+  const starTxt = earnedStars ? "⭐".repeat(earnedStars) : "—";
+  const unlockMsg = (earnedStars>=1)
+    ? (level < ADVENTURE_LEVELS.length ? " Niveau suivant débloqué !" : "🏆 Aventure terminée !")
+    : "❗ Niveau non validé (il faut au moins 50%).";
+
+  ui.gameArea.innerHTML = `
+    <div class="adv-banner">
+      <div class="big">Résultat</div>
+      <div class="small">
+        Score : <strong>${percent}%</strong> • Étoiles : <strong>${starTxt}</strong> • Bonus : <strong>+${bonus} 🪙</strong><br/>
+        Cœurs : <strong>❤️ ${state.adventure.hearts}</strong><br/>
+        ${esc(unlockMsg)}
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn gold" id="btnReplayLevel">🔁 Rejouer le niveau</button>
+      <button class="btn secondary" id="btnMap">🗺️ Carte</button>
+    </div>
+
+    <button class="btn secondary" id="btnModes">⬅️ Retour modes</button>
+  `;
+
+  $("#btnReplayLevel").onclick = ()=> startAdventureLevel(level);
+  $("#btnMap").onclick = ()=> renderAdventureMap();
+  $("#btnModes").onclick = ()=> renderModeMenu();
+}
+
+/* Mes réussites (simple) */
+function renderSuccesses(){
+  updateTopBar();
+  ui.qType.textContent = "RÉUSSITES";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "📖";
+  ui.qtext.textContent = "Mes questions réussies";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const correctIds = state.correctIds || {};
+  const ids = Object.keys(correctIds).filter(id => QUESTIONS.some(q=>q.id===id));
+
+  if(!ids.length){
+    ui.gameArea.innerHTML = `
+      <div class="hint">Aucune question réussie pour le moment.</div>
+      <button class="btn" id="backModes">⬅️ Retour modes</button>
+    `;
+    $("#backModes").onclick=()=>renderModeMenu();
+    return;
+  }
+
+  const groups = {};
+  ids.forEach(id=>{
+    const q = QUESTIONS.find(x=>x.id===id);
+    const th = q.theme || "Autre";
+    (groups[th] ||= []).push(q);
+  });
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">Total réussies : <strong>${ids.length}</strong></div>
+    <div id="acc"></div>
+    <button class="btn secondary" id="backModes">⬅️ Retour modes</button>
+  `;
+  $("#backModes").onclick=()=>renderModeMenu();
+
+  const acc=$("#acc");
+  Object.keys(groups).forEach(th=>{
+    const list = groups[th].slice().sort((a,b)=>a.question.localeCompare(b.question));
+    const box=document.createElement("div");
+    box.style.marginTop="10px";
+    box.innerHTML = `<div class="hint"><strong>${esc(th)}</strong> — ${list.length}</div>`;
+    list.forEach(q=>{
+      const it=document.createElement("div");
+      it.className="result good";
+      it.style.marginTop="8px";
+      it.innerHTML = `<div class="title"> ${esc(q.question)}</div>
+                      <div class="small"><b>Réponse :</b> ${esc(q.answer)} • <b>Réf :</b> ${esc(q.reference||"—")}</div>`;
+      box.appendChild(it);
+    });
+    acc.appendChild(box);
+  });
+}
+
+/* =======================
+   MODE MOTS CROISÉS
+   ======================= */
+
+function renderCrosswordHome(){
+  updateTopBar();
+  ui.qType.textContent = "MOTS CROISÉS";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🧩";
+  ui.qtext.textContent = "Mode Mots croisés";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const selectedKey = state.crossword.selectedBank || "grille1";
+  const banksHtml = CROSSWORD_BANKS.map(b=>{
+    const sel = b.key === selectedKey;
+    const done = !!(state.crossword?.completedBanks && state.crossword.completedBanks[b.key]);
+    const sub = (b.subtitle ? esc(b.subtitle) : "");
+    return `
+      <div class="theme-card ${sel ? "selected" : ""}${done ? " completed" : ""}" data-bank="${esc(b.key)}">
+        <div class="t-top">
+          <div class="t-name"><span class="t-ico">🧩</span> ${esc(b.title)}</div>
+          <div>${sel ? "" : ""}</div>
+        </div>
+        <div class="t-sub">${sub}</div>
+      </div>
+    `;
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      <strong>Les mots croisés vont vous donner le plaisir le lire la Bible différemment car pour ce mode de jeu ci, votre Bible vous sera très utile. Bon amusement.</strong>
+    </div>
+
+    <div class="hint" style="margin-top:10px;">
+     Accents tolérés (É = E) • Espaces ignorés (ex: “ÉMU DE PITIÉ” = une seule entrée)
+    </div>
+
+    <div class="hint" style="margin-top:10px;">
+      Choisis ta grille :
+    </div>
+
+    <div class="themes xw-themes" id="xwBanks">
+      ${banksHtml}
+    </div>
+
+    <div class="row">
+      <button class="btn gold" id="btnNewXW">🧩 Générer une grille</button>
+      <button class="btn secondary" id="btnBackModes">⬅️ Retour modes</button>
+    </div>
+
+    <div class="hint" style="margin-top:12px;">
+      Mots croisés gagnés : <strong>${state.crossword.wins}</strong>
+    </div>
+  `;
+
+  $("#btnBackModes").onclick = ()=> renderModeMenu();
+
+  [...document.querySelectorAll("#xwBanks [data-bank]")].forEach(card=>{
+    card.onclick = ()=>{
+      const k = card.getAttribute("data-bank");
+      state.crossword.selectedBank = k;
+      saveState();
+      renderCrosswordHome();
+    };
+  });
+
+  $("#btnNewXW").onclick = ()=> startCrossword();
+}
+
+function startCrossword(opts = {}){
+  const selectedKey = state.crossword.selectedBank || "grille1";
+  const bank = CROSSWORD_BANKS.find(b=>b.key===selectedKey) || CROSSWORD_BANKS[0];
+  if(!bank || !bank.items || !bank.items.length){
+    ui.footer.innerHTML = "⚠️ Grille vide.";
+      play.flashGridUntil = Date.now()+900;
+    return;
+  }
+
+  // Seed pour varier la génération
+  const seed = Number(opts.seed ?? Date.now());
+  const rng = mulberry32(seed);
+  const rand = ()=>rng();
+
+  function shuffleSeeded(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(rand()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  const baseItems = bank.items.map(x=>({
+    id:x.id,
+    clue:x.clue,
+    answerRaw:x.answer,
+    answer: normalizeLettersOnly(x.answer)
+  })).filter(x=>x.answer.length >= 2);
+
+  // On tente plusieurs générations et on garde la meilleure (le plus de mots placés)
+  let best = null;
+  const tries = 10;
+  for(let t=0;t<tries;t++){
+    const items = shuffleSeeded(baseItems).sort((a,b)=>b.answer.length-a.answer.length); // longs d'abord + shuffle
+    const gridSize = 15 + Math.floor(rand()*5); // 15..19
+    const gen = generateCrossword(items, gridSize, 240);
+
+    if(!best || (gen.placements?.length||0) > (best.gen.placements?.length||0)){
+      best = { gridSize, gen };
+    }
+    // Si on a tout placé, on stop
+    if((gen.placements?.length||0) >= baseItems.length) break;
+  }
+
+  const gridSize = best.gridSize;
+  const gen = best.gen;
+
+  // IMPORTANT: generateCrossword() returns an internal "blocks" helper matrix,
+  // but the UI expects: true = usable cell (letter), false = black block.
+  // We derive the usable-cells matrix directly from the generated grid.
+  const openCells = gen.grid.map(row => row.map(ch => !!ch));
+
+  state.crossword.last = {
+    seed,
+    gridSize,
+    placements: gen.placements,
+    grid: gen.grid,
+    blocks: openCells,
+    meta: {
+      placed: gen.placements.length,
+      total: baseItems.length,
+      at: Date.now(),
+      bankKey: bank.key,
+      bankTitle: bank.title,
+      won: false,
+    }
+  };
+  // reset user grid
+  state.crossword.userGrid = null;
+  saveState();
+  renderCrosswordGame();
+}
+
+
+function renderCrosswordGame(){
+  const last = state.crossword.last;
+  if(!last){ renderCrosswordHome(); return; }
+
+  updateTopBar();
+  ui.qType.textContent = "MOTS CROISÉS";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🧩";
+  ui.qtext.textContent = "Mots croisés";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const size = last.gridSize;
+  const solution = last.grid;     // lettres solution
+  const blocks = last.blocks;     // true=case utilisable, false=block
+
+  // Grille joueur persistée
+  if(!state.crossword.userGrid || state.crossword.userGrid.length !== size){
+    state.crossword.userGrid = Array.from({length:size}, ()=>Array.from({length:size}, ()=>""));
+    saveState();
+  }
+  const user = state.crossword.userGrid;
+
+  const placements = last.placements || [];
+  const numbering = buildCrosswordNumbering(solution, blocks);
+  const numGrid = numbering.numGrid;
+  const acrossStarts = numbering.clues.across || [];
+  const downStarts   = numbering.clues.down || [];
+
+  // Map clue par (x,y,dir)
+  const clueByKey = {};
+  placements.forEach(p=>{
+    clueByKey[`${p.x},${p.y},${p.dir}`] = p.clue;
+  });
+
+  function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+  function isOpen(x,y){ return inb(x,y) && blocks[y][x]; }
+
+  function extractWord(x,y,dir){
+    const dx = dir==="A" ? 1 : 0;
+    const dy = dir==="D" ? 1 : 0;
+    let letters = "";
+    let len = 0;
+    while(inb(x+dx*len, y+dy*len) && blocks[y+dy*len][x+dx*len]){
+      letters += String(solution[y+dy*len][x+dx*len] || "").toUpperCase();
+      len++;
+      // stop if solution empty (shouldn't happen)
+      if(!solution[y+dy*len-1][x+dx*len-1]) break;
+    }
+    return {letters, len};
+  }
+
+  // Build playable word list from actual placements (ensures every placed word is selectable)
+  const words = (placements || [])
+    .map(p=>{
+      const letters = String(p.answer || "").toUpperCase();
+      const len = letters.length;
+      const n = (numGrid[p.y] && numGrid[p.y][p.x]) ? numGrid[p.y][p.x] : 0;
+      const dirLabel = (p.dir === "A") ? "Horizontal ➡️" : "Vertical ⬇️";
+      return {
+        n, dir: p.dir, dirLabel,
+        x: p.x, y: p.y,
+        len, letters,
+        clue: clueByKey[`${p.x},${p.y},${p.dir}`] || p.clue || "(définition)"
+      };
+    })
+    .filter(w => w.len >= 2)
+    .sort((a,b)=> ((a.n||9999)-(b.n||9999)) || (a.dir==="A"?-1:1) || (b.len-a.len));
+
+  // Init play state
+  if(!state.crossword.play || state.crossword.play.size !== size || state.crossword.play.seed !== last.seed){
+    state.crossword.play = { size, seed:last.seed, wi:0, cursor:0 };
+    saveState();
+  }
+  const play = state.crossword.play;
+
+  if(!words.length){
+    ui.gameArea.innerHTML = `<div class="result bad"><div class="title">⚠️ Aucun mot placé</div><div class="small">Essaie “Grille aléatoire”.</div></div>`;
+    return;
+  }
+
+  play.wi = Math.max(0, Math.min(words.length-1, play.wi|0));
+  const cur = words[play.wi];
+
+  // Helpers cells of word
+  function cellsOf(word){
+    const dx = word.dir==="A" ? 1 : 0;
+    const dy = word.dir==="D" ? 1 : 0;
+    const arr = [];
+    for(let i=0;i<word.len;i++){
+      arr.push({x:word.x+dx*i, y:word.y+dy*i, i});
+    }
+    return arr;
+  }
+  
+  // Progression (sauvegardée) – par grille/seed
+  if(!state.crossword.progress || state.crossword.progress.seed !== last.seed){
+    state.crossword.progress = { seed: last.seed, validated: {}, errors: 0, coinsFromWords: 0, won: false };
+    saveState();
+  }
+  const prog = state.crossword.progress;
+
+  function wordKey(w){ return `${w.x},${w.y},${w.dir}`; }
+
+  function wordIsCorrect(w){
+    const cs = cellsOf(w);
+    for(const c of cs){
+      const u = (user[c.y][c.x]||"").toUpperCase();
+      const s = (solution[c.y][c.x]||"").toUpperCase();
+      if(u !== s) return false;
+    }
+    return true;
+  }
+
+  function wordIsFilled(w){
+    const cs = cellsOf(w);
+    for(const c of cs){
+      const u = (user[c.y][c.x]||"").toUpperCase();
+      if(!u) return false;
+    }
+    return true;
+  }
+
+  function computeStars(){
+    const e = Number(prog.errors)||0;
+    if(e === 0) return 3;
+    if(e <= 2) return 2;
+    if(e <= 5) return 1;
+    return 0;
+  }
+
+  function updateCrosswordHUD(){
+    const totalWords = words.length;
+    const done = Object.keys(prog.validated||{}).length;
+    const st = computeStars();
+    ui.counter.textContent = ` ${done}/${totalWords} • ${"⭐".repeat(st)||"—"}`;
+  }
+updateCrosswordHUD();
+
+  const curCells = cellsOf(cur);
+  play.cursor = Math.max(0, Math.min(cur.len-1, play.cursor|0));
+  const curCell = curCells[play.cursor];
+
+  // Build UI
+  ui.gameArea.innerHTML = `
+    <div class="xw-appbar">
+      <div class="left">
+        <button class="xw-iconbtn" id="xwBack" title="Retour">⬅️</button>
+        <button class="xw-iconbtn" id="xwMenu" title="Menu">☰</button>
+      </div>
+      <div class="right">
+        <button class="xw-iconbtn" id="xwRandom" title="Grille aléatoire">🎲Mélanger</button>
+                <button class="xw-iconbtn gold" id="xwCheckAll" title="Vérifier la grille"> Grille${(play.flashGridUntil && Date.now()<play.flashGridUntil)?" ✅":""}</button>
+      </div>
+    </div>
+
+    <div class="xw-stage-app">
+      <div class="xw-grid-app" id="xwGrid" style="grid-template-columns: repeat(${size}, max-content);">
+        ${Array.from({length:size}, (_,y)=>Array.from({length:size}, (_,x)=>{
+          if(!blocks[y][x]) return `<div class="xw-cell-app block"></div>`;
+          const n = numGrid[y][x] ? `<div class="num">${numGrid[y][x]}</div>` : "";
+          const ch = esc((user[y][x] || "").toUpperCase());
+          const isInWord = curCells.some(c=>c.x===x && c.y===y);
+          const isCursor = (curCell && curCell.x===x && curCell.y===y);
+          const cls = ["xw-cell-app", isInWord ? "active":"", isCursor ? "cursor":""].filter(Boolean).join(" ");
+          return `<div class="${cls}" data-x="${x}" data-y="${y}">${n}<div class="ch">${ch}</div></div>`;
+        }).join("")).join("")}
+      </div>
+    </div>
+
+    <div class="xw-cluebar-app">
+      <div class="arrow" id="xwPrev">‹</div>
+      <div class="text">
+        <span class="sub">${cur.n}. ${cur.dirLabel}</span>
+        <div class="main">${esc(cur.clue)}</div>
+      </div>
+      <div class="arrow" id="xwNext">›</div>
+    </div>
+
+    <div class="xw-tiles-row">
+      <div class="xw-answer-tiles" id="xwTiles">
+        ${curCells.map(({x,y,i})=>{
+        const v = (user[y][x]||"").toUpperCase();
+        const cls = ["xw-tile", v ? "" : "empty", (i===play.cursor) ? "cursor" : ""].filter(Boolean).join(" ");
+        return `<div class="${cls}" data-i="${i}">${esc(v||"")}</div>`;
+      }).join("")}
+      </div>
+      <button class="xw-iconbtn gold" id="xwCheckWord" title="Valider ce mot"> Mot${(play.flashWordUntil && Date.now()<play.flashWordUntil)?" ✅":""}</button>
+    </div>
+
+    <div class="xw-kb" aria-label="Clavier AZERTY">
+      <div class="xw-kb-row">
+        ${"AZERTYUIOP".split("").map(k=>`<button class="xw-key" data-k="${k}">${k}</button>`).join("")}
+      </div>
+      <div class="xw-kb-row">
+        ${"QSDFGHJKLM".split("").map(k=>`<button class="xw-key" data-k="${k}">${k}</button>`).join("")}
+      </div>
+      <div class="xw-kb-row">
+        <button class="xw-key wide gold" id="xwBksp">⌫</button>
+        ${"WXCVBN".split("").map(k=>`<button class="xw-key" data-k="${k}">${k}</button>`).join("")}
+        <button class="xw-key wide" id="xwClearWord">Effacer</button>
+      </div>
+    </div>
+
+    <div class="hint" style="margin-top:10px;">
+     Accents tolérés (É = E) • Espaces ignorés.
+    </div>
+  `;
+
+  // --- interactions
+  $("#xwBack").onclick = ()=> { state.session=null; saveState(); renderCrosswordHome(); };
+  $("#xwMenu").onclick = ()=> renderModeMenu();
+  $("#xwRandom").onclick = ()=> startCrossword({seed: Date.now()});
+  $("#xwPrev").onclick = ()=> { play.wi = (play.wi - 1 + words.length) % words.length; play.cursor = 0; saveState(); renderCrosswordGame(); };
+  $("#xwNext").onclick = ()=> { play.wi = (play.wi + 1) % words.length; play.cursor = 0; saveState(); renderCrosswordGame(); };
+
+  // click tile to move cursor
+  document.querySelectorAll("#xwTiles [data-i]").forEach(el=>{
+    el.onclick = ()=>{
+      play.cursor = Number(el.getAttribute("data-i"))||0;
+      saveState(); renderCrosswordGame();
+    };
+  });
+
+  // click cell: pick word containing it (prefer same number if possible)
+  document.querySelectorAll("#xwGrid .xw-cell-app").forEach(el=>{
+    if(el.classList.contains("block")) return;
+    el.onclick = ()=>{
+      const x = Number(el.getAttribute("data-x"));
+      const y = Number(el.getAttribute("data-y"));
+      // find first word that contains cell, prefer across then down for same number
+      let foundWi = -1;
+      let foundCursor = 0;
+      for(let wi=0; wi<words.length; wi++){
+        const w = words[wi];
+        const cs = cellsOf(w);
+        const idx = cs.findIndex(c=>c.x===x && c.y===y);
+        if(idx>=0){
+          foundWi = wi; foundCursor = idx; break;
+        }
+      }
+      if(foundWi>=0){
+        play.wi = foundWi;
+        play.cursor = foundCursor;
+        saveState(); renderCrosswordGame();
+      }
+    };
+  });
+
+  function setLetterAtCursor(letter){
+    const ch = normalizeLettersOnly(letter).slice(0,1);
+    if(!ch) return;
+    const cell = curCells[play.cursor];
+    user[cell.y][cell.x] = ch;
+    // advance
+    let next = play.cursor + 1;
+    if(next > cur.len-1) next = cur.len-1;
+    play.cursor = next;
+    saveState();
+    renderCrosswordGame();
+  }
+
+  document.querySelectorAll(".xw-key[data-k]").forEach(b=>{
+    b.onclick = ()=> setLetterAtCursor(b.getAttribute("data-k"));
+  });
+
+  $("#xwBksp").onclick = ()=>{
+    const cell = curCells[play.cursor];
+    if(user[cell.y][cell.x]){
+      user[cell.y][cell.x] = "";
+    }else{
+      // go back one and clear
+      play.cursor = Math.max(0, play.cursor-1);
+      const cell2 = curCells[play.cursor];
+      user[cell2.y][cell2.x] = "";
+    }
+    saveState(); renderCrosswordGame();
+  };
+
+  $("#xwClearWord").onclick = ()=>{
+    curCells.forEach(c=> user[c.y][c.x] = "");
+    play.cursor = 0;
+    saveState(); renderCrosswordGame();
+  };
+
+  
+  //  Valider le mot courant (sans indice)
+  $("#xwCheckWord").onclick = ()=>{
+    const wk = wordKey(cur);
+    if(prog.validated[wk]){
+      ui.footer.innerHTML = " Ce mot est déjà validé.";
+      return;
+    }
+    if(!wordIsFilled(cur)){
+      ui.footer.innerHTML = "⚠️ Remplis d’abord toutes les lettres du mot.";
+      return;
+    }
+    if(wordIsCorrect(cur)){
+      prog.validated[wk] = true;
+      play.flashWordUntil = Date.now()+900;
+
+      // Récompense : +1 🪙 par mot validé (une seule fois)
+      state.coins = Number(state.coins)||0;
+      state.coins += 1;
+      prog.coinsFromWords = Number(prog.coinsFromWords)||0;
+      prog.coinsFromWords += 1;
+
+      // Auto: passer au prochain mot non validé (si possible)
+      const next = words.findIndex(w=>!prog.validated[wordKey(w)]);
+      if(next >= 0) play.wi = next;
+
+      saveState();
+      updateTopBar();
+      renderCrosswordGame();
+      ui.footer.innerHTML = " Mot validé ! (+1 🪙)";
+    }else{
+      prog.errors = (Number(prog.errors)||0) + 1;
+      saveState();
+      updateCrosswordHUD();
+      ui.footer.innerHTML = "❌ Pas encore… vérifie l’orthographe.";
+    }
+  };
+
+// Vérifier tout
+  $("#xwCheckAll").onclick = ()=>{
+    let total=0, good=0, filled=0;
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(!blocks[y][x]) continue;
+        total++;
+        const u = (user[y][x]||"").toUpperCase();
+        if(u) filled++;
+        if(u === (solution[y][x]||"").toUpperCase()) good++;
+      }
+    }
+    const pct = total ? Math.round((good/total)*100) : 0;
+
+    ui.resultBox.style.display = "block";
+    ui.resultBox.className = "result " + (pct===100 ? "good":"bad");
+    ui.resultBox.innerHTML = `
+      <div class="title">${pct===100 ? "🎉 Grille correcte !" : "🔎 Vérification"}</div>
+      <div class="small">
+        Remplies : <strong>${filled}</strong> / ${total}<br>
+        Correctes : <strong>${good}</strong> / ${total} (${pct}%)
+      </div>
+    `;
+
+    if(pct === 100 && !last.meta.won){
+      const st = computeStars();
+      const bonus = 10 + (st * 5);
+      state.coins += bonus;
+      state.crossword.wins = (state.crossword.wins||0) + 1;
+      last.meta.won = true;
+      prog.won = true;
+      // Marquer cette grille comme terminée (pour afficher " terminée" dans le menu)
+      const bk = last?.meta?.bankKey;
+      if(bk){
+        state.crossword.completedBanks ||= {};
+        state.crossword.completedBanks[bk] = true;
+      }
+      saveState();
+      updateTopBar();
+      ui.footer.innerHTML = `🎉 Grille terminée ! +${bonus} 🪙 (${st}⭐)`;
+    }
+  };
+}
+
+
+/* Génération mots croisés (placement automatique) */
+function generateCrossword(items, size, maxTries=120){
+  function makeGrid(){
+    const g = Array.from({length:size}, ()=>Array.from({length:size}, ()=>""));
+    const b = Array.from({length:size}, ()=>Array.from({length:size}, ()=>true));
+    return {g,b};
+  }
+  function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+
+  function canPlace(grid, blocks, word, x, y, dir){
+    const dx = dir==="A" ? 1 : 0;
+    const dy = dir==="D" ? 1 : 0;
+
+    const bx = x - dx, by = y - dy;
+    const ax = x + dx*word.length, ay = y + dy*word.length;
+    if(inb(bx,by) && !blocks[by][bx]) return false;
+    if(inb(ax,ay) && !blocks[ay][ax]) return false;
+
+    for(let i=0;i<word.length;i++){
+      const cx = x + dx*i;
+      const cy = y + dy*i;
+      if(!inb(cx,cy)) return false;
+
+      const ch = word[i];
+      const existing = grid[cy][cx];
+      if(existing && existing !== ch) return false;
+
+      const left  = dir==="A" ? null : {x:cx-1,y:cy};
+      const right = dir==="A" ? null : {x:cx+1,y:cy};
+      const up    = dir==="D" ? null : {x:cx,y:cy-1};
+      const down  = dir==="D" ? null : {x:cx,y:cy+1};
+
+      if(left && inb(left.x,left.y) && !blocks[left.y][left.x] && !grid[cy][cx]) return false;
+      if(right && inb(right.x,right.y) && !blocks[right.y][right.x] && !grid[cy][cx]) return false;
+      if(up && inb(up.x,up.y) && !blocks[up.y][up.x] && !grid[cy][cx]) return false;
+      if(down && inb(down.x,down.y) && !blocks[down.y][down.x] && !grid[cy][cx]) return false;
+    }
+    return true;
+  }
+
+  function place(grid, blocks, word, x, y, dir){
+    const dx = dir==="A" ? 1 : 0;
+    const dy = dir==="D" ? 1 : 0;
+    for(let i=0;i<word.length;i++){
+      const cx = x + dx*i;
+      const cy = y + dy*i;
+      grid[cy][cx] = word[i];
+      blocks[cy][cx] = false;
+    }
+  }
+
+  function allLetterPositions(grid){
+    const pos = [];
+    for(let y=0;y<size;y++){
+      for(let x=0;x<size;x++){
+        if(grid[y][x]) pos.push({x,y,ch:grid[y][x]});
+      }
+    }
+    return pos;
+  }
+
+  let best = null;
+
+  for(let attempt=0; attempt<maxTries; attempt++){
+    const {g:grid, b:blocks} = makeGrid();
+    const bag = shuffle(items.slice()).sort((a,b)=>b.answer.length - a.answer.length);
+    const placements = [];
+
+    const first = bag.shift();
+    if(!first) break;
+
+    const startX = Math.floor((size - first.answer.length)/2);
+    const startY = Math.floor(size/2);
+    if(startX < 0) continue;
+
+    place(grid, blocks, first.answer, startX, startY, "A");
+    placements.push({x:startX,y:startY,dir:"A",answer:first.answer, clue:first.clue, id:first.id});
+
+    for(const it of bag){
+      const word = it.answer;
+      const letters = allLetterPositions(grid);
+      let placed = false;
+
+      const candidates = [];
+      for(let i=0;i<word.length;i++){
+        const ch = word[i];
+        for(const L of letters){
+          if(L.ch !== ch) continue;
+          candidates.push({x: L.x - i, y: L.y, dir:"A"});
+          candidates.push({x: L.x, y: L.y - i, dir:"D"});
+        }
+      }
+      shuffle(candidates);
+
+      for(const c of candidates){
+        if(canPlace(grid, blocks, word, c.x, c.y, c.dir)){
+          place(grid, blocks, word, c.x, c.y, c.dir);
+          placements.push({x:c.x,y:c.y,dir:c.dir,answer:word, clue:it.clue, id:it.id});
+          placed = true;
+          break;
+        }
+      }
+
+      if(!placed){
+        const tries = 80;
+        for(let t=0;t<tries;t++){
+          const dir = Math.random()<0.5 ? "A" : "D";
+          const x = Math.floor(Math.random()*size);
+          const y = Math.floor(Math.random()*size);
+          if(canPlace(grid, blocks, word, x, y, dir)){
+            place(grid, blocks, word, x, y, dir);
+            placements.push({x,y,dir,answer:word, clue:it.clue, id:it.id});
+            placed = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if(!best || placements.length > best.placements.length){
+      best = {grid, blocks, placements};
+      if(best.placements.length === items.length) break;
+    }
+  }
+
+  if(!best){
+    const {g,b} = makeGrid();
+    return {grid:g, blocks:b, placements:[]};
+  }
+  return best;
+}
+
+function buildCrosswordNumbering(solution, blocks){
+  const size = solution.length;
+  const numGrid = Array.from({length:size}, ()=>Array.from({length:size}, ()=>0));
+  const across = [];
+  const down = [];
+  let n = 0;
+
+  // Here, "blocks" is actually a usable-cells matrix: true = letter cell, false = black block.
+  function isBlock(x,y){ return !blocks[y][x]; }
+  function inb(x,y){ return x>=0 && y>=0 && x<size && y<size; }
+
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(isBlock(x,y)) continue;
+      const startA = (!inb(x-1,y) || isBlock(x-1,y)) && inb(x+1,y) && !isBlock(x+1,y);
+      const startD = (!inb(x,y-1) || isBlock(x,y-1)) && inb(x,y+1) && !isBlock(x,y+1);
+
+      if(startA || startD){
+        n++;
+        numGrid[y][x]=n;
+        if(startA) across.push({n, x, y});
+        if(startD) down.push({n, x, y});
+      }
+    }
+  }
+
+  return { numGrid, clues: { across, down } };
+}
+
+
+/* =======================
+   MODE MOTS MÊLÉS
+   (horizontal, vertical, diagonales)
+   Données dans wordmix.js : window.WORDMIX_BANKS
+   Sauvegarde locale séparée (n'affecte pas le reste du jeu)
+   ======================= */
+const WORDMIX_STORE_KEY = "jwquiz_wordmix_progress_v1";
+
+function loadWordMixStore(){
+  try{ return JSON.parse(localStorage.getItem(WORDMIX_STORE_KEY) || "{}"); }
+  catch(e){ return {}; }
+}
+function saveWordMixStore(obj){
+  localStorage.setItem(WORDMIX_STORE_KEY, JSON.stringify(obj));
+}
+
+function wmSeededRand(seed){
+  const rng = mulberry32(seed);
+  return ()=>rng();
+}
+function wmPick(rnd, arr){ return arr[Math.floor(rnd()*arr.length)]; }
+
+function wmNormalizeWord(w){
+  return String(w||"")
+    .toUpperCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^A-Z]/g,"");
+}
+
+// Directions: H / V / diagonales (8)
+const WM_DIRS = [
+  {dr:0, dc:1},   // →
+  {dr:0, dc:-1},  // ←
+  {dr:1, dc:0},   // ↓
+  {dr:-1, dc:0},  // ↑
+  {dr:1, dc:1},   // ↘
+  {dr:-1, dc:-1}, // ↖
+  {dr:1, dc:-1},  // ↙
+  {dr:-1, dc:1},  // ↗
+];
+
+function wmMakeGrid(n){
+  return Array.from({length:n}, ()=>Array.from({length:n}, ()=>""));
+}
+function wmInBounds(n, r, c){ return r>=0 && c>=0 && r<n && c<n; }
+
+function wmCanPlace(grid, word, r, c, dir){
+  const n = grid.length;
+  for(let i=0;i<word.length;i++){
+    const rr = r + dir.dr*i;
+    const cc = c + dir.dc*i;
+    if(!wmInBounds(n, rr, cc)) return false;
+    const cell = grid[rr][cc];
+    if(cell && cell !== word[i]) return false;
+  }
+  return true;
+}
+function wmPlace(grid, word, r, c, dir){
+  const coords = [];
+  for(let i=0;i<word.length;i++){
+    const rr = r + dir.dr*i;
+    const cc = c + dir.dc*i;
+    grid[rr][cc] = word[i];
+    coords.push([rr,cc]);
+  }
+  return coords;
+}
+
+function wmBuildPuzzle(bank, seed){
+  const size = Math.max(10, Math.min(22, Number(bank.size)||14));
+  const grid = wmMakeGrid(size);
+  const rnd = wmSeededRand(seed);
+
+  const raw = (bank.words||[]).map(wmNormalizeWord).filter(w=>w.length>=2);
+  const words = [...new Set(raw)].sort((a,b)=>b.length-a.length);
+
+  const placed = {};
+  for(const w of words){
+    let ok = false;
+    // On limite les essais pour rester rapide
+    for(let t=0; t<500 && !ok; t++){
+      const dir = wmPick(rnd, WM_DIRS);
+      const r = Math.floor(rnd()*size);
+      const c = Math.floor(rnd()*size);
+      if(wmCanPlace(grid, w, r, c, dir)){
+        placed[w] = wmPlace(grid, w, r, c, dir);
+        ok = true;
+      }
+    }
+  }
+
+  // Remplir les vides
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for(let r=0;r<size;r++){
+    for(let c=0;c<size;c++){
+      if(!grid[r][c]){
+        grid[r][c] = letters[Math.floor(rnd()*letters.length)];
+      }
+    }
+  }
+
+  return { size, grid, words: Object.keys(placed), placed };
+}
+
+function renderWordMixHome(){
+  updateTopBar();
+  ui.qType.textContent = "MOTS MÊLÉS";
+  ui.diffStars.textContent = "—";
+  ui.counter.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🔤";
+  ui.qtext.textContent = "Mode Mots mêlés";
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  ui.footer.innerHTML="";
+  setHeartsVisible(false);
+
+  const store = loadWordMixStore();
+
+  const banksHtml = (WORDMIX_BANKS||[]).map(b=>{
+    const done = !!store[b.key]?.done;
+    const sub = (b.subtitle ? esc(b.subtitle) : "");
+    return `
+      <div class="theme-card ${done ? " completed" : ""}" data-wm="${esc(b.key)}">
+        <div class="t-top">
+          <div class="t-name"><span class="t-ico">🔤</span> ${esc(b.title||b.key)}</div>
+          <div>${done ? "" : ""}</div>
+        </div>
+        <div class="t-sub">${sub}</div>
+      </div>
+    `;
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="hint">
+      Trouve les mots cachés dans la grille (horizontal, vertical et diagonales).<br/>
+    </div>
+
+    <div class="themes wm-themes" id="wmBanks">${banksHtml || `<div class="hint">⚠️ Aucune grille dans wordmix.js</div>`}</div>
+
+    <div class="row">
+      <button class="btn secondary" id="wmBackModes">⬅️ Retour modes</button>
+    </div>
+  `;
+
+  $("#wmBackModes").onclick = ()=> renderModeMenu();
+  [...document.querySelectorAll("#wmBanks [data-wm]")].forEach(card=>{
+    card.onclick = ()=>{
+      const k = card.getAttribute("data-wm");
+      startWordMix(k);
+    };
+  });
+}
+
+let wmSession = null;
+
+function startWordMix(bankKey){
+  const bank = (WORDMIX_BANKS||[]).find(b=>b.key===bankKey);
+  if(!bank){ ui.footer.innerHTML = "⚠️ Grille introuvable."; return; }
+
+  const store = loadWordMixStore();
+  const existing = store[bankKey] || null;
+  const seed = existing?.seed || Date.now();
+
+  const puzzle = wmBuildPuzzle(bank, seed);
+  const found = new Set((existing?.found || []).filter(w=>puzzle.words.includes(w)));
+
+    const colorsRaw = existing?.colors || {};
+  const colors = {};
+  Object.keys(colorsRaw).forEach(k=>{ if(puzzle.words.includes(k)) colors[k]=colorsRaw[k]; });
+  const nextColor = Number.isFinite(existing?.nextColor) ? existing.nextColor : Object.keys(colors).length;
+
+  wmSession = { bankKey, bank, seed, puzzle, found, colors, nextColor, drag:{active:false, start:null, path:[]} };
+  renderWordMixGame();
+}
+
+function renderWordMixGame(){
+  const s = wmSession;
+  if(!s){ renderWordMixHome(); return; }
+
+  updateTopBar();
+  ui.qType.textContent = "MOTS MÊLÉS";
+  ui.diffStars.textContent = "—";
+  ui.trackDot.style.left = "50%";
+  ui.qmedia.textContent = "🔤";
+  ui.qtext.textContent = esc(s.bank.title||"Grille");
+  ui.ref.style.display="none";
+  ui.resultBox.style.display="none";
+  ui.controls.style.display="none";
+  setHeartsVisible(false);
+
+  const total = s.puzzle.words.length;
+  const done = s.found.size;
+  ui.counter.textContent = ` ${done}/${total}`;
+
+  // Word list
+  const wordList = s.puzzle.words
+    .slice()
+    .sort((a,b)=>a.localeCompare(b))
+    .map(w=>{
+      const ok = s.found.has(w);
+      return `<div class="pill wm-word ${ok? "wm-word--found":""}">${esc(w)}</div>`;
+    }).join("");
+
+  // Build grid HTML
+  const n = s.puzzle.size;
+  const gridHtml = s.puzzle.grid.map((row,r)=>{
+    return row.map((ch,c)=>{
+      const cls = ["xw-cell-app", "wm-cell"].join(" ");
+      return `<div class="${cls}" data-r="${r}" data-c="${c}"><div class="ch">${esc(ch)}</div></div>`;
+    }).join("");
+  }).join("");
+
+  ui.gameArea.innerHTML = `
+    <div class="xw-appbar">
+      <div class="left">
+        <button class="xw-iconbtn" id="wmBack" title="Retour">⬅️</button>
+        <button class="xw-iconbtn" id="wmMenu" title="Menu">☰</button>
+      </div>
+      <div class="right">
+        <button class="xw-iconbtn" id="wmRestart" title="Nouvelle grille">🎲Mélanger</button>
+        <button class="xw-iconbtn gold" id="wmCheckAll" title="Finir"> Grille</button>
+      </div>
+    </div>
+
+    <div class="wm-legend hint">
+      <span>Mot trouvé =  (+1 🪙)</span>
+      <span>Grille finie = +10 🪙</span>
+    </div>
+
+    <div class="xw-stage-app">
+      <div class="xw-grid-app" id="wmGrid" data-size="${n}" style="grid-template-columns: repeat(${n}, auto);">
+        ${gridHtml}
+      </div>
+    </div>
+
+    <div class="wm-wordlist">${wordList || ""}</div>
+  `;
+
+  $("#wmBack").onclick = ()=> { wmSession=null; renderWordMixHome(); };
+  $("#wmMenu").onclick = ()=> { wmSession=null; renderModeMenu(); };
+
+  $("#wmRestart").onclick = ()=>{
+    const store = loadWordMixStore();
+    store[s.bankKey] = { seed: Date.now(), found: [], done:false };
+    saveWordMixStore(store);
+    startWordMix(s.bankKey);
+  };
+
+  // Save progress helper
+  function persist(doneFlag=false){
+    const store = loadWordMixStore();
+    store[s.bankKey] = {
+      seed: s.seed,
+      found: [...s.found],
+      colors: s.colors || {},
+      nextColor: Number.isFinite(s.nextColor) ? s.nextColor : 0,
+      done: !!doneFlag
+    };
+    saveWordMixStore(store);
+  }
+
+  // Highlight helpers
+  const clearActive = ()=> {
+    ui.gameArea.querySelectorAll(".wm-cell.active").forEach(el=>el.classList.remove("active"));
+  };
+  const markPathActive = (path)=>{
+    clearActive();
+    path.forEach(p=>{
+      const el = ui.gameArea.querySelector(`.wm-cell[data-r="${p.r}"][data-c="${p.c}"]`);
+      if(el) el.classList.add("active");
+    });
+  };
+
+  // Mark found word cells (optional visual)
+  function markFoundCellsForWord(word){
+    // Mark its placement cells as found (if we know placement)
+    const coords = s.puzzle.placed[word];
+    if(!coords) return;
+    coords.forEach(([r,c])=>{
+      const el = ui.gameArea.querySelector(`.wm-cell[data-r="${r}"][data-c="${c}"]`);
+      if(el){
+        el.classList.add("found");
+        const ci = (s.colors && (word in s.colors)) ? s.colors[word] : 0;
+        el.classList.add(`wm-c${ci}`);
+      }
+    });
+  }
+  // apply on render
+  s.found.forEach(markFoundCellsForWord);
+
+  // Build straight line path between start and end (must be H/V/Diag)
+  function linePath(a,b){
+    const dr = b.r - a.r;
+    const dc = b.c - a.c;
+    const adr = Math.abs(dr), adc = Math.abs(dc);
+    if(dr===0 && dc===0) return [a];
+
+    const stepR = dr===0 ? 0 : dr/adr;
+    const stepC = dc===0 ? 0 : dc/adc;
+
+    // valid if horizontal, vertical, or perfect diagonal
+    if(!( (stepR===0 && stepC!==0) || (stepC===0 && stepR!==0) || (adr===adc && stepR!==0 && stepC!==0) )) return null;
+
+    const len = Math.max(adr, adc);
+    const path = [];
+    for(let i=0;i<=len;i++){
+      path.push({ r: a.r + stepR*i, c: a.c + stepC*i });
+    }
+    return path;
+  }
+
+  function lettersFromPath(path){
+    return path.map(p=>s.puzzle.grid[p.r][p.c]).join("");
+  }
+
+  function tryValidate(path){
+    if(!path || path.length < 2) return;
+    const str = lettersFromPath(path);
+    const rev = str.split("").reverse().join("");
+    const w = s.puzzle.words.find(x=>x===str || x===rev);
+    if(!w) return;
+
+    if(s.found.has(w)){
+      ui.footer.innerHTML = " Déjà trouvé.";
+      return;
+    }
+
+    s.found.add(w);
+
+    // assign a color for this word
+    s.colors = s.colors || {};
+    if(!(w in s.colors)){
+      const idx = Number.isFinite(s.nextColor) ? s.nextColor : Object.keys(s.colors).length;
+      s.colors[w] = idx % 8;
+      s.nextColor = idx + 1;
+    }
+    // reward: +1 coin per word
+    state.coins = Number(state.coins)||0;
+    state.coins += 1;
+    saveState();
+    updateTopBar();
+
+    markFoundCellsForWord(w);
+
+    const finished = (s.found.size === s.puzzle.words.length && s.puzzle.words.length>0);
+    persist(finished);
+
+    ui.footer.innerHTML = ` Mot trouvé : ${esc(w)} (+1 🪙)`;
+
+    // re-render to update list + counter
+    renderWordMixGame();
+  }
+
+  const gridEl = $("#wmGrid");
+
+  const getCellFromEvent = (evt)=>{
+    const el = evt.target.closest(".wm-cell");
+    if(!el) return null;
+    return { r: Number(el.getAttribute("data-r")), c: Number(el.getAttribute("data-c")) };
+  };
+
+  const onDown = (evt)=>{
+    const cell = getCellFromEvent(evt);
+    if(!cell) return;
+    evt.preventDefault();
+    s.drag.active = true;
+    s.drag.start = cell;
+    s.drag.path = [cell];
+    markPathActive(s.drag.path);
+  };
+  const onMove = (evt)=>{
+    if(!s.drag.active || !s.drag.start) return;
+    const cell = getCellFromEvent(evt);
+    if(!cell) return;
+    const path = linePath(s.drag.start, cell);
+    if(!path) return;
+    s.drag.path = path;
+    markPathActive(path);
+  };
+  const onUp = ()=>{
+    if(!s.drag.active) return;
+    s.drag.active = false;
+    const path = s.drag.path;
+    clearActive();
+    tryValidate(path);
+    s.drag.start = null;
+    s.drag.path = [];
+  };
+
+  gridEl.addEventListener("pointerdown", onDown);
+
+  /* ===== ANDROID TOUCH FALLBACK (si pointer events buggent) ===== */
+  let wmTouchActive = false;
+
+  function wmCellFromPoint(x, y){
+    const el = document.elementFromPoint(x, y);
+    if(!el) return null;
+    const cellEl = el.closest(".wm-cell");
+    if(!cellEl) return null;
+    return { r: Number(cellEl.getAttribute("data-r")), c: Number(cellEl.getAttribute("data-c")) };
+  }
+
+  gridEl.addEventListener("touchstart", (e)=>{
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    const cell = wmCellFromPoint(t.clientX, t.clientY);
+    if(!cell) return;
+    wmTouchActive = true;
+    if(e.cancelable) e.preventDefault();
+    // Simule un onDown
+    s.drag.active = true;
+    s.drag.start = cell;
+    s.drag.path = [cell];
+    markPathActive(s.drag.path);
+  }, { passive:false });
+
+  gridEl.addEventListener("touchmove", (e)=>{
+    if(!wmTouchActive || !s.drag.active || !s.drag.start) return;
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    if(e.cancelable) e.preventDefault();
+    const cell = wmCellFromPoint(t.clientX, t.clientY);
+    if(!cell) return;
+    const path = linePath(s.drag.start, cell);
+    if(!path) return;
+    s.drag.path = path;
+    markPathActive(path);
+  }, { passive:false });
+
+  gridEl.addEventListener("touchend", (e)=>{
+    if(!wmTouchActive) return;
+    wmTouchActive = false;
+    // Simule un onUp
+    s.drag.active = false;
+    const path = s.drag.path;
+    clearActive();
+    tryValidate(path);
+    s.drag.start = null;
+    s.drag.path = [];
+  }, { passive:false });
+
+  gridEl.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+
+  //  Grille: donne bonus si tout trouvé
+  $("#wmCheckAll").onclick = ()=>{
+    const totalWords = s.puzzle.words.length;
+    const found = s.found.size;
+    const pct = totalWords ? Math.round((found/totalWords)*100) : 0;
+
+    ui.resultBox.style.display = "block";
+    ui.resultBox.className = "result " + (pct===100 ? "good":"bad");
+    ui.resultBox.innerHTML = `
+      <div class="title">${pct===100 ? "🎉 Grille terminée !" : "📌 Progression"}</div>
+      <div class="small">Trouvés : <strong>${found}</strong> / ${totalWords} (${pct}%)</div>
+    `;
+
+    if(pct===100){
+      // Bonus fin
+      state.coins = Number(state.coins)||0;
+      state.coins += 10;
+      saveState();
+      updateTopBar();
+
+      persist(true);
+      ui.footer.innerHTML = "🎉 Grille terminée ! +10 🪙";
+      renderWordMixGame();
+    }else{
+      ui.footer.innerHTML = `⚠️ Il reste ${Math.max(0, totalWords-found)} mot(s).`;
+    }
+  };
+}
+
+
+/* Boot */
+function boot(){
+  updateTopBar();
+  if(!state.profile) renderProfileGate();
+  else if(state.session && state.session.ids && state.session.ids.length) renderQuestion();
+  else renderModeMenu();
+}
+boot();
+</script>
+</body>
+</html>
+
       --radius: 18px;
     }
     *{box-sizing:border-box}
@@ -3643,3 +7288,4 @@ boot();
 </script>
 </body>
 </html>
+
