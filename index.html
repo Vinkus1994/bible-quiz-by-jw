@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>JW Quiz</title>
+  <title>Quiz Biblique par un JW</title>
   <style>
     :root{
       --sky1:#4cc3ff;
@@ -1405,7 +1405,7 @@ input, button{
 <body>
   <div class="wrap">
     <div class="hud">
-      <div class="hud-center" id="hudTitle">JW Quiz</div>
+      <div class="hud-center" id="hudTitle">Quiz Biblique par un JW</div>
       <div class="hud-right">
         <span class="hud-pill" title="Profil">👤 <strong id="profileName">—</strong></span>
         <span class="hud-pill">🪙 <strong id="coins">0</strong></span>
@@ -1424,8 +1424,8 @@ input, button{
       <div class="card-top">
         <div class="tag">
           <span id="qType">MENU</span>
-          • Thème : <strong id="themeLabel">Mixte</strong>
-          • Difficulté : <strong id="diffStars">—</strong>
+          <strong id="themeLabel"></strong>
+          <strong id="diffStars"></strong>
         </div>
         <div class="counter" id="counter">—</div>
       </div>
@@ -1637,8 +1637,8 @@ function setHeartsVisible(show){
 }
 function updateTopBar(){
   ui.coins.textContent = String(state.coins);
-  ui.profileName.textContent = state.profile?.name ? state.profile.name : "—";
-  ui.themeLabel.textContent = state.selectedTheme || "Mixte";
+  ui.profileName.textContent = state.profile?.name ? state.profile.name : "";
+  ui.themeLabel.textContent = state.selectedTheme || "";
   ui.hearts.textContent = String(state.adventure?.hearts ?? 0);
 
   const inAdventure = state.session?.mode === "adventure";
