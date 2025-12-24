@@ -1096,8 +1096,8 @@ input, button{
 }
 @media (max-width: 520px){
   .themes.modes-3{
-    grid-template-columns: repeat(3, 1fr);
-    gap:8px;
+    grid-template-columns: repeat(2, 1fr);
+    gap:10px;
   }
   .themes.modes-3 .theme-card{
     padding:10px;
@@ -1151,6 +1151,20 @@ input, button{
   }
 }
 .action-tile:active{ transform: scale(.99); }
+
+
+
+/* ===== FIX MOBILE: "Grille 10" sur une ligne ===== */
+.xw-themes .t-name,
+.wm-themes .t-name{
+  white-space: nowrap;
+}
+@media (max-width:480px){
+  .xw-themes .t-name,
+  .wm-themes .t-name{
+    font-size: 13px;
+  }
+}
 
 </style>
 </head>
